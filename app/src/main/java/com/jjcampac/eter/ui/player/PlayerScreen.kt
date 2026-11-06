@@ -92,7 +92,7 @@ fun PlayerScreen(
             if (isCurrentPlaying) {
                 AnimatedWavesIcon(
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(96.dp)
+                    modifier = Modifier.size(110.dp)
                 )
             } else {
                 Icon(
