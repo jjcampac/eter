@@ -2,7 +2,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fase 1 completada ✅ (nov. 2026) · En curso: Fase 2
+> **Última actualización del estado:** Fase 2 completada ✅ (build OK) · Pendiente: prueba en dispositivo · En curso: Fase 3
 
 ---
 
@@ -95,15 +95,15 @@ Objetivo: tener el proyecto creado y reproducir una emisora con una URL fija.
 
 **Cómo probar:** ejecutar la app y comprobar que suena la emisora de prueba.
 
-### Fase 2 — Segundo plano y notificación ⬜
+### Fase 2 — Segundo plano y notificación ✅
 
 Objetivo: que la reproducción continúe con la pantalla apagada.
 
-- [ ] `MediaSessionService` con servicio en primer plano (`mediaPlayback`)
-- [ ] Notificación con play/pausa
-- [ ] Gestión del permiso `POST_NOTIFICATIONS`
-- [ ] Respuesta a controles de auriculares y Bluetooth
-- [ ] Metadatos ICY en la notificación y en la interfaz
+- [x] `MediaSessionService` con servicio en primer plano (`mediaPlayback`)
+- [x] Notificación con play/pausa y siguiente/anterior (placeholders)
+- [x] Gestión del permiso `POST_NOTIFICATIONS`
+- [x] Respuesta a controles de auriculares y Bluetooth (vía MediaSession)
+- [x] Metadatos ICY (título de canción) en la notificación y en la interfaz
 
 **Cómo probar:** bloquear el móvil y comprobar que sigue sonando y que los controles responden.
 
@@ -149,7 +149,7 @@ Objetivo: dejar la app lista para el uso diario.
 | Fase | Descripción | Estado |
 |---|---|---|
 | 1 | Proyecto base y reproductor | ✅ Completada |
-| 2 | Segundo plano y notificación | ⬜ Pendiente |
+| 2 | Segundo plano y notificación | ✅ Completada |
 | 3 | Room y favoritas | ⬜ Pendiente |
 | 4 | API de Radio Browser y buscador | ⬜ Pendiente |
 | 5 | Pulido y robustez | ⬜ Pendiente |

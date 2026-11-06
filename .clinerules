@@ -1,0 +1,62 @@
+# App de Radio: reglas del proyecto
+
+## Qué es
+App nativa de Android (Kotlin) para escuchar emisoras de radio por internet, sin publicidad, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams de las emisoras. Uso personal, instalación manual (sin Play Store por ahora).
+Dispositivo de pruebas: Nothing Phone (3a).
+
+## Stack y arquitectura
+- Kotlin, minSdk 26, targetSdk la última estable. Un único módulo.
+- Jetpack Compose (Material 3) para la UI. Room para emisoras y favoritas.
+- Media3 (ExoPlayer + MediaSessionService) para la reproducción.
+- Retrofit/OkHttp solo para la API pública de Radio Browser.
+- Arquitectura MVVM con repositorio. Hilt solo si no complica el proyecto.
+- Sin dependencias innecesarias. Antes de añadir una librería, justifícala y espera mi confirmación.
+- Reproducción en un MediaSessionService en primer plano (tipo mediaPlayback) con notificación persistente, para que Android no lo mate.
+- Estructura de paquetes: data (local, remote, repository), domain/model, player, ui (components, screens, theme), di.
+
+## Decisiones ya tomadas (no cambiar sin consultarme)
+- Streams: el móvil se conecta directamente a la URL de cada emisora (Icecast/Shoutcast, MP3, AAC o HLS). No se monta ningún servidor intermedio.
+- Directorio: Radio Browser (https://all.api.radio-browser.info), usando un mirror aleatorio y un User-Agent propio de la app. Es opcional: la app debe funcionar también solo con emisoras añadidas a mano.
+- Emisoras manuales: nombre + URL del stream, editables y borrables, porque las URLs cambian con el tiempo.
+- Tráfico http: permitido solo mediante network_security_config y limitado a los dominios necesarios. No activar usesCleartextTraffic de forma global.
+- Metadatos: mostrar el título de la canción (ICY) cuando la emisora lo envíe.
+- Favoritas: persistentes en Room y accesibles sin conexión. La notificación permite pasar a la anterior/siguiente favorita.
+- Reconexión: si el stream se corta, reintentar automáticamente y mostrar mensajes de error claros.
+- Controles: compatibilidad con auriculares y Bluetooth. Android Auto solo si resulta sencillo.
+- Temporizador para dormir.
+- Idioma: interfaz en español de España. Tema claro y oscuro.
+
+## Privacidad
+- Cero SDKs de publicidad, analítica o rastreo. Sin cuentas de usuario.
+- La única comunicación de red es con los streams de las emisoras y, opcionalmente, con la API de Radio Browser.
+- Permisos solo los imprescindibles: INTERNET, FOREGROUND_SERVICE (tipo mediaPlayback) y POST_NOTIFICATIONS.
+
+## Convenciones de código
+- Código y comentarios en español. Nombres de clases y funciones claros.
+- Gestionar con cuidado el ciclo de vida de ExoPlayer y del MediaSession: liberar el reproductor al destruir el servicio y evitar fugas.
+- Las operaciones de red y de base de datos fuera del hilo principal (corrutinas).
+- Logs con Log.d y un tag por clase para facilitar el diagnóstico.
+- No romper funcionalidad existente al corregir otra.
+
+## Forma de trabajar
+- Primero propón la estructura de paquetes y espera mi confirmación.
+- Trabaja por fases y detente al terminar cada una para que yo pruebe en el móvil real. No avances hasta que yo lo confirme.
+- Ante un fallo, primero diagnostica con logs y explícame la causa; después corrige.
+- Al terminar cada tarea, resume en pocas líneas qué has cambiado y qué debo probar.
+- Al terminar cada fase, actualiza el apartado "Estado actual" de este archivo y la tabla de estado del README.md.
+- En debug, mantén una emisora de prueba con URL fija para poder verificar la reproducción sin depender de la API.
+- Solo haz commit en Git cuando te lo pida.
+
+## Fases
+1. Proyecto base y reproductor con una URL fija.
+2. Servicio en segundo plano y notificación (incluye metadatos ICY y controles Bluetooth/auriculares).
+3. Room y favoritas (alta, edición y borrado manual de emisoras).
+4. API de Radio Browser y buscador (nombre, país y género; España por defecto).
+5. Pulido: reconexión, errores claros, temporizador, tema claro/oscuro y, opcionalmente, Android Auto.
+
+## Estado actual (actualizar al terminar cada fase)
+- Fase 1: completada.
+- Fase 2: completada (build OK, pendiente de prueba en dispositivo).
+- Fase 3: pendiente.
+- Fase 4: pendiente.
+- Fase 5: pendiente.

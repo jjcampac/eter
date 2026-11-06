@@ -1,5 +1,6 @@
 package com.jjcampac.eter
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +12,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jjcampac.eter.di.AppModule
+import com.jjcampac.eter.player.service.RadioMediaSessionService
 import com.jjcampac.eter.ui.main.MainScreen
 import com.jjcampac.eter.ui.main.MainViewModel
 import com.jjcampac.eter.ui.player.PlayerScreen
@@ -24,6 +26,9 @@ import com.jjcampac.eter.util.TestData
  * Muestra la lista de emisoras y el reproductor, con una navegación simple
  * basada en estado (sin librería externa). El reproductor es único y se
  * comparte entre la UI y el servicio de medios (Fase 2).
+ *
+ * Cuando el usuario selecciona una emisora, se inicia el servicio en primer
+ * plano para que la reproducción continúe con la pantalla apagada.
  */
 class MainActivity : ComponentActivity() {
 
@@ -42,20 +47,45 @@ class MainActivity : ComponentActivity() {
                 var currentStationId by rememberSaveable { mutableStateOf<String?>(null) }
                 val currentStation = TestData.all.firstOrNull { it.id == currentStationId }
 
+                // Iniciar/detener el servicio de medios según haya estación activa.
+                if (currentStationId != null) {
+                    startRadioService()
+                }
+
                 if (currentStation == null) {
                     MainScreen(
                         mainViewModel = mainViewModel,
                         playerViewModel = playerViewModel,
-                        onStationClick = { station -> currentStationId = station.id }
+                        onStationClick = { station ->
+                            currentStationId = station.id
+                            startRadioService()
+                        }
                     )
                 } else {
                     PlayerScreen(
                         station = currentStation,
                         playerViewModel = playerViewModel,
-                        onBack = { currentStationId = null }
+                        onBack = {
+                            currentStationId = null
+                            stopRadioService()
+                        }
                     )
                 }
             }
         }
+    }
+
+    private fun startRadioService() {
+        val intent = Intent(this, RadioMediaSessionService::class.java)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
+    }
+
+    private fun stopRadioService() {
+        val intent = Intent(this, RadioMediaSessionService::class.java)
+        stopService(intent)
     }
 }

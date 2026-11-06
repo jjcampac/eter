@@ -15,6 +15,8 @@
     <string name="radio_live">En directo</string>
     <string name="radio_paused">En pausa</string>
     <string name="buffering">Conectando…</string>
+    <string name="skip_previous">Anterior</string>
+    <string name="skip_next">Siguiente</string>
     <string name="error_cannot_connect">No se puede conectar con la emisora. Comprueba tu conexión o la URL del stream.</string>
     <string name="error_unknown">Se produjo un error inesperado.</string>
     <string name="metadata_empty">Sintonizando…</string>

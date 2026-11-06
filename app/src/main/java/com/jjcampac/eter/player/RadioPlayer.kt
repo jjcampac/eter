@@ -2,6 +2,7 @@ package com.jjcampac.eter.player
 
 import android.content.Context
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -19,11 +20,13 @@ enum class PlaybackStatus { IDLE, LOADING, PLAYING, PAUSED, ERROR }
  *
  * @param currentStation Emisora cargada en el reproductor.
  * @param errorMessage   Mensaje de error en español (nulo si no hay error).
+ * @param metadataTitle  Título de canción recibido vía metadatos ICY (nulo si no hay).
  */
 data class PlayerState(
     val status: PlaybackStatus = PlaybackStatus.IDLE,
     val currentStation: Station? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val metadataTitle: String? = null
 )
 
 /**
@@ -90,6 +93,21 @@ class RadioPlayer(context: Context) {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == Player.STATE_IDLE && exoPlayer.mediaItemCount > 0 && playWhenReady) {
                     exoPlayer.prepare()
+                }
+            }
+
+            // Metadatos ICY (título de la canción).
+            override fun onMetadata(metadata: Metadata) {
+                var title: String? = null
+                for (i in 0 until metadata.length()) {
+                    val str = metadata.get(i).toString()
+                    if (str.isNotEmpty()) {
+                        title = str
+                        break
+                    }
+                }
+                if (title != null && title.isNotEmpty()) {
+                    _state.update { it.copy(metadataTitle = title) }
                 }
             }
         })
