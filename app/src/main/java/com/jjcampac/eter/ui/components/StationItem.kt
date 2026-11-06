@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -30,6 +31,7 @@ fun StationItem(
     station: Station,
     isCurrent: Boolean = false,
     isPlaying: Boolean = false,
+    isPaused: Boolean = false,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -79,8 +81,15 @@ fun StationItem(
                 )
             } else if (isPlaying) {
                 Icon(
+                    imageVector = Icons.Filled.Pause,
+                    contentDescription = "Pausar",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+            } else if (isPaused) {
+                Icon(
                     imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = "Sonando",
+                    contentDescription = "Reproducir",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(end = 8.dp)
                 )

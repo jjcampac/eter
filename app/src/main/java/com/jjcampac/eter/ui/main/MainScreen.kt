@@ -108,9 +108,11 @@ fun MainScreen(
                     items(filtered, key = { it.id }) { station ->
                         StationItem(
                             station = station,
-                            isCurrent = playerState.currentStation?.id == station.id,
+                            isCurrent = playerState.currentStation?.url == station.url,
                             isPlaying = playerState.status == PlaybackStatus.PLAYING &&
-                                playerState.currentStation?.id == station.id,
+                                playerState.currentStation?.url == station.url,
+                            isPaused = playerState.currentStation?.url == station.url &&
+                                playerState.status == PlaybackStatus.PAUSED,
                             onClick = { onStationClick(station) }
                         )
                     }
