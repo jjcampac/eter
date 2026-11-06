@@ -20,6 +20,7 @@
     <string name="error_cannot_connect">No se puede conectar con la emisora. Comprueba tu conexión o la URL del stream.</string>
     <string name="error_unknown">Se produjo un error inesperado.</string>
     <string name="metadata_empty">Sintonizando…</string>
+    <string name="tap_to_play">Pulsa reproducir para escuchar</string>
 
     <!-- Emisora de prueba (Fase 1) -->
     <string name="station_test_name">SomaFM Groove Salad</string>

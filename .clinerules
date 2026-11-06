@@ -45,7 +45,8 @@ Dispositivo de pruebas: Nothing Phone (3a).
 - Al terminar cada tarea, resume en pocas líneas qué has cambiado y qué debo probar.
 - Al terminar cada fase, actualiza el apartado "Estado actual" de este archivo y la tabla de estado del README.md.
 - En debug, mantén una emisora de prueba con URL fija para poder verificar la reproducción sin depender de la API.
-- Solo haz commit en Git cuando te lo pida.
+- NO hacer commit ni push en Git salvo que el usuario lo pida explícitamente. Al terminar
+  un cambio, resume qué has hecho y qué debe probar, y espera su confirmación para commitear.
 
 ## Fases
 1. Proyecto base y reproductor con una URL fija.

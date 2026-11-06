@@ -70,8 +70,11 @@ class MainActivity : ComponentActivity() {
                         station = currentStation,
                         playerViewModel = playerViewModel,
                         onBack = {
+                            // Volver a la lista SIN detener el servicio de radio:
+                            // ExoPlayer comparte el proceso y Android lo mataria a los ~30s
+                            // si dejamos de estar en primer plano. La reproduccion se
+                            // gestiona desde la notificacion (play/pausa/detener).
                             currentStationId = null
-                            stopRadioService()
                         }
                     )
                 }

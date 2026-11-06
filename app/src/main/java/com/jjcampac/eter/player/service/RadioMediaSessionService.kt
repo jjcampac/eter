@@ -117,6 +117,9 @@ class RadioMediaSessionService : MediaSessionService() {
         Log.d(TAG, "stopPlayback()")
         radioPlayer.stop()
         stopForeground(true)
+        // Liberar el servicio por completo al detener la reproduccion desde la
+        // notificacion: ya no hay nada que mantener en primer plano.
+        stopSelf()
     }
 
     private fun updateNotification(state: PlayerState) {

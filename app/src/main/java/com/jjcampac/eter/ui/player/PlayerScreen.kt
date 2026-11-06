@@ -120,10 +120,10 @@ fun PlayerScreen(
             val statusText = when (playerState.status) {
                 PlaybackStatus.PLAYING -> stringResource(R.string.radio_live)
                 PlaybackStatus.PAUSED -> stringResource(R.string.radio_paused)
-                PlaybackStatus.LOADING -> stringResource(R.string.buffering)
+                PlaybackStatus.LOADING -> stringResource(R.string.loading)
                 PlaybackStatus.ERROR ->
                     playerState.errorMessage ?: stringResource(R.string.error_unknown)
-                PlaybackStatus.IDLE -> stringResource(R.string.metadata_empty)
+                PlaybackStatus.IDLE -> stringResource(R.string.tap_to_play)
             }
             val statusColor = when (playerState.status) {
                 PlaybackStatus.PLAYING -> MaterialTheme.colorScheme.primary

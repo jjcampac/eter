@@ -2,6 +2,8 @@ package com.jjcampac.eter.player
 
 import android.content.Context
 import android.util.Log
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
@@ -44,7 +46,15 @@ class RadioPlayer(context: Context) {
 
     private val appContext = context.applicationContext
 
-    val exoPlayer: ExoPlayer = ExoPlayer.Builder(appContext).build()
+    val exoPlayer: ExoPlayer = ExoPlayer.Builder(appContext).build().apply {
+        // Audio focus: al pedir el foco, el sistema pausa o atenua cualquier
+        // otro medio que se este reproduciendo (Spotify, YouTube, etc.).
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(C.USAGE_MEDIA)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+            .build()
+        setAudioAttributes(audioAttributes, true)
+    }
 
     private val _state = MutableStateFlow(PlayerState())
     val state: StateFlow<PlayerState> = _state.asStateFlow()
@@ -124,6 +134,8 @@ class RadioPlayer(context: Context) {
     /** Carga una emisora y comienza la reproducción. */
     fun play(station: Station) {
         Log.d(TAG, "play() station=${station.name} url=${station.url}")
+        // Detener cualquier reproducción previa para evitar conflictos
+        stop()
         // Persistir para auto-reanudar tras muerte del proceso (pantalla apagada, etc.)
         (appContext as? EterApplication)?.saveLastStationUrl(station.url)
 
