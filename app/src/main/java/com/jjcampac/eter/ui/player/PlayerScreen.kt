@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
+import com.jjcampac.eter.ui.components.AnimatedWavesIcon
 import android.util.Log
 
 private const val TAG = "PlayerScreen"
@@ -86,18 +87,21 @@ fun PlayerScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            Icon(
-                imageVector = Icons.Filled.GraphicEq,
-                contentDescription = null,
-                modifier = Modifier.size(96.dp),
-                tint = if (playerState.status == PlaybackStatus.PLAYING &&
-                    playerState.currentStation?.id == station.id
-                ) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
-            )
+            val isCurrentPlaying = playerState.status == PlaybackStatus.PLAYING &&
+                playerState.currentStation?.url == station.url
+            if (isCurrentPlaying) {
+                AnimatedWavesIcon(
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(96.dp)
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.GraphicEq,
+                    contentDescription = null,
+                    modifier = Modifier.size(96.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
