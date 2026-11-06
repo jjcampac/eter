@@ -73,16 +73,15 @@ class RadioMediaSessionService : MediaSessionService() {
             null -> Unit
         }
 
-        // Si hay reproducción activa (incluyendo carga), mantener en primer plano.
+        // Con estacion cargada, mantener siempre en primer plano para que
+        // Android no mate el proceso aunque vengamos de la lista de emisoras.
         val currentState = radioPlayer.state.value
-        if (currentState.status == PlaybackStatus.PLAYING ||
-            currentState.status == PlaybackStatus.PAUSED ||
-            currentState.status == PlaybackStatus.LOADING
-        ) {
+        if (currentState.currentStation != null) {
             updateNotification(currentState)
             startForeground(NOTIFICATION_ID, buildNotification(this, currentState.currentStation, currentState.status, currentState.metadataTitle))
+        } else {
+            stopForeground(true)
         }
-
         return Service.START_STICKY
     }
 
