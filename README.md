@@ -2,7 +2,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fase 2 completada ✅ (build OK) · Pendiente: prueba en dispositivo · En curso: Fase 3
+> **Última actualización del estado:** Fase 1 y 2 completadas ✅ · Fixes de reproducción, play/pausa e iconos animados aplicados · En curso: Fase 3
 
 ---
 
@@ -42,6 +42,7 @@ El objetivo es disponer de un reproductor de radio sencillo, limpio y respetuoso
 6. Reconexión automática si se corta el stream y mensajes de error claros.
 7. Compatibilidad con controles Bluetooth/auriculares y, si es sencillo, con Android Auto.
 8. Temporizador para dormir.
+9. Iconos dinámicos en la lista de emisoras: ondas animadas mientras suena, ícono de pausa clásica cuando está pausada.
 
 ---
 
@@ -104,6 +105,9 @@ Objetivo: que la reproducción continúe con la pantalla apagada.
 - [x] Gestión del permiso `POST_NOTIFICATIONS`
 - [x] Respuesta a controles de auriculares y Bluetooth (vía MediaSession)
 - [x] Metadatos ICY (título de canción) en la notificación y en la interfaz
+- [x] Fix de play/pausa: `resume()` establece `PLAYING` de inmediato (evita "Conectando…" al reanudar)
+- [x] Fix de ciclo de vida: `updateNotification()` mantiene `startForeground` en `LOADING`/`PLAYING`/`PAUSED` (evita que Android mate el proceso a los ~5s de pantalla apagada)
+- [x] Iconos en la lista: ondas animadas al reproducir, pausa clásica al pausar
 
 **Cómo probar:** bloquear el móvil y comprobar que sigue sonando y que los controles responden.
 
