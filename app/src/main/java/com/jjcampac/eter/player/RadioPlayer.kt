@@ -1,16 +1,20 @@
 package com.jjcampac.eter.player
 
 import android.content.Context
+import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.jjcampac.eter.EterApplication
 import com.jjcampac.eter.domain.model.Station
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+
+private const val TAG = "RadioPlayer"
 
 /** Estados de reproducción expuestos a la UI. */
 enum class PlaybackStatus { IDLE, LOADING, PLAYING, PAUSED, ERROR }
@@ -49,6 +53,7 @@ class RadioPlayer(context: Context) {
         exoPlayer.addListener(object : Player.Listener {
 
             override fun onPlaybackStateChanged(playbackState: Int) {
+                Log.d(TAG, "onPlaybackStateChanged() state=$playbackState playWhenReady=${exoPlayer.playWhenReady}")
                 _state.update { current ->
                     val newStatus = when (playbackState) {
                         Player.STATE_BUFFERING -> PlaybackStatus.LOADING
@@ -62,6 +67,7 @@ class RadioPlayer(context: Context) {
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                Log.d(TAG, "onIsPlayingChanged() isPlaying=$isPlaying currentStatus=${_state.value.status}")
                 _state.update { current ->
                     current.copy(
                         status =
@@ -73,6 +79,7 @@ class RadioPlayer(context: Context) {
             }
 
             override fun onPlayerError(error: PlaybackException) {
+                Log.e(TAG, "onPlayerError() code=${error.errorCode} message=${error.message}")
                 _state.update {
                     it.copy(
                         status = PlaybackStatus.ERROR,
@@ -92,6 +99,7 @@ class RadioPlayer(context: Context) {
             // Reconexión automática ante cortes de red y estado "detenido" inesperado.
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == Player.STATE_IDLE && exoPlayer.mediaItemCount > 0 && playWhenReady) {
+                    _state.update { it.copy(status = PlaybackStatus.LOADING, errorMessage = null) }
                     exoPlayer.prepare()
                 }
             }
@@ -115,6 +123,10 @@ class RadioPlayer(context: Context) {
 
     /** Carga una emisora y comienza la reproducción. */
     fun play(station: Station) {
+        Log.d(TAG, "play() station=${station.name} url=${station.url}")
+        // Persistir para auto-reanudar tras muerte del proceso (pantalla apagada, etc.)
+        (appContext as? EterApplication)?.saveLastStationUrl(station.url)
+
         _state.value = PlayerState(status = PlaybackStatus.LOADING, currentStation = station)
         exoPlayer.setMediaItem(MediaItem.fromUri(station.url))
         exoPlayer.prepare()
@@ -123,18 +135,21 @@ class RadioPlayer(context: Context) {
 
     /** Pausa la reproducción actual (deja el stream cargado). */
     fun pause() {
+        Log.d(TAG, "pause()")
         exoPlayer.pause()
         _state.update { it.copy(status = PlaybackStatus.PAUSED, errorMessage = null) }
     }
 
     /** Reanuda la emisora actual si estaba pausada. */
     fun resume() {
+        Log.d(TAG, "resume()")
         exoPlayer.playWhenReady = true
         _state.update { it.copy(status = PlaybackStatus.LOADING, errorMessage = null) }
     }
 
     /** Detiene y libera la emisora actual. */
     fun stop() {
+        Log.d(TAG, "stop()")
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         _state.value = PlayerState()
@@ -142,6 +157,7 @@ class RadioPlayer(context: Context) {
 
     /** Libera los recursos del reproductor. No debe usarse después de llamarlo. */
     fun release() {
+        Log.d(TAG, "release()")
         exoPlayer.release()
     }
 }

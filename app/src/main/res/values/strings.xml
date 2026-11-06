@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Éter</string>
+    <string name="app_name">Éter Radio</string>
 
     <!-- Buscador / listas -->
     <string name="search_hint">Buscar emisora por nombre, país o género</string>

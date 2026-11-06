@@ -2,6 +2,7 @@ package com.jjcampac.eter
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -20,6 +21,8 @@ import com.jjcampac.eter.ui.player.PlayerViewModel
 import com.jjcampac.eter.ui.theme.EterTheme
 import com.jjcampac.eter.util.TestData
 
+private const val TAG = "MainActivity"
+
 /**
  * Actividad principal de Eter.
  *
@@ -34,6 +37,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate() savedInstanceState=${savedInstanceState != null}")
         enableEdgeToEdge()
         setContent {
             EterTheme {

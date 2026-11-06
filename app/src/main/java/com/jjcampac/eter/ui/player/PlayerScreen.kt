@@ -32,6 +32,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
+import android.util.Log
+
+private const val TAG = "PlayerScreen"
 
 /**
  * Pantalla del reproductor a pantalla completa.
@@ -48,6 +51,7 @@ fun PlayerScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    Log.d(TAG, "PlayerScreen() station=${station.name} url=${station.url}")
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -136,14 +140,14 @@ fun PlayerScreen(
             Spacer(modifier = Modifier.height(40.dp))
 
             // Botón central de reproducción.
-            val isThisStation = playerState.currentStation?.id == station.id
+            val isThisStation = playerState.currentStation?.url == station.url
             val isBuffering = isThisStation && playerState.status == PlaybackStatus.LOADING
             val isPlaying = isThisStation && playerState.status == PlaybackStatus.PLAYING
 
             FilledIconButton(
                 onClick = { playerViewModel.togglePlay(station) },
                 modifier = Modifier.size(84.dp),
-                enabled = !isBuffering
+                enabled = true
             ) {
                 Icon(
                     imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
