@@ -2,7 +2,11 @@ package com.jjcampac.eter
 
 import android.app.Application
 import android.content.SharedPreferences
+import com.jjcampac.eter.data.local.EterDatabase
+import com.jjcampac.eter.data.local.dao.StationDao
+import com.jjcampac.eter.data.repository.StationRepositoryImpl
 import com.jjcampac.eter.domain.model.Station
+import com.jjcampac.eter.domain.repository.StationRepository
 import com.jjcampac.eter.player.RadioPlayer
 
 /**
@@ -27,6 +31,17 @@ class EterApplication : Application() {
         }
         return _radioPlayer
     }
+
+    private val database: EterDatabase by lazy {
+        EterDatabase.getDatabase(applicationContext)
+    }
+
+    private val _stationRepository: StationRepository by lazy {
+        StationRepositoryImpl(database.stationDao())
+    }
+
+    /** Devuelve el repositorio de emisoras (Room). */
+    fun getStationRepository(): StationRepository = _stationRepository
 
     private fun getPrefs(): SharedPreferences =
         getSharedPreferences("eter_prefs", MODE_PRIVATE)

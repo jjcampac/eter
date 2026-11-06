@@ -2,7 +2,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fase 1 y 2 completadas ✅ · Fixes de reproducción, play/pausa e iconos animados aplicados · En curso: Fase 3
+> **Última actualización del estado:** Fase 1, 2 y 3 completadas ✅ · En curso: Fase 4
 
 ---
 
@@ -111,14 +111,14 @@ Objetivo: que la reproducción continúe con la pantalla apagada.
 
 **Cómo probar:** bloquear el móvil y comprobar que sigue sonando y que los controles responden.
 
-### Fase 3 — Room y favoritas ⬜
+### Fase 3 — Room y favoritas ✅
 
 Objetivo: persistir emisoras y favoritas.
 
-- [ ] Entidades, DAO y base de datos Room
-- [ ] Alta, edición y borrado manual de emisoras
-- [ ] Marcar y desmarcar favoritas
-- [ ] Navegación anterior/siguiente entre favoritas desde la notificación
+- [x] Entidades, DAO y base de datos Room
+- [x] Alta, edición y borrado manual de emisoras
+- [x] Marcar y desmarcar favoritas
+- [x] Navegación anterior/siguiente entre favoritas desde el reproductor (nextFavorite/prevFavorite)
 
 **Cómo probar:** añadir emisoras, cerrar la app y comprobar que se conservan.
 
@@ -154,7 +154,7 @@ Objetivo: dejar la app lista para el uso diario.
 |---|---|---|
 | 1 | Proyecto base y reproductor | ✅ Completada |
 | 2 | Segundo plano y notificación | ✅ Completada |
-| 3 | Room y favoritas | ⬜ Pendiente |
+| 3 | Room y favoritas | ✅ Completada |
 | 4 | API de Radio Browser y buscador | ⬜ Pendiente |
 | 5 | Pulido y robustez | ⬜ Pendiente |
 

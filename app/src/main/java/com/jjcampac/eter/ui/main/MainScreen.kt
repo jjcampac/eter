@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +46,10 @@ fun MainScreen(
     mainViewModel: MainViewModel,
     playerViewModel: PlayerViewModel,
     onStationClick: (Station) -> Unit,
+    onAddStation: () -> Unit,
+    onEditStation: (Station) -> Unit,
+    onDeleteStation: (Station) -> Unit,
+    onToggleFavorite: (Station) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
@@ -53,6 +59,11 @@ fun MainScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(title = { Text(stringResource(R.string.app_name)) })
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddStation) {
+                Icon(Icons.Filled.Add, contentDescription = "Añadir emisora")
+            }
         }
     ) { innerPadding ->
         Column(
@@ -113,7 +124,10 @@ fun MainScreen(
                                 playerState.currentStation?.url == station.url,
                             isPaused = playerState.currentStation?.url == station.url &&
                                 playerState.status == PlaybackStatus.PAUSED,
-                            onClick = { onStationClick(station) }
+                            onClick = { onStationClick(station) },
+                            onFavoriteToggle = { onToggleFavorite(station) },
+                            onEdit = if (station.isCustom) { { onEditStation(station) } } else null,
+                            onDelete = if (station.isCustom) { { onDeleteStation(station) } } else null
                         )
                     }
                 }

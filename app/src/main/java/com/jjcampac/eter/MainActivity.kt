@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jjcampac.eter.di.AppModule
 import com.jjcampac.eter.player.service.RadioMediaSessionService
@@ -18,8 +19,9 @@ import com.jjcampac.eter.ui.main.MainScreen
 import com.jjcampac.eter.ui.main.MainViewModel
 import com.jjcampac.eter.ui.player.PlayerScreen
 import com.jjcampac.eter.ui.player.PlayerViewModel
+import com.jjcampac.eter.ui.station.StationFormScreen
+import com.jjcampac.eter.ui.station.StationFormViewModel
 import com.jjcampac.eter.ui.theme.EterTheme
-import com.jjcampac.eter.util.TestData
 
 private const val TAG = "MainActivity"
 
@@ -42,27 +44,66 @@ class MainActivity : ComponentActivity() {
         setContent {
             EterTheme {
                 val radioPlayer = remember { AppModule.radioPlayer(applicationContext) }
+                val stationRepository = remember { AppModule.stationRepository(applicationContext) }
 
-                val mainViewModel: MainViewModel = viewModel()
+                val mainViewModel: MainViewModel = viewModel(factory = MainViewModel.factory(stationRepository))
                 val playerViewModel: PlayerViewModel =
-                    viewModel(factory = PlayerViewModel.factory(radioPlayer))
+                    viewModel(factory = PlayerViewModel.factory(radioPlayer, stationRepository))
 
                 // Pantalla actual: `null` = lista; id = reproductor de esa emisora.
                 var currentStationId by rememberSaveable { mutableStateOf<String?>(null) }
-                val currentStation = TestData.all.firstOrNull { it.id == currentStationId }
+                var showForm by rememberSaveable { mutableStateOf(false) }
+                var editingStationId by rememberSaveable { mutableStateOf<String?>(null) }
+                val stations by stationRepository.getAllStations().collectAsStateWithLifecycle(initialValue = emptyList())
+                val currentStation = remember(currentStationId, stations) {
+                    stations.firstOrNull { it.id == currentStationId }
+                }
 
                 // Iniciar/detener el servicio de medios según haya estación activa.
                 if (currentStationId != null) {
                     startRadioService()
                 }
 
-                if (currentStation == null) {
+                if (currentStation == null && currentStationId != null) {
+                    currentStationId = null
+                }
+
+                if (showForm) {
+                    val formViewModel: StationFormViewModel = viewModel(
+                        factory = StationFormViewModel.factory(stationRepository, editingStationId)
+                    )
+                    StationFormScreen(
+                        viewModel = formViewModel,
+                        onBack = {
+                            showForm = false
+                            editingStationId = null
+                        },
+                        onSaved = {
+                            showForm = false
+                            editingStationId = null
+                        }
+                    )
+                } else if (currentStation == null) {
                     MainScreen(
                         mainViewModel = mainViewModel,
                         playerViewModel = playerViewModel,
                         onStationClick = { station ->
                             currentStationId = station.id
                             startRadioService()
+                        },
+                        onAddStation = {
+                            editingStationId = null
+                            showForm = true
+                        },
+                        onEditStation = { station ->
+                            editingStationId = station.id
+                            showForm = true
+                        },
+                        onDeleteStation = { station ->
+                            mainViewModel.deleteStation(station)
+                        },
+                        onToggleFavorite = { station ->
+                            mainViewModel.toggleFavorite(station)
                         }
                     )
                 } else {
