@@ -26,9 +26,9 @@ class PlayerViewModel(
     /** Reproduce la emisora o la pausa si ya es la actual y está sonando. */
     fun togglePlay(station: Station) {
         val current = playerState.value
-        if (current.status == PlaybackStatus.PLAYING && current.currentStation?.id == station.id) {
+        if (current.status == PlaybackStatus.PLAYING && current.currentStation?.url == station.url) {
             radioPlayer.pause()
-        } else if (current.status == PlaybackStatus.PAUSED && current.currentStation?.id == station.id) {
+        } else if (current.status == PlaybackStatus.PAUSED && current.currentStation?.url == station.url) {
             radioPlayer.resume()
         } else {
             radioPlayer.play(station)

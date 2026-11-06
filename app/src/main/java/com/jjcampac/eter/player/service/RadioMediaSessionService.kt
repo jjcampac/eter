@@ -73,9 +73,12 @@ class RadioMediaSessionService : MediaSessionService() {
             null -> Unit
         }
 
-        // Si hay reproducción activa, mantener en primer plano.
+        // Si hay reproducción activa (incluyendo carga), mantener en primer plano.
         val currentState = radioPlayer.state.value
-        if (currentState.status == PlaybackStatus.PLAYING || currentState.status == PlaybackStatus.PAUSED) {
+        if (currentState.status == PlaybackStatus.PLAYING ||
+            currentState.status == PlaybackStatus.PAUSED ||
+            currentState.status == PlaybackStatus.LOADING
+        ) {
             updateNotification(currentState)
             startForeground(NOTIFICATION_ID, buildNotification(this, currentState.currentStation, currentState.status, currentState.metadataTitle))
         }
@@ -129,10 +132,10 @@ class RadioMediaSessionService : MediaSessionService() {
 
         // Mantener el servicio en primer plano mientras haya algo cargado
         // (reproduciendo, pausado o cargando). Solo salir de foreground
-        // cuando esté IDLE o ERROR (sin stream activo).
+        // cuando esté IDLE sin estación (reproducción detenida) o ERROR.
         if (state.status == PlaybackStatus.PLAYING || state.status == PlaybackStatus.PAUSED || state.status == PlaybackStatus.LOADING) {
             startForeground(NOTIFICATION_ID, notification)
-        } else {
+        } else if (state.currentStation == null) {
             stopForeground(true)
         }
     }
