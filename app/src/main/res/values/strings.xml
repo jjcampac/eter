@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Eter</string>
+
+    <!-- Buscador / listas -->
+    <string name="search_hint">Buscar emisora por nombre, país o género</string>
+    <string name="no_results">No se encontraron emisoras</string>
+    <string name="loading">Cargando…</string>
+
+    <!-- Reproductor -->
+    <string name="play">Reproducir</string>
+    <string name="pause">Pausar</string>
+    <string name="resume">Reanudar</string>
+    <string name="stop">Detener</string>
+    <string name="back">Volver</string>
+    <string name="radio_live">En directo</string>
+    <string name="radio_paused">En pausa</string>
+    <string name="buffering">Conectando…</string>
+    <string name="error_cannot_connect">No se puede conectar con la emisora. Comprueba tu conexión o la URL del stream.</string>
+    <string name="error_unknown">Se produjo un error inesperado.</string>
+    <string name="metadata_empty">Sintonizando…</string>
+
+    <!-- Emisora de prueba (Fase 1) -->
+    <string name="station_test_name">SomaFM Groove Salad</string>
+    <string name="station_test_tagline">Chillout · Downtempo · EE.&amp;nbsp;UU.</string>
+
+    <!-- Navegación / acciones -->
+    <string name="favorites">Favoritas</string>
+    <string name="all_stations">Todas</string>
+    <string name="add_station">Añadir emisora</string>
+    <string name="sleep_timer">Temporizador de sueño</string>
+    <string name="country_es">España</string>
+</resources>

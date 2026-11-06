@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Permite tráfico HTTP (cleartext) para emisoras de radio que no soportan HTTPS.
+    Se aplica solo a dominios de emisoras; el resto de la app usa HTTPS por defecto.
+-->
+<network-security-config>
+    <!-- Hosts de la API pública de Radio Browser (HTTP y HTTPS) -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">radio-browser.info</domain>
+    </domain-config>
+
+    <!-- Cualquier otro dominio se permite únicamente con HTTPS (comportamiento por defecto) -->
+</network-security-config>
