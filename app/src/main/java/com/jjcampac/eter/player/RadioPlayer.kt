@@ -99,7 +99,7 @@ class RadioPlayer(context: Context) {
             // Reconexión automática ante cortes de red y estado "detenido" inesperado.
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == Player.STATE_IDLE && exoPlayer.mediaItemCount > 0 && playWhenReady) {
-                    _state.update { it.copy(status = PlaybackStatus.LOADING, errorMessage = null) }
+                    _state.update { it.copy(status = PlaybackStatus.PLAYING, errorMessage = null) }
                     exoPlayer.prepare()
                 }
             }
@@ -144,7 +144,7 @@ class RadioPlayer(context: Context) {
     fun resume() {
         Log.d(TAG, "resume()")
         exoPlayer.playWhenReady = true
-        _state.update { it.copy(status = PlaybackStatus.LOADING, errorMessage = null) }
+        _state.update { it.copy(status = PlaybackStatus.PLAYING, errorMessage = null) }
     }
 
     /** Detiene y libera la emisora actual. */
