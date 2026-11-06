@@ -36,20 +36,22 @@ fun AnimatedWavesIcon(
     Canvas(modifier = modifier.semantics { 
         if (contentDescription != null) this.contentDescription = contentDescription 
     }) {
-        // Margenes internos para que las barras queden centradas y proporcionadas
-        // (como un icono clasico), no ocupando todo el canvas.
+        // 5 barras centradas horizontalmente dentro del canvas (con margen)
         val n = 5
         val margin = size.width * 0.18f
         val useWidth = size.width - (2f * margin)
-        val gap = useWidth / (n * 2f)
-        val barWidth = gap * 0.6f
+        // gap entre centros de barras adyacentes
+        val gap = useWidth / (n + 1f)
+        val barWidth = gap * 0.5f
         val centerY = size.height / 2f
         val maxHeight = size.height * 0.6f
-        val startX = margin
+        // ancho total del bloque de barras
+        val totalBarsWidth = (n - 1) * gap + barWidth
+        val startX = (size.width - totalBarsWidth) / 2f
         for (i in 0 until n) {
             val amp = bars[i].value
             val h = maxHeight * amp
-            val x = startX + i * gap + gap * 0.5f - barWidth / 2f
+            val x = startX + i * gap
             drawRoundRect(
                 color = tint,
                 topLeft = Offset(x, centerY - h / 2f),
