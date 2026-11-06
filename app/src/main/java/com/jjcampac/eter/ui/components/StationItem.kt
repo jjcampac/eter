@@ -8,7 +8,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -81,15 +81,15 @@ fun StationItem(
                 )
             } else if (isPlaying) {
                 Icon(
-                    imageVector = Icons.Filled.Pause,
-                    contentDescription = "Pausar",
+                    imageVector = Icons.Filled.QueueMusic,
+                    contentDescription = "Emisora en reproducción",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(end = 8.dp)
                 )
             } else if (isPaused) {
                 Icon(
-                    imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = "Reproducir",
+                    imageVector = Icons.Filled.Pause,
+                    contentDescription = "Pausa",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(end = 8.dp)
                 )
