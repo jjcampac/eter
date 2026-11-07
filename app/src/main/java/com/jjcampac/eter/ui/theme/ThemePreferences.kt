@@ -3,8 +3,9 @@ package com.jjcampac.eter.ui.theme
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 // Clave de preferencia para el modo de tema
 private const val PREF_THEME_MODE = "pref_theme_mode"
@@ -36,15 +37,24 @@ class ThemePreferences(private val context: Context) {
     }
 }
 
-/** ViewModel para exponer ThemePreferences a la UI. */
+/**
+ * ViewModel para exponer ThemePreferences a la UI.
+ *
+ * Mantiene un [StateFlow] con el tema actual para que la interfaz se actualice
+ * al instante (sin reiniciar la app) cuando el usuario lo cambia en Ajustes.
+ * Como MainActivity y SettingsScreen comparten la misma instancia de este
+ * ViewModel (mismo ViewModelStoreOwner de la Activity), basta con observar el
+ * flujo para recomponer `EterTheme` en vivo.
+ */
 class ThemeViewModel(private val context: Context) : ViewModel() {
     private val prefs = ThemePreferences(context)
 
-    val themeMode: ThemeMode
-        get() = prefs.getThemeMode()
+    private val _themeMode = MutableStateFlow(prefs.getThemeMode())
+    val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
 
     fun saveThemeMode(mode: ThemeMode) {
         prefs.saveThemeMode(mode)
+        _themeMode.value = mode
     }
 
     companion object {

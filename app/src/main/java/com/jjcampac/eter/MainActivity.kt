@@ -95,9 +95,10 @@ class MainActivity : ComponentActivity() {
         }
         val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
 
-        // Tema de la app (guardado en SharedPreferences)
+        // Tema de la app (guardado en SharedPreferences). Se observa el flujo para
+        // que `EterTheme` se recomponga en vivo al cambiarlo desde Ajustes.
         val themeViewModel: ThemeViewModel = viewModel(factory = ThemeViewModel.factory(applicationContext))
-        val themeMode by remember { mutableStateOf(themeViewModel.themeMode) }
+        val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
 
         EterTheme(themeMode = themeMode) {
 
