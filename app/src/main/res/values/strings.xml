@@ -32,4 +32,24 @@
     <string name="add_station">Añadir emisora</string>
     <string name="sleep_timer">Temporizador de sueño</string>
     <string name="country_es">España</string>
+
+    <!-- Navegación por pestañas -->
+    <string name="tab_favorites">Favoritas</string>
+    <string name="tab_stations">Estaciones</string>
+    <string name="tab_settings">Ajustes</string>
+
+    <!-- Favoritas -->
+    <string name="favorites_empty">Aún no tienes emisoras favoritas.\nPulsa el corazón de una emisora para guardarla aquí.</string>
+    <string name="favorites_title">Favoritas</string>
+
+    <!-- Ajustes -->
+    <string name="settings_about">Acerca de Éter Radio</string>
+    <string name="settings_about_desc">App de radio por internet, sin publicidad y sin cuentas.\nTe conectas directamente a los streams de las emisoras.</string>
+    <string name="settings_theme">Tema de la app</string>
+    <string name="settings_theme_desc">Sigue la preferencia del sistema</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_desc">Español (España)</string>
+    <string name="settings_version">Versión</string>
+    <string name="settings_version_desc">1.0</string>
+    <string name="settings_pending">Disponible en una próxima actualización</string>
 </resources>
