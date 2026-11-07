@@ -50,7 +50,8 @@ fun MainScreen(
     onEditStation: (Station) -> Unit,
     onDeleteStation: (Station) -> Unit,
     onToggleFavorite: (Station) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedTab: Int = 0
 ) {
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
@@ -58,7 +59,14 @@ fun MainScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(title = { Text(stringResource(R.string.app_name)) })
+            TopAppBar(
+                title = {
+                    when (selectedTab) {
+                        0 -> Text(stringResource(R.string.favorites))
+                        else -> Text(stringResource(R.string.all_stations))
+                    }
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddStation) {
