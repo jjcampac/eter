@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jjcampac.eter.domain.model.Station
-import com.jjcampac.eter.ui.theme.EterOutline
+import com.jjcampac.eter.ui.theme.EterOutlineColor
 import com.jjcampac.eter.ui.theme.EterShapeCard
 
 /**
@@ -74,7 +74,7 @@ fun StationItem(
         ),
         shape = EterShapeCard,
         border = if (hasBorder)
-            androidx.compose.foundation.BorderStroke(2.dp, EterOutline)
+            androidx.compose.foundation.BorderStroke(2.dp, EterOutlineColor())
         else null,
         elevation = androidx.compose.material3.CardDefaults.cardElevation(
             defaultElevation = if (isCurrent || isPlaying) 8.dp else 3.dp
