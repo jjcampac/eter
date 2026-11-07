@@ -1,10 +1,5 @@
 package com.jjcampac.eter.ui.components
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,18 +26,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
 import com.jjcampac.eter.domain.model.Station
+import com.jjcampac.eter.ui.theme.EterOutline
+import com.jjcampac.eter.ui.theme.EterShapeCard
 
 /**
  * Fila de una emisora en las listas de la app.
  *
- * @param isCurrent  `true` si es la emisora cargada actualmente en el reproductor.
- * @param isPlaying  `true` si ademas de ser la actual esta sonando.
- * @param isPaused   `true` si la emisora actual esta pausada.
+ * Usa exclusivamente colores de MaterialTheme.colorScheme y formas de ui/theme.
+ * No hay colores sueltos en esta pantalla.
+ *
+ * @param isCurrent  true si es la emisora cargada actualmente en el reproductor.
+ * @param isPlaying  true si ademas de ser la actual esta sonando.
+ * @param isPaused   true si la emisora actual esta pausada.
  */
 @Composable
 fun StationItem(
@@ -61,11 +59,7 @@ fun StationItem(
     } else {
         MaterialTheme.colorScheme.surface
     }
-    val borderColor = if (isCurrent || isPlaying) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        Color.Unspecified
-    }
+    val hasBorder = isCurrent || isPlaying
 
     Card(
         modifier = modifier
@@ -78,9 +72,9 @@ fun StationItem(
             else
                 MaterialTheme.colorScheme.onSurface
         ),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-        border = if (borderColor != Color.Unspecified)
-            androidx.compose.foundation.BorderStroke(2.dp, borderColor)
+        shape = EterShapeCard,
+        border = if (hasBorder)
+            androidx.compose.foundation.BorderStroke(2.dp, EterOutline)
         else null,
         elevation = androidx.compose.material3.CardDefaults.cardElevation(
             defaultElevation = if (isCurrent || isPlaying) 8.dp else 3.dp
@@ -133,7 +127,7 @@ fun StationItem(
 
             // Estado de reproducción (olas animadas o pausa)
             if (isPlaying) {
-                AnimatedWavesIcon(
+                WavesIcon(
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(28.dp)
                 )
@@ -195,4 +189,18 @@ fun StationItem(
             }
         }
     }
+}
+
+/** Ícono de ondas para indicar reproducción en directo. */
+@Composable
+private fun WavesIcon(
+    tint: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier
+) {
+    Icon(
+        imageVector = Icons.Filled.GraphicEq,
+        contentDescription = "En directo",
+        tint = tint,
+        modifier = modifier
+    )
 }

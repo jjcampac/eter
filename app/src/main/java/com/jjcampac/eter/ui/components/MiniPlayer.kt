@@ -25,12 +25,14 @@ import androidx.compose.ui.unit.dp
 import com.jjcampac.eter.R
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.player.PlayerState
+import com.jjcampac.eter.ui.theme.EterShapePanel
 
 /**
  * Mini reproductor compacto que se muestra sobre la barra de navegación.
  *
  * Aparece siempre que haya una emisora cargada en el reproductor. Al pulsar
  * sobre el cuerpo abre la pantalla completa; el botón derecho reproduce/pausa.
+ * Usa exclusivamente colores de MaterialTheme.colorScheme y formas de ui/theme.
  */
 @Composable
 fun MiniPlayer(
@@ -59,8 +61,9 @@ fun MiniPlayer(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = EterShapePanel,
         tonalElevation = 12.dp
     ) {
         Row(
@@ -89,7 +92,7 @@ fun MiniPlayer(
                 Text(
                     text = secondaryText,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
