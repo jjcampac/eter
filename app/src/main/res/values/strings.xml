@@ -52,4 +52,12 @@
     <string name="settings_version">Versión</string>
     <string name="settings_version_desc">1.0</string>
     <string name="settings_pending">Disponible en una próxima actualización</string>
+    <!-- Selector de tema (Ajustes) -->
+    <string name="theme_system">Sistema</string>
+    <string name="theme_system_desc">Sigue la preferencia del dispositivo</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_light_desc">Tema claro siempre</string>
+    <string name="theme_dark">Oscuro</string>
+    <string name="theme_dark_desc">Tema oscuro siempre</string>
+
 </resources>

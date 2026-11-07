@@ -59,18 +59,20 @@ private val LightColors = lightColorScheme(
     error = EterErrorLight,
     onError = EterOnErrorLight
 )
-
-// Colores adicionales que no forman parte de ColorScheme estándar
-
 /**
- * Tema de la app. Respeta el tema del sistema (claro/oscuro) por defecto.
+ * Tema de la app. Respeta el tema del sistema por defecto.
  * Todas las pantallas deben usar MaterialTheme.colorScheme y no colores sueltos.
  */
 @Composable
 fun EterTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = ThemeMode.SISTEMA,
     content: @Composable () -> Unit
 ) {
+    val darkTheme = when (themeMode) {
+        ThemeMode.SISTEMA -> isSystemInDarkTheme()
+        ThemeMode.CLARO -> false
+        ThemeMode.OSCURO -> true
+    }
     val colorScheme = if (darkTheme) DarkColors else LightColors
     MaterialTheme(
         colorScheme = colorScheme,

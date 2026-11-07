@@ -46,6 +46,8 @@ import com.jjcampac.eter.ui.settings.SettingsScreen
 import com.jjcampac.eter.ui.station.StationFormScreen
 import com.jjcampac.eter.ui.station.StationFormViewModel
 import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.ThemeViewModel
 
 private const val TAG = "MainActivity"
 
@@ -67,9 +69,7 @@ class MainActivity : ComponentActivity() {
         Log.d(TAG, "onCreate() savedInstanceState=${savedInstanceState != null}")
         enableEdgeToEdge()
         setContent {
-            EterTheme {
-                RootContent()
-            }
+            RootContent()
         }
     }
 
@@ -94,6 +94,12 @@ class MainActivity : ComponentActivity() {
             stations.firstOrNull { it.id == currentStationId }
         }
         val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+
+        // Tema de la app (guardado en SharedPreferences)
+        val themeViewModel: ThemeViewModel = viewModel(factory = ThemeViewModel.factory(applicationContext))
+        val themeMode by remember { mutableStateOf(themeViewModel.themeMode) }
+
+        EterTheme(themeMode = themeMode) {
 
         // Iniciar el servicio de medios según haya estación activa.
         if (currentStationId != null) {
@@ -234,6 +240,7 @@ class MainActivity : ComponentActivity() {
             )
         }
     }
+}
 
     private fun startRadioService() {
         val intent = Intent(this, RadioMediaSessionService::class.java)
