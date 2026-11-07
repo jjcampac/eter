@@ -1,9 +1,12 @@
 package com.jjcampac.eter.ui.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Info
@@ -21,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,12 +38,12 @@ import com.jjcampac.eter.ui.theme.ThemeViewModel
  * Pestaña "Ajustes".
  *
  * Incluye selector de tema (Sistema / Claro / Oscuro) mediante un desplegable
- * que se aplica inmediatamente y se persiste en SharedPreferences.
+ * anclado al selector que se aplica inmediatamente y se persiste en SharedPreferences.
  */
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {
     val themeViewModel: ThemeViewModel = viewModel(factory = ThemeViewModel.factory(LocalContext.current))
-    val currentTheme by remember { mutableStateOf(themeViewModel.themeMode) }
+    var currentTheme by remember { mutableStateOf(themeViewModel.themeMode) }
     var themeMenuOpen by remember { mutableStateOf(false) }
 
     Column(
@@ -47,62 +51,72 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(vertical = 8.dp)
     ) {
-        // --- Selector de tema (desplegable) ---
-        ListItem(
-            headlineContent = {
-                Text(
-                    text = stringResource(R.string.settings_theme),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-            },
-            supportingContent = {
-                Text(
-                    text = stringResource(R.string.settings_theme_desc),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            trailingContent = {
-                IconButton(onClick = { themeMenuOpen = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowDropDown,
-                        contentDescription = "Abrir selector de tema",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-        )
-        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-
-        // Desplegable de opciones de tema
-        DropdownMenu(
-            expanded = themeMenuOpen,
-            onDismissRequest = { themeMenuOpen = false }
+        // --- Selector de tema (desplegable anclado) ---
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
         ) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.theme_system)) },
-                onClick = {
-                    themeMenuOpen = false
-                    themeViewModel.saveThemeMode(ThemeMode.SISTEMA)
+            ListItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                headlineContent = {
+                    Text(
+                        text = stringResource(R.string.settings_theme),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                supportingContent = {
+                    Text(
+                        text = stringResource(R.string.settings_theme_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                trailingContent = {
+                    IconButton(onClick = { themeMenuOpen = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowDropDown,
+                            contentDescription = "Abrir selector de tema",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.theme_light)) },
-                onClick = {
-                    themeMenuOpen = false
-                    themeViewModel.saveThemeMode(ThemeMode.CLARO)
-                }
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.theme_dark)) },
-                onClick = {
-                    themeMenuOpen = false
-                    themeViewModel.saveThemeMode(ThemeMode.OSCURO)
-                }
-            )
-        }
 
+            // Desplegable de opciones de tema (anclado al selector)
+            DropdownMenu(
+                expanded = themeMenuOpen,
+                onDismissRequest = { themeMenuOpen = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.theme_system)) },
+                    onClick = {
+                        themeMenuOpen = false
+                        themeViewModel.saveThemeMode(ThemeMode.SISTEMA)
+                        currentTheme = ThemeMode.SISTEMA
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.theme_light)) },
+                    onClick = {
+                        themeMenuOpen = false
+                        themeViewModel.saveThemeMode(ThemeMode.CLARO)
+                        currentTheme = ThemeMode.CLARO
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.theme_dark)) },
+                    onClick = {
+                        themeMenuOpen = false
+                        themeViewModel.saveThemeMode(ThemeMode.OSCURO)
+                        currentTheme = ThemeMode.OSCURO
+                    }
+                )
+            }
+        }
         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
 
         // Idioma (pendiente Fase 5)
