@@ -47,15 +47,7 @@ fun MiniPlayer(
     val isPlaying = isThisStation && playerState.status == PlaybackStatus.PLAYING
     val isBuffering = isThisStation && playerState.status == PlaybackStatus.LOADING
 
-    val secondaryText = when {
-        playerState.status == PlaybackStatus.ERROR -> {
-            playerState.errorMessage ?: stringResource(R.string.error_unknown)
-        }
-        isBuffering -> stringResource(R.string.buffering)
-        playerState.status == PlaybackStatus.PAUSED -> stringResource(R.string.radio_paused)
-        playerState.metadataTitle.isNullOrEmpty() -> station.subtitle.ifEmpty { station.name }
-        else -> playerState.metadataTitle.orEmpty()
-    }
+    val songTitle = playerState.metadataTitle.orEmpty()
 
     Surface(
         modifier = modifier
@@ -90,7 +82,7 @@ fun MiniPlayer(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = secondaryText,
+                    text = songTitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

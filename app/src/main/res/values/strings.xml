@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">Éter Radio</string>
+    <string name="app_name">Simple Radio</string>
 
     <!-- Buscador / listas -->
-    <string name="search_hint">Buscar emisora por nombre, país o género</string>
+    <string name="search_hint">Buscar (nombre, país o género)</string>
     <string name="no_results">No se encontraron emisoras</string>
     <string name="loading">Cargando…</string>
 
