@@ -2,7 +2,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fases 1-3 completadas ✅ · Fase 4 completada (build OK, pendiente de prueba en dispositivo) · Fase 5 pendiente
+> **Última actualización del estado:** Fases 1-3 completadas ✅ · Fase 4 completada (build OK, pendiente de prueba en dispositivo) · Fase 5 en curso (reconexión)
 
 ---
 
@@ -134,11 +134,11 @@ Objetivo: descubrir emisoras sin mantener un listado propio.
 
 **Cómo probar:** buscar una emisora conocida y reproducirla desde los resultados.
 
-### Fase 5 — Pulido y robustez ⬜
+### Fase 5 — Pulido y robustez 🟨
 
 Objetivo: dejar la app lista para el uso diario.
 
-- [ ] Reconexión automática ante cortes de stream
+- [x] Reconexión automática ante cortes de stream, con aviso al usuario tras un tiempo configurable en Ajustes
 - [ ] Mensajes de error claros para el usuario
 - [ ] Temporizador para dormir
 - [ ] Tema claro/oscuro

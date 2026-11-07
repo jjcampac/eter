@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jjcampac.eter.R
 import com.jjcampac.eter.ui.theme.ThemeMode
 import com.jjcampac.eter.ui.theme.ThemeViewModel
+import com.jjcampac.eter.util.ReconnectPreferences
 
 /**
  * Pestaña "Ajustes".
@@ -46,6 +47,12 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
     val themeViewModel: ThemeViewModel = viewModel(factory = ThemeViewModel.factory(LocalContext.current))
     val currentTheme by themeViewModel.themeMode.collectAsStateWithLifecycle()
     var themeExpanded by remember { mutableStateOf(false) }
+
+    // Preferencia de reconexión (Fase 5) para informar al usuario tras un corte.
+    val context = LocalContext.current
+    val reconnectPrefs = remember { ReconnectPreferences(context) }
+    var reconnectSeconds by remember { mutableStateOf(reconnectPrefs.getReconnectSeconds()) }
+    var reconnectExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -101,6 +108,74 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                     description = stringResource(R.string.theme_dark_desc),
                     selected = currentTheme == ThemeMode.OSCURO,
                     onClick = { themeViewModel.saveThemeMode(ThemeMode.OSCURO) }
+                )
+            }
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+
+        // --- Reintento de conexión (acordeón, Fase 5) ---
+        ListItem(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { reconnectExpanded = !reconnectExpanded },
+            headlineContent = {
+                Text(
+                    text = stringResource(R.string.settings_reconnect),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+            },
+            supportingContent = {
+                Text(
+                    text = stringResource(R.string.settings_reconnect_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            trailingContent = {
+                Icon(
+                    imageVector = if (reconnectExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = stringResource(R.string.settings_reconnect),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        )
+        AnimatedVisibility(visible = reconnectExpanded) {
+            Column {
+                ReconnectOption(
+                    label = stringResource(R.string.reconnect_10s),
+                    selected = reconnectSeconds == 10,
+                    onClick = {
+                        reconnectSeconds = 10
+                        reconnectPrefs.saveReconnectSeconds(10)
+                    }
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                ReconnectOption(
+                    label = stringResource(R.string.reconnect_20s),
+                    selected = reconnectSeconds == 20,
+                    onClick = {
+                        reconnectSeconds = 20
+                        reconnectPrefs.saveReconnectSeconds(20)
+                    }
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                ReconnectOption(
+                    label = stringResource(R.string.reconnect_30s),
+                    selected = reconnectSeconds == 30,
+                    onClick = {
+                        reconnectSeconds = 30
+                        reconnectPrefs.saveReconnectSeconds(30)
+                    }
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                ReconnectOption(
+                    label = stringResource(R.string.reconnect_unlimited),
+                    selected = reconnectSeconds == ReconnectPreferences.UNLIMITED,
+                    onClick = {
+                        reconnectSeconds = ReconnectPreferences.UNLIMITED
+                        reconnectPrefs.saveReconnectSeconds(ReconnectPreferences.UNLIMITED)
+                    }
                 )
             }
         }
@@ -190,5 +265,30 @@ private fun ThemeOption(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    )
+}
+
+/**
+ * Fila de una opción de tiempo de reintento de conexión dentro del acordeón.
+ * Muestra la opción seleccionada y permite cambiarla con un toque.
+ */
+@Composable
+private fun ReconnectOption(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    ListItem(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        leadingContent = {
+            Icon(
+                imageVector = if (selected) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked,
+                contentDescription = null,
+                tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        headlineContent = { Text(label) }
     )
 }
