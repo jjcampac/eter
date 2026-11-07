@@ -116,16 +116,12 @@ class RadioPlayer(context: Context) {
 
             // Metadatos ICY (título de la canción).
             override fun onMetadata(metadata: Metadata) {
-                var title: String? = null
                 for (i in 0 until metadata.length()) {
-                    val str = metadata.get(i).toString()
-                    if (str.isNotEmpty()) {
-                        title = str
-                        break
+                    val clean = cleanMetadataTitle(metadata.get(i).toString())
+                    if (clean != null) {
+                        _state.update { it.copy(metadataTitle = clean) }
+                        return
                     }
-                }
-                if (title != null && title.isNotEmpty()) {
-                    _state.update { it.copy(metadataTitle = title) }
                 }
             }
         })
@@ -171,5 +167,36 @@ class RadioPlayer(context: Context) {
     fun release() {
         Log.d(TAG, "release()")
         exoPlayer.release()
+    }
+
+    /**
+     * Limpia el título de canción recibido por metadatos ICY.
+     *
+     * Media3 expone los metadatos como `IcyInfo`, cuyo `toString()` es del tipo
+     * `ICY: title="Artista - Canción", url="http://..."`. Icecast, por su parte,
+     * envía `StreamTitle='Artista - Canción'`. Para mostrarlo de forma limpia
+     * en el mini reproductor y en la notificación se extrae el valor del campo
+     * `title` (o `StreamTitle`), descartando marcas (ICY:), la url y el resto de
+     * metaetiquetas. Si no se encuentra ninguna etiqueta, se devuelve la cadena
+     * original recortada (quitando comillas y restos conocidos).
+     */
+    private fun cleanMetadataTitle(raw: String?): String? {
+        if (raw.isNullOrBlank()) return null
+        val match = Regex(
+            "(?:StreamTitle|title)\\s*=\\s*['\"]([^'\"]*)['\"]",
+            RegexOption.IGNORE_CASE
+        ).find(raw)
+        val value = match?.groupValues?.get(1)?.trim()
+            ?: raw.trim()
+                .removePrefix("ICY:")
+                .trim()
+                .substringBefore("url = ")
+                .substringBefore("url=")
+                .substringBefore("StreamUrl = ")
+                .substringBefore("StreamUrl=")
+                .trim()
+                .trim('\'')
+                .trim('"')
+        return value.takeIf { it.isNotEmpty() }
     }
 }

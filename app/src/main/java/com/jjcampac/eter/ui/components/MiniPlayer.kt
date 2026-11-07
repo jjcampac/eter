@@ -45,9 +45,20 @@ fun MiniPlayer(
 
     val isThisStation = playerState.currentStation?.url == station.url
     val isPlaying = isThisStation && playerState.status == PlaybackStatus.PLAYING
-    val isBuffering = isThisStation && playerState.status == PlaybackStatus.LOADING
 
-    val songTitle = playerState.metadataTitle.orEmpty()
+    // Segunda línea del mini reproductor: el título de la canción solo se
+    // muestra mientras la emisora está en reproducción. En pausa, conectando,
+    // con error o parado se muestra el estado en lenguaje claro.
+    val secondLine = when (playerState.status) {
+        PlaybackStatus.PLAYING ->
+            playerState.metadataTitle?.takeIf { it.isNotEmpty() }
+                ?: stringResource(R.string.radio_live)
+        PlaybackStatus.PAUSED -> stringResource(R.string.radio_paused)
+        PlaybackStatus.LOADING -> stringResource(R.string.buffering)
+        PlaybackStatus.ERROR ->
+            playerState.errorMessage ?: stringResource(R.string.error_unknown)
+        PlaybackStatus.IDLE -> stringResource(R.string.tap_to_play)
+    }
 
     Surface(
         modifier = modifier
@@ -82,7 +93,7 @@ fun MiniPlayer(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = songTitle,
+                    text = secondLine,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
