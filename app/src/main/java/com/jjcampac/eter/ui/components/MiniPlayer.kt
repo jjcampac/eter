@@ -61,7 +61,7 @@ fun MiniPlayer(
             .clickable(onClick = onClick),
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        tonalElevation = 8.dp
+        tonalElevation = 12.dp
     ) {
         Row(
             modifier = Modifier
@@ -73,7 +73,7 @@ fun MiniPlayer(
                 imageVector = if (isPlaying) Icons.Filled.GraphicEq else Icons.Filled.MusicNote,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(36.dp)
             )
             Column(
                 modifier = Modifier

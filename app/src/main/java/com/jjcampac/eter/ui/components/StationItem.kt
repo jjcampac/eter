@@ -80,16 +80,16 @@ fun StationItem(
         ),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
         border = if (borderColor != Color.Unspecified)
-            androidx.compose.foundation.BorderStroke(1.5.dp, borderColor)
+            androidx.compose.foundation.BorderStroke(2.dp, borderColor)
         else null,
         elevation = androidx.compose.material3.CardDefaults.cardElevation(
-            defaultElevation = if (isCurrent || isPlaying) 4.dp else 1.dp
+            defaultElevation = if (isCurrent || isPlaying) 8.dp else 3.dp
         )
     ) {
         androidx.compose.foundation.layout.Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
             // Ícono de emisora (onda si es la actual/reproduciendo, nota musical si no)
@@ -100,10 +100,10 @@ fun StationItem(
                     MaterialTheme.colorScheme.onPrimaryContainer
                 else
                     MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(40.dp)
             )
 
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(12.dp))
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(16.dp))
 
             // Información textual
             Column(
@@ -135,14 +135,14 @@ fun StationItem(
             if (isPlaying) {
                 AnimatedWavesIcon(
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             } else if (isPaused) {
                 Icon(
                     imageVector = Icons.Filled.Pause,
                     contentDescription = "Pausa",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
 
@@ -170,7 +170,7 @@ fun StationItem(
                         imageVector = Icons.Filled.Favorite,
                         contentDescription = "Favorita",
                         tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(28.dp)
                     )
                 }
                 // Acciones para emisoras manuales
@@ -179,7 +179,7 @@ fun StationItem(
                         Icon(
                             Icons.Filled.Edit,
                             contentDescription = "Editar",
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                 }
@@ -188,7 +188,7 @@ fun StationItem(
                         Icon(
                             Icons.Filled.Delete,
                             contentDescription = "Borrar",
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                 }
