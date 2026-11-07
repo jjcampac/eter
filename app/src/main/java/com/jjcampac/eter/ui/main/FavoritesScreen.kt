@@ -1,11 +1,20 @@
 package com.jjcampac.eter.ui.main
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,12 +54,21 @@ fun FavoritesScreen(
     val favorites = uiState.stations.filter { it.isFavorite }
 
     if (favorites.isEmpty()) {
-        Box(
+        Column(
             modifier = modifier
                 .fillMaxSize()
                 .padding(horizontal = 32.dp),
-            contentAlignment = Alignment.Center
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
+            Icon(
+                imageVector = Icons.Filled.Favorite,
+                contentDescription = "Sin favoritas",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                modifier = Modifier
+                    .size(64.dp)
+                    .padding(bottom = 16.dp)
+            )
             Text(
                 text = stringResource(R.string.favorites_empty),
                 style = MaterialTheme.typography.bodyLarge,
