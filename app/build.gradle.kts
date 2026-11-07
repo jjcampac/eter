@@ -53,8 +53,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-    // Reproducción: Media3 (ExoPlayer + MediaSession + UI)
+    // Reproducción: Media3 (ExoPlayer + HLS + MediaSession + UI)
     implementation(libs.media3.exoplayer)
+    implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.session)
     implementation(libs.media3.ui)
 
@@ -65,6 +66,11 @@ dependencies {
 
     // Corrutinas
     implementation(libs.kotlinx.coroutines.android)
+
+    // Red (Retrofit/OkHttp) — Fase 4: API pública de Radio Browser
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

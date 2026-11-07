@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Permite tráfico HTTP (cleartext) para emisoras de radio que no soportan HTTPS.
-    Se aplica solo a dominios de emisoras; el resto de la app usa HTTPS por defecto.
+    Permite tráfico HTTP (cleartext) porque los streams de las emisoras pueden
+    estar en dominios arbitrarios que no se pueden enumerar a priori (decisión
+    acordada al corregir la Fase 4). No se activa usesCleartextTraffic: toda la
+    política de red se gestiona desde este archivo.
 -->
 <network-security-config>
+    <!-- HTTP permitido en general: necesario para reproducir streams http de
+         emisoras (dominios desconocidos de antemano). -->
+    <base-config cleartextTrafficPermitted="true" />
+
     <!-- Hosts de la API pública de Radio Browser (HTTP y HTTPS) -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">radio-browser.info</domain>
     </domain-config>
-
-    <!-- Cualquier otro dominio se permite únicamente con HTTPS (comportamiento por defecto) -->
 </network-security-config>

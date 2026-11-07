@@ -30,4 +30,14 @@ interface StationRepository {
 
     /** Lista síncrona de favoritas (para navegación anterior/siguiente). */
     suspend fun getFavoritesList(): List<Station>
+
+    /**
+     * Busca emisoras en la API pública de Radio Browser.
+     * Devuelve lista vacía si el repositorio no tiene fuente remota configurada.
+     *
+     * @param query   Término a buscar en el nombre de la emisora.
+     * @param country País para filtrar (España por defecto en la UI).
+     * @param genre   Género/etiqueta opcional (nulo = sin filtro).
+     */
+    suspend fun searchRemote(query: String, country: String, genre: String? = null): List<Station>
 }

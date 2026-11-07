@@ -3,6 +3,7 @@ package com.jjcampac.eter.di
 import android.content.Context
 import com.jjcampac.eter.EterApplication
 import com.jjcampac.eter.data.local.EterDatabase
+import com.jjcampac.eter.data.remote.RadioBrowserDataSource
 import com.jjcampac.eter.data.repository.StationRepositoryImpl
 import com.jjcampac.eter.domain.repository.StationRepository
 import com.jjcampac.eter.player.RadioPlayer
@@ -33,7 +34,8 @@ object AppModule {
             appContext.getStationRepository()
         } else {
             StationRepositoryImpl(
-                EterDatabase.getDatabase(appContext).stationDao()
+                EterDatabase.getDatabase(appContext).stationDao(),
+                RadioBrowserDataSource()
             )
         }
     }

@@ -2,7 +2,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fase 1, 2 y 3 completadas ✅ · En curso: Fase 4
+> **Última actualización del estado:** Fases 1-3 completadas ✅ · Fase 4 completada (build OK, pendiente de prueba en dispositivo) · Fase 5 pendiente
 
 ---
 
@@ -122,14 +122,15 @@ Objetivo: persistir emisoras y favoritas.
 
 **Cómo probar:** añadir emisoras, cerrar la app y comprobar que se conservan.
 
-### Fase 4 — API de Radio Browser y buscador ⬜
+### Fase 4 — API de Radio Browser y buscador ✅
 
 Objetivo: descubrir emisoras sin mantener un listado propio.
 
-- [ ] Cliente Retrofit con selección de mirror aleatorio y `User-Agent` propio
-- [ ] Búsqueda por nombre, país (España por defecto) y género
-- [ ] Añadir a favoritas desde los resultados
-- [ ] Manejo de errores de red
+- [x] Cliente Retrofit con selección de mirror aleatorio y `User-Agent` propio
+- [x] Búsqueda por nombre, país (España por defecto) y género
+- [x] Añadir a favoritas desde los resultados (persiste en Room al marcar)
+- [x] Manejo de errores de red y estados de cargando/vacío
+- [x] Selector de origen (Mis emisoras / Internet) con debounce de 500 ms
 
 **Cómo probar:** buscar una emisora conocida y reproducirla desde los resultados.
 

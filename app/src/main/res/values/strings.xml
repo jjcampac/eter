@@ -30,6 +30,7 @@
     <string name="favorites">Favoritas</string>
     <string name="all_stations">Todas</string>
     <string name="add_station">Añadir emisora</string>
+    <string name="delete_station">Eliminar emisora</string>
     <string name="sleep_timer">Temporizador de sueño</string>
     <string name="country_es">España</string>
 
@@ -41,9 +42,10 @@
     <!-- Favoritas -->
     <string name="favorites_empty">Aún no tienes emisoras favoritas.\nPulsa el corazón de una emisora para guardarla aquí.</string>
     <string name="favorites_title">Favoritas</string>
+    <string name="manual_stations_empty">Aún no has añadido emisoras.\nPulsa el botón + para añadir la primera.</string>
 
     <!-- Ajustes -->
-    <string name="settings_about">Acerca de Éter Radio</string>
+    <string name="settings_about">Acerca de Simple Radio</string>
     <string name="settings_about_desc">App de radio por internet, sin publicidad y sin cuentas.\nTe conectas directamente a los streams de las emisoras.</string>
     <string name="settings_theme">Tema de la app</string>
     <string name="settings_theme_desc">Sigue la preferencia del sistema</string>
@@ -59,5 +61,14 @@
     <string name="theme_light_desc">Tema claro siempre</string>
     <string name="theme_dark">Oscuro</string>
     <string name="theme_dark_desc">Tema oscuro siempre</string>
+
+    <!-- Búsqueda en Internet (Fase 4, Radio Browser) -->
+    <string name="search_source_local">Mis emisoras</string>
+    <string name="search_source_internet">Internet</string>
+    <string name="search_country_label">País</string>
+    <string name="search_genre_label">Género (opcional)</string>
+    <string name="search_internet_hint">Escribe para buscar en Internet (Radio Browser)</string>
+    <string name="error_radio_browser">No se pudo contactar con Radio Browser. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="retry">Reintentar</string>
 
 </resources>

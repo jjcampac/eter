@@ -136,9 +136,20 @@ class RadioPlayer(context: Context) {
         (appContext as? EterApplication)?.saveLastStationUrl(station.url)
 
         _state.value = PlayerState(status = PlaybackStatus.LOADING, currentStation = station)
-        exoPlayer.setMediaItem(MediaItem.fromUri(station.url))
-        exoPlayer.prepare()
-        exoPlayer.playWhenReady = true
+        try {
+            exoPlayer.setMediaItem(MediaItem.fromUri(station.url))
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = true
+        } catch (e: Exception) {
+            // Blindaje: una URL inválida o un formato de stream no soportado no debe
+            // tumbar la aplicación (ej. HLS antes de incluir media3-exoplayer-hls).
+            Log.e(TAG, "play() no se pudo configurar el stream (${station.url}): ${e.message}")
+            _state.value = PlayerState(
+                status = PlaybackStatus.ERROR,
+                currentStation = station,
+                errorMessage = "No se puede reproducir esta emisora. Comprueba su URL o su formato."
+            )
+        }
     }
 
     /** Pausa la reproducción actual (deja el stream cargado). */
@@ -177,26 +188,46 @@ class RadioPlayer(context: Context) {
      * envía `StreamTitle='Artista - Canción'`. Para mostrarlo de forma limpia
      * en el mini reproductor y en la notificación se extrae el valor del campo
      * `title` (o `StreamTitle`), descartando marcas (ICY:), la url y el resto de
-     * metaetiquetas. Si no se encuentra ninguna etiqueta, se devuelve la cadena
-     * original recortada (quitando comillas y restos conocidos).
+     * metaetiquetas. Además se descartan marcos de metadatos no legibles como
+     * canción (p. ej. `PRIV` que envían los streams HLS) para no mostrar basura.
+     * Si no se encuentra ninguna etiqueta razonable, devuelve `null`.
      */
     private fun cleanMetadataTitle(raw: String?): String? {
         if (raw.isNullOrBlank()) return null
-        val match = Regex(
+        val trimmed = raw.trim()
+
+        // 1) Título clásico de Shoutcast/Icecast (`StreamTitle='...'` o `title="..."`).
+        val icyMatch = Regex(
             "(?:StreamTitle|title)\\s*=\\s*['\"]([^'\"]*)['\"]",
             RegexOption.IGNORE_CASE
-        ).find(raw)
-        val value = match?.groupValues?.get(1)?.trim()
-            ?: raw.trim()
-                .removePrefix("ICY:")
-                .trim()
-                .substringBefore("url = ")
-                .substringBefore("url=")
-                .substringBefore("StreamUrl = ")
-                .substringBefore("StreamUrl=")
-                .trim()
-                .trim('\'')
-                .trim('"')
-        return value.takeIf { it.isNotEmpty() }
+        ).find(trimmed)
+        if (icyMatch != null) {
+            return icyMatch.groupValues[1].trim().takeIf { it.isNotEmpty() }
+        }
+
+        // 2) Etiqueta ID3 de título (TIT2), habitual en algunos streams.
+        val tit2 = Regex("(?i)^TIT2\\s*:\\s*(.+)$").find(trimmed)
+        if (tit2 != null) {
+            return tit2.groupValues[1].trim().trim('\'').trim('"').takeIf { it.isNotEmpty() }
+        }
+
+        // 3) Marcos de metadatos no legibles como canción (PRIV, TXXX, TALB, COMM,
+        //    APIC, TCON, TDRC, UFID...): se descartan para no mostrar basura.
+        if (Regex("^[A-Z][A-Z0-9]{3}\\s*:", RegexOption.IGNORE_CASE).containsMatchIn(trimmed)) {
+            return null
+        }
+
+        // 4) Fallback: cadena original recortada (quitando comillas y restos conocidos).
+        return trimmed
+            .removePrefix("ICY:")
+            .trim()
+            .substringBefore("url = ")
+            .substringBefore("url=")
+            .substringBefore("StreamUrl = ")
+            .substringBefore("StreamUrl=")
+            .trim()
+            .trim('\'')
+            .trim('"')
+            .takeIf { it.isNotEmpty() }
     }
 }

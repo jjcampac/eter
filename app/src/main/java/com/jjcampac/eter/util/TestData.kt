@@ -10,13 +10,18 @@ import com.jjcampac.eter.domain.model.Station
  */
 object TestData {
 
-    /** Emisora fija usada para validar la reproducción en esta fase. */
+    /**
+     * Emisora fija usada para validar la reproducción sin depender de la API
+     * (decisión del proyecto en Fase 1). Se guarda con `isCustom = true` para
+     * que aparezca como una emisora añadida a mano en "Mis Emisoras".
+     */
     val testStation = Station(
         id = "test-somafm",
         name = "SomaFM Groove Salad",
         url = "https://ice1.somafm.com/groovesalad-128-mp3",
         country = "EE. UU.",
-        genre = "Chillout / Downtempo"
+        genre = "Chillout / Downtempo",
+        isCustom = true
     )
 
     val all: List<Station> = listOf(testStation)

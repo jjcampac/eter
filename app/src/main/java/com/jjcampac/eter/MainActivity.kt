@@ -90,8 +90,12 @@ class MainActivity : ComponentActivity() {
         var selectedTab by rememberSaveable { mutableStateOf(0) }
         val stations by stationRepository.getAllStations()
             .collectAsStateWithLifecycle(initialValue = emptyList())
-        val currentStation = remember(currentStationId, stations) {
+        // Estado de la pantalla principal: permite localizar emisoras de Internet
+        // (Radio Browser) que aún no están guardadas en Room.
+        val mainUiState by mainViewModel.uiState.collectAsStateWithLifecycle()
+        val currentStation = remember(currentStationId, stations, mainUiState.internetStations) {
             stations.firstOrNull { it.id == currentStationId }
+                ?: mainUiState.internetStations.firstOrNull { it.id == currentStationId }
         }
         val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
 

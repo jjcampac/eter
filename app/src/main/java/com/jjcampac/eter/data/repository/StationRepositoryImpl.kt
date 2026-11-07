@@ -2,15 +2,23 @@ package com.jjcampac.eter.data.repository
 
 import com.jjcampac.eter.data.local.dao.StationDao
 import com.jjcampac.eter.data.local.entity.StationEntity
+import com.jjcampac.eter.data.remote.RadioBrowserDataSource
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.domain.repository.StationRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
- * Implementación del repositorio de emisoras sobre Room.
+ * Implementación del repositorio de emisoras.
+ *
+ * Combina el almacenamiento local (Room, Fase 3) con la búsqueda remota en la
+ * API de Radio Browser (Fase 4). Si no se inyecta fuente remota, las búsquedas
+ * devuelven lista vacía, así la app sigue funcionando solo con emisoras locales.
  */
-class StationRepositoryImpl(private val dao: StationDao) : StationRepository {
+class StationRepositoryImpl(
+    private val dao: StationDao,
+    private val remote: RadioBrowserDataSource? = null
+) : StationRepository {
 
     override fun getAllStations(): Flow<List<Station>> =
         dao.getAllFlow().map { list -> list.map { it.toDomain() } }
@@ -35,6 +43,9 @@ class StationRepositoryImpl(private val dao: StationDao) : StationRepository {
 
     override suspend fun getFavoritesList(): List<Station> =
         dao.getFavorites().map { it.toDomain() }
+
+    override suspend fun searchRemote(query: String, country: String, genre: String?): List<Station> =
+        remote?.searchStations(query, country, genre) ?: emptyList()
 }
 
 /** Mapeo de entidad Room a modelo de dominio. */
