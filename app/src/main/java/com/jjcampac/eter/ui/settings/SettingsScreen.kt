@@ -1,5 +1,6 @@
 package com.jjcampac.eter.ui.settings
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -30,9 +31,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jjcampac.eter.R
+import com.jjcampac.eter.di.AppModule
+import com.jjcampac.eter.player.SleepTimer
 import com.jjcampac.eter.ui.theme.ThemeMode
 import com.jjcampac.eter.ui.theme.ThemeViewModel
+import com.jjcampac.eter.util.AppLanguage
 import com.jjcampac.eter.util.ReconnectPreferences
+
+/** Secciones desplegables de Ajustes. Solo puede haber una abierta a la vez. */
+private enum class SettingsAccordion { TEMA, RECONEXION, IDIOMA, DORMIR }
 
 /**
  * Pestaña "Ajustes".
@@ -46,13 +53,33 @@ import com.jjcampac.eter.util.ReconnectPreferences
 fun SettingsScreen(modifier: Modifier = Modifier) {
     val themeViewModel: ThemeViewModel = viewModel(factory = ThemeViewModel.factory(LocalContext.current))
     val currentTheme by themeViewModel.themeMode.collectAsStateWithLifecycle()
-    var themeExpanded by remember { mutableStateOf(false) }
 
     // Preferencia de reconexión (Fase 5) para informar al usuario tras un corte.
     val context = LocalContext.current
     val reconnectPrefs = remember { ReconnectPreferences(context) }
     var reconnectSeconds by remember { mutableStateOf(reconnectPrefs.getReconnectSeconds()) }
-    var reconnectExpanded by remember { mutableStateOf(false) }
+
+    // Temporizador para dormir (Fase 5).
+    val sleepTimer: SleepTimer = remember { AppModule.sleepTimer(context) }
+    var sleepMinutes by remember { mutableStateOf(sleepTimer.selectedMinutes()) }
+    val sleepOptions = listOf(
+        0 to R.string.sleep_off,
+        15 to R.string.sleep_15,
+        30 to R.string.sleep_30,
+        45 to R.string.sleep_45,
+        60 to R.string.sleep_60
+    )
+
+    // Idioma (Fase 5). Los acordeones son excluyentes: solo uno abierto a la vez.
+    val currentLanguageCode = remember { AppLanguage.current(context) }
+    val currentLanguageName = remember(currentLanguageCode) {
+        AppLanguage.options.firstOrNull { it.code == currentLanguageCode }
+            ?.name ?: AppLanguage.options.first().name
+    }
+    var openAccordion by remember { mutableStateOf<SettingsAccordion?>(null) }
+    fun toggleAccordion(section: SettingsAccordion) {
+        openAccordion = if (openAccordion == section) null else section
+    }
 
     Column(
         modifier = modifier
@@ -62,7 +89,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         ListItem(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { themeExpanded = !themeExpanded },
+                .clickable { toggleAccordion(SettingsAccordion.TEMA) },
             headlineContent = {
                 Text(
                     text = stringResource(R.string.settings_theme),
@@ -79,7 +106,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             },
             trailingContent = {
                 Icon(
-                    imageVector = if (themeExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    imageVector = if (openAccordion == SettingsAccordion.TEMA) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                     contentDescription = stringResource(R.string.settings_theme),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -87,7 +114,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         )
 
         // Opciones de tema expandibles
-        AnimatedVisibility(visible = themeExpanded) {
+        AnimatedVisibility(visible = openAccordion == SettingsAccordion.TEMA) {
             Column {
                 ThemeOption(
                     label = stringResource(R.string.theme_system),
@@ -117,7 +144,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         ListItem(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { reconnectExpanded = !reconnectExpanded },
+                .clickable { toggleAccordion(SettingsAccordion.RECONEXION) },
             headlineContent = {
                 Text(
                     text = stringResource(R.string.settings_reconnect),
@@ -134,13 +161,13 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             },
             trailingContent = {
                 Icon(
-                    imageVector = if (reconnectExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    imageVector = if (openAccordion == SettingsAccordion.RECONEXION) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                     contentDescription = stringResource(R.string.settings_reconnect),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
         )
-        AnimatedVisibility(visible = reconnectExpanded) {
+        AnimatedVisibility(visible = openAccordion == SettingsAccordion.RECONEXION) {
             Column {
                 ReconnectOption(
                     label = stringResource(R.string.reconnect_10s),
@@ -181,8 +208,11 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
 
-        // Idioma (pendiente Fase 5)
+        // --- Idioma (acordeón, Fase 5) ---
         ListItem(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { toggleAccordion(SettingsAccordion.IDIOMA) },
             headlineContent = {
                 Text(
                     text = stringResource(R.string.settings_language),
@@ -192,16 +222,46 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             },
             supportingContent = {
                 Text(
-                    text = stringResource(R.string.settings_language_desc),
+                    text = currentLanguageName,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            },
+            trailingContent = {
+                Icon(
+                    imageVector = if (openAccordion == SettingsAccordion.IDIOMA) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = stringResource(R.string.settings_language),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         )
+        AnimatedVisibility(visible = openAccordion == SettingsAccordion.IDIOMA) {
+            Column {
+                AppLanguage.options.forEachIndexed { index, option ->
+                    if (index > 0) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                    }
+                    LanguageOption(
+                        label = option.name,
+                        selected = currentLanguageCode == option.code,
+                        onClick = {
+                            if (option.code != currentLanguageCode) {
+                                AppLanguage.save(context, option.code)
+                                // Recrea la Activity para aplicar el idioma al instante.
+                                (context as? Activity)?.recreate()
+                            }
+                        }
+                    )
+                }
+            }
+        }
         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
 
-        // Temporizador (pendiente Fase 5)
+        // --- Temporizador para dormir (acordeón, Fase 5) ---
         ListItem(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { toggleAccordion(SettingsAccordion.DORMIR) },
             headlineContent = {
                 Text(
                     text = stringResource(R.string.sleep_timer),
@@ -211,12 +271,40 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             },
             supportingContent = {
                 Text(
-                    text = stringResource(R.string.settings_pending),
+                    text = stringResource(R.string.settings_sleep_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            },
+            trailingContent = {
+                Icon(
+                    imageVector = if (openAccordion == SettingsAccordion.DORMIR) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = stringResource(R.string.sleep_timer),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         )
+        AnimatedVisibility(visible = openAccordion == SettingsAccordion.DORMIR) {
+            Column {
+                sleepOptions.forEachIndexed { index, (minutes, labelRes) ->
+                    if (index > 0) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                    }
+                    SleepOption(
+                        label = stringResource(labelRes),
+                        selected = sleepMinutes == minutes,
+                        onClick = {
+                            sleepMinutes = minutes
+                            if (minutes <= 0) {
+                                sleepTimer.stop()
+                            } else {
+                                sleepTimer.start(minutes)
+                            }
+                        }
+                    )
+                }
+            }
+        }
 
         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
 
@@ -292,3 +380,54 @@ private fun ReconnectOption(
         headlineContent = { Text(label) }
     )
 }
+
+/**
+ * Fila de una opción del temporizador para dormir dentro del acordeón.
+ * Muestra la opción seleccionada y permite cambiarla con un toque.
+ */
+@Composable
+private fun SleepOption(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    ListItem(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        leadingContent = {
+            Icon(
+                imageVector = if (selected) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked,
+                contentDescription = null,
+                tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        headlineContent = { Text(label) }
+    )
+}
+
+/**
+ * Fila de una opción de idioma dentro del acordeón. Muestra la opción marcada
+ * y, al pulsarla, guarda el idioma y recrea la Activity para aplicarlo.
+ */
+@Composable
+private fun LanguageOption(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    ListItem(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        leadingContent = {
+            Icon(
+                imageVector = if (selected) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked,
+                contentDescription = null,
+                tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        headlineContent = { Text(label) }
+    )
+}
+

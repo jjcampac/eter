@@ -24,6 +24,9 @@ const val ACTION_NEXT = "com.jjcampac.eter.ACTION_NEXT"
 const val ACTION_PREVIOUS = "com.jjcampac.eter.ACTION_PREVIOUS"
 const val ACTION_STOP = "com.jjcampac.eter.ACTION_STOP"
 
+/** Acción interna del temporizador para dormir (Fase 5). */
+const val ACTION_SLEEP_TIMER = "com.jjcampac.eter.ACTION_SLEEP_TIMER"
+
 /**
  * Crea el canal de notificación una sola vez (Android 8.0+).
  */

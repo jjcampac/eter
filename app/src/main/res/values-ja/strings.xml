@@ -1,0 +1,89 @@
+<resources>
+    <string name="app_name">Simple Radio</string>
+
+    <!-- 検索 / 一覧 -->
+    <string name="search_hint">検索（名前、国、ジャンル）</string>
+    <string name="no_results">放送局が見つかりません</string>
+    <string name="loading">読み込み中…</string>
+
+    <!-- プレーヤー -->
+    <string name="play">再生</string>
+    <string name="pause">一時停止</string>
+    <string name="resume">再開</string>
+    <string name="stop">停止</string>
+    <string name="back">戻る</string>
+    <string name="radio_live">ライブ</string>
+    <string name="radio_paused">一時停止中</string>
+    <string name="buffering">接続中…</string>
+    <string name="skip_previous">前へ</string>
+    <string name="skip_next">次へ</string>
+    <string name="error_cannot_connect">放送局に接続できません。接続状況またはストリームURLをご確認ください。</string>
+    <string name="error_unknown">予期しないエラーが発生しました。</string>
+    <string name="metadata_empty">受信中…</string>
+    <string name="tap_to_play">再生を押して聴く</string>
+
+    <!-- テスト放送局（フェーズ1） -->
+    <string name="station_test_name">SomaFM Groove Salad</string>
+    <string name="station_test_tagline">Chillout · Downtempo · 米国</string>
+
+    <!-- ナビゲーション / 操作 -->
+    <string name="favorites">お気に入り</string>
+    <string name="all_stations">すべて</string>
+    <string name="add_station">放送局を追加</string>
+    <string name="delete_station">放送局を削除</string>
+    <string name="sleep_timer">スリープタイマー</string>
+    <string name="country_es">スペイン</string>
+
+    <!-- タブ -->
+    <string name="tab_favorites">お気に入り</string>
+    <string name="tab_stations">放送局</string>
+    <string name="tab_settings">設定</string>
+
+    <!-- お気に入り -->
+    <string name="favorites_empty">まだお気に入りの放送局がありません。\n放送局のハートをタップしてここに保存してください。</string>
+    <string name="favorites_title">お気に入り</string>
+    <string name="manual_stations_empty">まだ放送局を追加していません。\n＋ボタンを押して最初の1局を追加してください。</string>
+
+    <!-- 設定 -->
+    <string name="settings_about">Simple Radioについて</string>
+    <string name="settings_about_desc">広告なし・アカウント不要のインターネットラジオアプリです。\n放送局のストリームに直接接続します。</string>
+    <string name="settings_theme">アプリのテーマ</string>
+    <string name="settings_theme_desc">システム設定に従う</string>
+    <string name="settings_language">言語</string>
+    <string name="settings_language_desc">日本語</string>
+    <string name="settings_version">バージョン</string>
+    <string name="settings_version_desc">1.0</string>
+    <string name="settings_pending">今後のアップデートで利用可能</string>
+    <string name="theme_system">システム</string>
+    <string name="theme_system_desc">端末の設定に従う</string>
+    <string name="theme_light">ライト</string>
+    <string name="theme_light_desc">常にライト</string>
+    <string name="theme_dark">ダーク</string>
+    <string name="theme_dark_desc">常にダーク</string>
+
+    <!-- インターネット検索（フェーズ4） -->
+    <string name="search_source_local">マイ放送局</string>
+    <string name="search_source_internet">インターネット</string>
+    <string name="search_country_label">国</string>
+    <string name="search_genre_label">ジャンル（任意）</string>
+    <string name="search_internet_hint">インターネットで検索（Radio Browser）</string>
+    <string name="error_radio_browser">Radio Browserに接続できませんでした。接続を確認して再試行してください。</string>
+    <string name="retry">再試行</string>
+
+    <!-- 接続の再試行（フェーズ5） -->
+    <string name="settings_reconnect">接続の再試行</string>
+    <string name="settings_reconnect_desc">エラーを通知するまでアプリが再接続を試みる時間</string>
+    <string name="reconnect_10s">10秒</string>
+    <string name="reconnect_20s">20秒</string>
+    <string name="reconnect_30s">30秒</string>
+    <string name="reconnect_unlimited">無制限（常に再試行）</string>
+
+    <!-- スリープタイマー（フェーズ5） -->
+    <string name="settings_sleep_desc">時間が切れると再生を停止し、通知を削除します</string>
+    <string name="sleep_off">オフ</string>
+    <string name="sleep_15">15分</string>
+    <string name="sleep_30">30分</string>
+    <string name="sleep_45">45分</string>
+    <string name="sleep_60">60分</string>
+    <string name="sleep_timer_active">%1$s後にオフになります</string>
+</resources>

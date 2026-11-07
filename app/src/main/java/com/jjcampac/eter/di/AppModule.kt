@@ -7,6 +7,7 @@ import com.jjcampac.eter.data.remote.RadioBrowserDataSource
 import com.jjcampac.eter.data.repository.StationRepositoryImpl
 import com.jjcampac.eter.domain.repository.StationRepository
 import com.jjcampac.eter.player.RadioPlayer
+import com.jjcampac.eter.player.SleepTimer
 
 /**
  * Contenedor de dependencias simple (sin Hilt).
@@ -24,6 +25,16 @@ object AppModule {
             appContext.getRadioPlayer()
         } else {
             RadioPlayer(appContext)
+        }
+    }
+
+    /** Devuelve el temporizador para dormir compartido (Fase 5). */
+    fun sleepTimer(context: Context): SleepTimer {
+        val appContext = context.applicationContext
+        return if (appContext is EterApplication) {
+            appContext.getSleepTimer()
+        } else {
+            SleepTimer(appContext)
         }
     }
 

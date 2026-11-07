@@ -1,0 +1,89 @@
+<resources>
+    <string name="app_name">Simple Radio</string>
+
+    <!-- Suche / Listen -->
+    <string name="search_hint">Suchen (Name, Land oder Genre)</string>
+    <string name="no_results">Keine Sender gefunden</string>
+    <string name="loading">Wird geladen…</string>
+
+    <!-- Player -->
+    <string name="play">Abspielen</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Fortsetzen</string>
+    <string name="stop">Stopp</string>
+    <string name="back">Zurück</string>
+    <string name="radio_live">Live</string>
+    <string name="radio_paused">Pausiert</string>
+    <string name="buffering">Verbinde…</string>
+    <string name="skip_previous">Vorheriger</string>
+    <string name="skip_next">Nächster</string>
+    <string name="error_cannot_connect">Keine Verbindung zum Sender möglich. Prüfe deine Verbindung oder die Stream-URL.</string>
+    <string name="error_unknown">Unerwarteter Fehler.</string>
+    <string name="metadata_empty">Wird eingestellt…</string>
+    <string name="tap_to_play">Zum Hören auf Wiedergabe tippen</string>
+
+    <!-- Testsender (Phase 1) -->
+    <string name="station_test_name">SomaFM Groove Salad</string>
+    <string name="station_test_tagline">Chillout · Downtempo · USA</string>
+
+    <!-- Navigation / Aktionen -->
+    <string name="favorites">Favoriten</string>
+    <string name="all_stations">Alle</string>
+    <string name="add_station">Sender hinzufügen</string>
+    <string name="delete_station">Sender löschen</string>
+    <string name="sleep_timer">Schlaftimer</string>
+    <string name="country_es">Spanien</string>
+
+    <!-- Tabs -->
+    <string name="tab_favorites">Favoriten</string>
+    <string name="tab_stations">Sender</string>
+    <string name="tab_settings">Einstellungen</string>
+
+    <!-- Favoriten -->
+    <string name="favorites_empty">Du hast noch keine Lieblingssender.\nTippe auf das Herz eines Senders, um ihn zu speichern.</string>
+    <string name="favorites_title">Favoriten</string>
+    <string name="manual_stations_empty">Du hast noch keine Sender hinzugefügt.\nTippe auf +, um den ersten hinzuzufügen.</string>
+
+    <!-- Einstellungen -->
+    <string name="settings_about">Über Simple Radio</string>
+    <string name="settings_about_desc">Werbefreie Internet-Radio-App ohne Konten.\nDu verbindest dich direkt mit den Streams der Sender.</string>
+    <string name="settings_theme">App-Design</string>
+    <string name="settings_theme_desc">Folgt der Systemeinstellung</string>
+    <string name="settings_language">Sprache</string>
+    <string name="settings_language_desc">Deutsch</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_version_desc">1.0</string>
+    <string name="settings_pending">In einem zukünftigen Update verfügbar</string>
+    <string name="theme_system">System</string>
+    <string name="theme_system_desc">Folgt der Geräteeinstellung</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_light_desc">Immer hell</string>
+    <string name="theme_dark">Dunkel</string>
+    <string name="theme_dark_desc">Immer dunkel</string>
+
+    <!-- Internetsuche (Phase 4) -->
+    <string name="search_source_local">Meine Sender</string>
+    <string name="search_source_internet">Internet</string>
+    <string name="search_country_label">Land</string>
+    <string name="search_genre_label">Genre (optional)</string>
+    <string name="search_internet_hint">Tippen, um im Internet zu suchen (Radio Browser)</string>
+    <string name="error_radio_browser">Radio Browser konnte nicht erreicht werden. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="retry">Erneut versuchen</string>
+
+    <!-- Verbindungswiederholung (Phase 5) -->
+    <string name="settings_reconnect">Verbindungswiederholung</string>
+    <string name="settings_reconnect_desc">Wie lange die App es versucht, sich zu verbinden, bevor sie dich über einen Fehler informiert</string>
+    <string name="reconnect_10s">10 Sekunden</string>
+    <string name="reconnect_20s">20 Sekunden</string>
+    <string name="reconnect_30s">30 Sekunden</string>
+    <string name="reconnect_unlimited">Keine Begrenzung (immer wiederholen)</string>
+
+    <!-- Schlaftimer (Phase 5) -->
+    <string name="settings_sleep_desc">Stoppt die Wiedergabe und entfernt die Benachrichtigung, wenn die Zeit abläuft</string>
+    <string name="sleep_off">Aus</string>
+    <string name="sleep_15">15 Minuten</string>
+    <string name="sleep_30">30 Minuten</string>
+    <string name="sleep_45">45 Minuten</string>
+    <string name="sleep_60">60 Minuten</string>
+    <string name="sleep_timer_active">Wird in %1$s ausgeschaltet</string>
+</resources>

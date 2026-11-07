@@ -65,11 +65,13 @@ class RadioMediaSessionService : MediaSessionService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand() action=${intent?.action}")
         val action = intent?.action
+        var sleepTimerFinished = false
         when (action) {
             ACTION_PLAY_PAUSE -> togglePlay()
             ACTION_NEXT -> /* siguiente favorita (Fase 3) */ Unit
             ACTION_PREVIOUS -> /* anterior favorita (Fase 3) */ Unit
             ACTION_STOP -> stopPlayback()
+            ACTION_SLEEP_TIMER -> sleepTimerFinished = true
             null -> Unit
         }
 
@@ -81,6 +83,19 @@ class RadioMediaSessionService : MediaSessionService() {
             startForeground(NOTIFICATION_ID, buildNotification(this, currentState.currentStation, currentState.status, currentState.metadataTitle))
         } else {
             stopForeground(true)
+        }
+
+        // Temporizador para dormir: al agotarse se pausa la reproducción y se
+        // retira la notificación (la app sigue abierta).
+        if (sleepTimerFinished) {
+            Log.d(TAG, "ACTION_SLEEP_TIMER: pausando y quitando notificación.")
+            val state = radioPlayer.state.value
+            if (state.status == PlaybackStatus.PLAYING || state.status == PlaybackStatus.LOADING) {
+                radioPlayer.pause()
+            }
+            stopForeground(true)
+            stopSelf()
+            return Service.START_NOT_STICKY
         }
         return Service.START_STICKY
     }

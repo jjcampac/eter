@@ -9,6 +9,8 @@ import com.jjcampac.eter.data.repository.StationRepositoryImpl
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.domain.repository.StationRepository
 import com.jjcampac.eter.player.RadioPlayer
+import com.jjcampac.eter.player.SleepTimer
+import com.jjcampac.eter.util.AppLanguage
 
 /**
  * Clase Application de Eter.
@@ -25,6 +27,12 @@ class EterApplication : Application() {
 
     private lateinit var _radioPlayer: RadioPlayer
 
+    override fun onCreate() {
+        super.onCreate()
+        // Cargar el idioma guardado en el flujo observado por la UI.
+        AppLanguage.init(applicationContext)
+    }
+
     /** Devuelve el reproductor único, creándolo si es necesario. */
     fun getRadioPlayer(): RadioPlayer {
         if (!::_radioPlayer.isInitialized) {
@@ -40,6 +48,13 @@ class EterApplication : Application() {
     private val _stationRepository: StationRepository by lazy {
         StationRepositoryImpl(database.stationDao(), RadioBrowserDataSource())
     }
+
+    private val _sleepTimer: SleepTimer by lazy {
+        SleepTimer(applicationContext)
+    }
+
+    /** Devuelve el temporizador para dormir compartido (Fase 5). */
+    fun getSleepTimer(): SleepTimer = _sleepTimer
 
     /** Devuelve el repositorio de emisoras (Room). */
     fun getStationRepository(): StationRepository = _stationRepository

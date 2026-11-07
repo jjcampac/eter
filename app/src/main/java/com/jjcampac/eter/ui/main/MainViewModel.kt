@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.domain.repository.StationRepository
+import com.jjcampac.eter.util.AppLanguage
 import com.jjcampac.eter.util.TestData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -49,10 +50,15 @@ data class MainUiState(
  * Fase 3: catálogo local de Room (emisoras manuales y favoritas).
  * Fase 4: búsqueda en la API de Radio Browser con origen local/internet,
  * debounce de 500 ms, estados de cargando/error y persistencia de favoritas.
+ * El país por defecto de la búsqueda se adapta al idioma de la UI
+ * (se pasa desde la Activity al crear el ViewModel).
  */
-class MainViewModel(private val repository: StationRepository) : ViewModel() {
+class MainViewModel(
+    private val repository: StationRepository,
+    defaultCountry: String = DEFAULT_COUNTRY
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MainUiState())
+    private val _uiState = MutableStateFlow(MainUiState(country = defaultCountry))
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     private var searchJob: Job? = null
@@ -71,6 +77,16 @@ class MainViewModel(private val repository: StationRepository) : ViewModel() {
                 _uiState.update { it.copy(favoriteIds = favorites.map { f -> f.id }.toSet()) }
             }
         }
+        // País por defecto según el idioma de la UI: al cambiar idioma en Ajustes
+        // el campo "País" de la búsqueda se actualiza al instante (sin reiniciar).
+        viewModelScope.launch {
+            AppLanguage.currentLanguage.collect { langCode ->
+                _uiState.update {
+                    it.copy(country = AppLanguage.defaultCountryDisplayName(langCode))
+                }
+            }
+        }
+
         // Catálogo local (Room): alimenta "Mis emisoras" y la pestaña de Favoritas.
         viewModelScope.launch {
             repository.getAllStations().collect { stations ->
@@ -175,11 +191,14 @@ class MainViewModel(private val repository: StationRepository) : ViewModel() {
     }
 
     companion object {
-        fun factory(repository: StationRepository): androidx.lifecycle.ViewModelProvider.Factory =
+        fun factory(
+            repository: StationRepository,
+            defaultCountry: String = DEFAULT_COUNTRY
+        ): androidx.lifecycle.ViewModelProvider.Factory =
             object : androidx.lifecycle.ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return MainViewModel(repository) as T
+                    return MainViewModel(repository, defaultCountry) as T
                 }
             }
     }

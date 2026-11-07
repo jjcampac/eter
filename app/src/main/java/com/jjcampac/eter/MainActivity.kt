@@ -1,5 +1,6 @@
 package com.jjcampac.eter
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -48,6 +49,7 @@ import com.jjcampac.eter.ui.station.StationFormViewModel
 import com.jjcampac.eter.ui.theme.EterTheme
 import com.jjcampac.eter.ui.theme.ThemeMode
 import com.jjcampac.eter.ui.theme.ThemeViewModel
+import com.jjcampac.eter.util.AppLanguage
 
 private const val TAG = "MainActivity"
 
@@ -64,6 +66,11 @@ private const val TAG = "MainActivity"
  */
 class MainActivity : ComponentActivity() {
 
+    /** Aplica el idioma guardado en Ajustes envolviendo el contexto base. */
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguage.wrapWithAppLocale(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate() savedInstanceState=${savedInstanceState != null}")
@@ -78,8 +85,14 @@ class MainActivity : ComponentActivity() {
     private fun RootContent() {
         val radioPlayer = remember { AppModule.radioPlayer(applicationContext) }
         val stationRepository = remember { AppModule.stationRepository(applicationContext) }
+        val sleepTimer = remember { AppModule.sleepTimer(applicationContext) }
 
-        val mainViewModel: MainViewModel = viewModel(factory = MainViewModel.factory(stationRepository))
+        val mainViewModel: MainViewModel = viewModel(
+            factory = MainViewModel.factory(
+                stationRepository,
+                AppLanguage.defaultCountryDisplayName(AppLanguage.current(applicationContext))
+            )
+        )
         val playerViewModel: PlayerViewModel =
             viewModel(factory = PlayerViewModel.factory(radioPlayer, stationRepository))
 
@@ -235,6 +248,7 @@ class MainActivity : ComponentActivity() {
             PlayerScreen(
                 station = currentStation,
                 playerViewModel = playerViewModel,
+                sleepTimer = sleepTimer,
                 onBack = {
                     // Volver a las pestañas SIN detener el servicio de radio:
                     // la reproducción se gestiona desde la notificación y el

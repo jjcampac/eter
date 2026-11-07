@@ -120,12 +120,14 @@ class RadioBrowserDataSource {
             .replace("ñ", "n")
 
     private companion object {
-        /** Nombres de país normalizados (es/en) → código ISO 3166-1 alpha-2. */
+        /** Nombres de país normalizados (es/en/de/fr/it/ja) → código ISO 3166-1 alpha-2. */
         val COUNTRY_TO_CODE = mapOf(
-            "españa" to "ES", "espana" to "ES", "spain" to "ES",
-            "alemania" to "DE", "germany" to "DE",
-            "francia" to "FR", "france" to "FR",
-            "italia" to "IT", "italy" to "IT",
+            "espana" to "ES", "spain" to "ES", "spanien" to "ES", "espagne" to "ES",
+            "spagna" to "ES", "スペイン" to "ES",
+            "alemania" to "DE", "germany" to "DE", "deutschland" to "DE",
+            "allemagne" to "DE", "germania" to "DE", "ドイツ" to "DE",
+            "francia" to "FR", "france" to "FR", "frankreich" to "FR", "フランス" to "FR",
+            "italia" to "IT", "italy" to "IT", "italien" to "IT", "italie" to "IT", "イタリア" to "IT",
             "portugal" to "PT",
             "reino unido" to "GB", "uk" to "GB", "great britain" to "GB",
             "irlanda" to "IE", "ireland" to "IE",
@@ -140,7 +142,8 @@ class RadioBrowserDataSource {
             "dinamarca" to "DK", "denmark" to "DK",
             "finlandia" to "FI", "finland" to "FI",
             "estados unidos" to "US", "ee. uu." to "US", "ee.uu." to "US",
-            "usa" to "US", "united states" to "US",
+            "usa" to "US", "united states" to "US", "vereinigte staaten" to "US",
+            "etats unis" to "US", "stati uniti" to "US", "アメリカ" to "US",
             "mexico" to "MX",
             "argentina" to "AR",
             "colombia" to "CO",
@@ -154,7 +157,7 @@ class RadioBrowserDataSource {
             "cuba" to "CU",
             "republica dominicana" to "DO",
             "brasil" to "BR", "brazil" to "BR",
-            "japon" to "JP"
+            "japon" to "JP", "japan" to "JP", "giappone" to "JP", "日本" to "JP"
         )
     }
 

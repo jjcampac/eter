@@ -1,0 +1,89 @@
+<resources>
+    <string name="app_name">Simple Radio</string>
+
+    <!-- Ricerca / elenchi -->
+    <string name="search_hint">Cerca (nome, paese o genere)</string>
+    <string name="no_results">Nessuna stazione trovata</string>
+    <string name="loading">Caricamento…</string>
+
+    <!-- Player -->
+    <string name="play">Riproduci</string>
+    <string name="pause">Pausa</string>
+    <string name="resume">Riprendi</string>
+    <string name="stop">Ferma</string>
+    <string name="back">Indietro</string>
+    <string name="radio_live">In diretta</string>
+    <string name="radio_paused">In pausa</string>
+    <string name="buffering">Connessione…</string>
+    <string name="skip_previous">Precedente</string>
+    <string name="skip_next">Successiva</string>
+    <string name="error_cannot_connect">Impossibile connettersi alla stazione. Controlla la connessione o l\'URL del flusso.</string>
+    <string name="error_unknown">Si è verificato un errore imprevisto.</string>
+    <string name="metadata_empty">Sintonizzazione…</string>
+    <string name="tap_to_play">Premi riproduci per ascoltare</string>
+
+    <!-- Stazione di test (Fase 1) -->
+    <string name="station_test_name">SomaFM Groove Salad</string>
+    <string name="station_test_tagline">Chillout · Downtempo · USA</string>
+
+    <!-- Navigazione / azioni -->
+    <string name="favorites">Preferite</string>
+    <string name="all_stations">Tutte</string>
+    <string name="add_station">Aggiungi stazione</string>
+    <string name="delete_station">Elimina stazione</string>
+    <string name="sleep_timer">Timer di sospensione</string>
+    <string name="country_es">Spagna</string>
+
+    <!-- Schede -->
+    <string name="tab_favorites">Preferite</string>
+    <string name="tab_stations">Stazioni</string>
+    <string name="tab_settings">Impostazioni</string>
+
+    <!-- Preferite -->
+    <string name="favorites_empty">Non hai ancora stazioni preferite.\nTocca il cuore di una stazione per salvarla qui.</string>
+    <string name="favorites_title">Preferite</string>
+    <string name="manual_stations_empty">Non hai ancora aggiunto stazioni.\nTocca + per aggiungerne una.</string>
+
+    <!-- Impostazioni -->
+    <string name="settings_about">Informazioni su Simple Radio</string>
+    <string name="settings_about_desc">App radio su internet, senza pubblicità e senza account.\nTi connetti direttamente ai flussi delle stazioni.</string>
+    <string name="settings_theme">Tema dell\'app</string>
+    <string name="settings_theme_desc">Segue la preferenza del sistema</string>
+    <string name="settings_language">Lingua</string>
+    <string name="settings_language_desc">Italiano</string>
+    <string name="settings_version">Versione</string>
+    <string name="settings_version_desc">1.0</string>
+    <string name="settings_pending">Disponibile in un futuro aggiornamento</string>
+    <string name="theme_system">Sistema</string>
+    <string name="theme_system_desc">Segue la preferenza del dispositivo</string>
+    <string name="theme_light">Chiaro</string>
+    <string name="theme_light_desc">Sempre chiaro</string>
+    <string name="theme_dark">Scuro</string>
+    <string name="theme_dark_desc">Sempre scuro</string>
+
+    <!-- Ricerca su Internet (Fase 4) -->
+    <string name="search_source_local">Le mie stazioni</string>
+    <string name="search_source_internet">Internet</string>
+    <string name="search_country_label">Paese</string>
+    <string name="search_genre_label">Genere (facoltativo)</string>
+    <string name="search_internet_hint">Scrivi per cercare su Internet (Radio Browser)</string>
+    <string name="error_radio_browser">Impossibile contattare Radio Browser. Controlla la connessione e riprova.</string>
+    <string name="retry">Riprova</string>
+
+    <!-- Reintento di connessione (Fase 5) -->
+    <string name="settings_reconnect">Reintento di connessione</string>
+    <string name="settings_reconnect_desc">Per quanto tempo l\'app tenta di riconnettersi prima di avvisarti di un errore</string>
+    <string name="reconnect_10s">10 secondi</string>
+    <string name="reconnect_20s">20 secondi</string>
+    <string name="reconnect_30s">30 secondi</string>
+    <string name="reconnect_unlimited">Senza limite (riprova sempre)</string>
+
+    <!-- Timer di sospensione (Fase 5) -->
+    <string name="settings_sleep_desc">Interrompe la riproduzione e rimuove la notifica allo scadere del tempo</string>
+    <string name="sleep_off">Disattivato</string>
+    <string name="sleep_15">15 minuti</string>
+    <string name="sleep_30">30 minuti</string>
+    <string name="sleep_45">45 minuti</string>
+    <string name="sleep_60">60 minuti</string>
+    <string name="sleep_timer_active">Si spegnerà tra %1$s</string>
+</resources>

@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
+import com.jjcampac.eter.player.SleepTimer
 import com.jjcampac.eter.ui.components.AnimatedWavesIcon
 import android.util.Log
 
@@ -49,11 +50,13 @@ private const val TAG = "PlayerScreen"
 fun PlayerScreen(
     station: Station,
     playerViewModel: PlayerViewModel,
+    sleepTimer: SleepTimer,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Log.d(TAG, "PlayerScreen() station=${station.name} url=${station.url}")
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+    val sleepTimerState by sleepTimer.state.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -140,6 +143,22 @@ fun PlayerScreen(
                 color = statusColor,
                 textAlign = TextAlign.Center
             )
+
+            // Aviso del temporizador para dormir (Fase 5): tiempo restante.
+            if (sleepTimerState.active) {
+                val totalSeconds = sleepTimerState.remainingMillis / 1000
+                val minutesLeft = totalSeconds / 60
+                val secondsLeft = totalSeconds % 60
+                Text(
+                    text = stringResource(
+                        R.string.sleep_timer_active,
+                        String.format("%02d:%02d", minutesLeft, secondsLeft)
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center
+                )
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
 

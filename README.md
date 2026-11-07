@@ -1,8 +1,8 @@
-# Éter
+# Simple Radio
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fases 1-3 completadas ✅ · Fase 4 completada (build OK, pendiente de prueba en dispositivo) · Fase 5 en curso (reconexión)
+> **Última actualización del estado:** Fases 1-4 completadas ✅ · Fase 5 en curso (reconexión, temporizador, idiomas y ajustes)
 
 ---
 
@@ -27,55 +27,69 @@ El objetivo es disponer de un reproductor de radio sencillo, limpio y respetuoso
 | Persistencia | Room |
 | Red | Retrofit + OkHttp (solo para la API de Radio Browser) |
 | Arquitectura | MVVM con repositorio |
-| Inyección de dependencias | Hilt (solo si no complica el proyecto) |
-| SDK | minSdk 26 · targetSdk: última versión estable |
+| Inyección de dependencias | Manual ligera en `di/` (sin Hilt) |
+| SDK | minSdk 26 · targetSdk 37 |
 
 ---
 
 ## Características
 
-1. Lista de emisoras con buscador por nombre, país (España por defecto) y género.
-2. Favoritas persistentes en Room, accesibles sin conexión.
-3. Alta manual de emisoras (nombre + URL del stream), con edición y borrado.
+1. Lista de emisoras con buscador por nombre, país y género (España por defecto, adaptado al idioma de la UI).
+2. Dos orígenes de búsqueda: **"Mis Emisoras"** (añadidas a mano, con edición, borrado y gesto de deslizar) e **"Internet"** (Radio Browser).
+3. Favoritas persistentes en Room, accesibles sin conexión.
 4. Reproducción en segundo plano con notificación (play/pausa, anterior/siguiente entre favoritas).
-5. Metadatos ICY (título de la canción) cuando la emisora los envía.
-6. Reconexión automática si se corta el stream y mensajes de error claros.
+5. Metadatos ICY/HLS (título de la canción) cuando la emisora los envía, mostrados sin metaetiquetas.
+6. Reconexión automática si se corta el stream, con aviso al usuario tras un tiempo configurable en Ajustes.
 7. Compatibilidad con controles Bluetooth/auriculares y, si es sencillo, con Android Auto.
-8. Temporizador para dormir.
-9. Iconos dinámicos en la lista de emisoras: ondas animadas mientras suena, ícono de pausa clásica cuando está pausada.
+8. Temporizador para dormir (15/30/45/60 min) con aviso del tiempo restante en el reproductor.
+9. Interfaz en 6 idiomas (español, inglés, alemán, francés, italiano y japonés) con cambio al instante.
+10. Tema claro/oscuro (Sistema / Claro / Oscuro) con cambio en vivo.
+11. Iconos dinámicos en la lista: ondas animadas mientras suena, pausa clásica cuando está pausada.
 
 ---
 
 ## Requisitos técnicos
 
-- Permitir tráfico `http` solo para los dominios necesarios mediante `network_security_config`, ya que algunas emisoras no usan `https`.
+- Permitir tráfico `http` mediante `network_security_config` (base-config con cleartext permitido, decisión de Fase 4) porque muchas emisoras usan stream `http` o HLS en dominios arbitrarios que no pueden prefijarse. No se activa `usesCleartextTraffic` de forma global.
 - Permisos mínimos: `INTERNET`, `FOREGROUND_SERVICE` (tipo `mediaPlayback`) y `POST_NOTIFICATIONS`.
 - Cero SDKs de publicidad, analítica o rastreo.
-- Tema claro/oscuro y textos en español.
+- Tema claro/oscuro y textos en varios idiomas (español, inglés, alemán, francés, italiano y japonés).
 - Para Radio Browser: usar un mirror aleatorio y un `User-Agent` propio de la app.
 
 ---
 
 ## Estructura del proyecto (aplicada)
 
-> Estructura acordada en la fase 1. Paquete raíz `com.jjcampac.eter`; sin Hilt por ahora
-> (inyección manual ligera en `di/`).
+> Estructura aplicada tras las Fases 1-5. Paquete raíz `com.jjcampac.eter`;
+> inyección manual ligera en `di/` (sin Hilt).
 
 ```
 app/src/main/java/com/jjcampac/eter/
-├── di/                  # Inyección de dependencias simple (sin Hilt)
+├── EterApplication.kt        # Application: reproductor, temporizador y repositorio compartidos
+├── MainActivity.kt           # Actividad principal (tema e idioma aplicados en attachBaseContext)
+├── di/
+│   └── AppModule.kt          # Inyección de dependencias manual (sin Hilt)
 ├── domain/
-│   ├── model/           # Modelos de dominio (Station, etc.)
-│   └── repository/      # Interfaz de repositorio (por completar en Fases 3-4)
-├── data/                # (Se añadirá: Room local + API remota de Radio Browser)
-├── player/              # RadioPlayer (ExoPlayer) + service/MediaSessionService
+│   ├── model/                # Modelos de dominio (Station)
+│   └── repository/           # Contrato del repositorio
+├── data/
+│   ├── local/                # Room: EterDatabase, StationDao, StationEntity
+│   ├── remote/               # API de Radio Browser (Retrofit) + DTOs
+│   └── repository/           # Implementación del repositorio (Room + remoto)
+├── player/
+│   ├── RadioPlayer.kt        # Wrapper de ExoPlayer con reconexión controlada
+│   ├── SleepTimer.kt         # Temporizador para dormir (Fase 5)
+│   └── service/              # RadioMediaSessionService + PlayerNotification
 ├── ui/
-│   ├── components/      # Elementos reutilizables de Compose
-│   ├── main/            # Pantalla principal (lista y buscador)
-│   ├── player/          # Pantalla del reproductor + ViewModel
-│   └── theme/           # Tema Material 3 (claro/oscuro)
-├── util/                # Constantes y datos de prueba
-└── MainActivity.kt
+│   ├── components/           # Componentes reutilizables (StationItem, MiniPlayer…)
+│   ├── main/                 # Pestañas Favoritas/Estaciones (buscador) + ViewModels
+│   ├── player/               # Pantalla del reproductor + ViewModel
+│   ├── settings/             # Ajustes (tema, idioma, reconexión, temporizador)
+│   ├── station/              # Formulario de alta/edición de emisoras + ViewModel
+│   └── theme/                # Tema Material 3 (claro/oscuro) + preferencias
+├── util/                     # Datos de prueba, idioma (AppLanguage) y preferencias
+└── res/
+    └── values/strings.xml      # Textos (es) + values-en, values-de, values-fr, values-it, values-ja
 ```
 
 ---
@@ -139,13 +153,13 @@ Objetivo: descubrir emisoras sin mantener un listado propio.
 Objetivo: dejar la app lista para el uso diario.
 
 - [x] Reconexión automática ante cortes de stream, con aviso al usuario tras un tiempo configurable en Ajustes
-- [ ] Mensajes de error claros para el usuario
-- [ ] Temporizador para dormir
-- [ ] Tema claro/oscuro
+- [x] Mensajes de error claros para el usuario
+- [x] Temporizador para dormir (con aviso del tiempo restante en el reproductor)
+- [x] Tema claro/oscuro
 - [ ] Compatibilidad con Android Auto (opcional)
 - [ ] Revisión final de permisos y dependencias (sin rastreo)
 
-**Cómo probar:** cortar la conexión durante la reproducción y comprobar que se recupera.
+**Cómo probar:** cortar la conexión durante la reproducción (reconexión con aviso tras la ventana configurada), probar el temporizador de sueño y cambiar de idioma en Ajustes (la UI cambia al instante y el país por defecto de la búsqueda se adapta).
 
 ---
 
@@ -156,8 +170,8 @@ Objetivo: dejar la app lista para el uso diario.
 | 1 | Proyecto base y reproductor | ✅ Completada |
 | 2 | Segundo plano y notificación | ✅ Completada |
 | 3 | Room y favoritas | ✅ Completada |
-| 4 | API de Radio Browser y buscador | ⬜ Pendiente |
-| 5 | Pulido y robustez | ⬜ Pendiente |
+| 4 | API de Radio Browser y buscador | ✅ Completada (build OK, pendiente de prueba en dispositivo) |
+| 5 | Pulido y robustez | 🟨 En curso (reconexión, temporizador, idiomas y ajustes) |
 
 ---
 

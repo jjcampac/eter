@@ -79,4 +79,13 @@
     <string name="reconnect_30s">30 segundos</string>
     <string name="reconnect_unlimited">Sin límite (reintenta siempre)</string>
 
+    <!-- Temporizador para dormir (Fase 5) -->
+    <string name="settings_sleep_desc">Detiene la reproducción y quita la notificación al agotarse el tiempo</string>
+    <string name="sleep_off">Desactivado</string>
+    <string name="sleep_15">15 minutos</string>
+    <string name="sleep_30">30 minutos</string>
+    <string name="sleep_45">45 minutos</string>
+    <string name="sleep_60">60 minutos</string>
+    <string name="sleep_timer_active">Se apagará en %1$s</string>
+
 </resources>
