@@ -48,8 +48,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jjcampac.eter.di.AppModule
@@ -156,9 +158,15 @@ class MainActivity : ComponentActivity() {
             currentStationId = null
         }
 
-        val openStation: (com.jjcampac.eter.domain.model.Station) -> Unit = { station ->
+        // Al pulsar el minireproductor se abre la pantalla completa.
+        val openPlayerDetail: (com.jjcampac.eter.domain.model.Station) -> Unit = { station ->
             currentStationId = station.id
             startRadioService()
+        }
+
+        // Al pulsar una tarjeta se reproduce directamente (sin abrir detalle).
+        val playStation: (com.jjcampac.eter.domain.model.Station) -> Unit = { station ->
+            playerViewModel.play(station)
         }
         val editStation: (com.jjcampac.eter.domain.model.Station) -> Unit = { station ->
             editingStationId = station.id
@@ -195,7 +203,19 @@ class MainActivity : ComponentActivity() {
                                 1 -> R.string.all_stations
                                 else -> R.string.tab_settings
                             }
-                            Text(stringResource(titleRes))
+                            Column {
+                                // Nombre de la app sobre el título de cada pantalla.
+                                Text(
+                                    text = stringResource(R.string.app_name).uppercase(),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = 1.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
+                                Text(stringResource(titleRes))
+                            }
                         }
                     )
                 },
@@ -204,9 +224,10 @@ class MainActivity : ComponentActivity() {
                         // Mini reproductor (solo visible si hay emisora cargada).
                         MiniPlayer(
                             playerState = playerState,
+                            sleepTimer = sleepTimer,
                             onClick = {
                                 playerState.currentStation?.let { station ->
-                                    openStation(station)
+                                    openPlayerDetail(station)
                                 }
                             },
                             onPlayPause = {
@@ -257,13 +278,13 @@ class MainActivity : ComponentActivity() {
                         0 -> FavoritesScreen(
                             mainViewModel = mainViewModel,
                             playerViewModel = playerViewModel,
-                            onStationClick = openStation,
+                            onStationClick = playStation,
                             onToggleFavorite = { station -> mainViewModel.toggleFavorite(station) }
                         )
                         1 -> MainScreen(
                             mainViewModel = mainViewModel,
                             playerViewModel = playerViewModel,
-                            onStationClick = openStation,
+                            onStationClick = playStation,
                             onEditStation = editStation,
                             onDeleteStation = { station -> mainViewModel.deleteStation(station) },
                             onToggleFavorite = { station -> mainViewModel.toggleFavorite(station) }

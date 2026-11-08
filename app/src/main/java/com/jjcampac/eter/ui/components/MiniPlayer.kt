@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +40,7 @@ import coil3.compose.rememberAsyncImagePainter
 import com.jjcampac.eter.R
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.player.PlayerState
+import com.jjcampac.eter.player.SleepTimer
 import com.jjcampac.eter.ui.theme.EterShapePanel
 
 /**
@@ -51,6 +53,7 @@ import com.jjcampac.eter.ui.theme.EterShapePanel
 @Composable
 fun MiniPlayer(
     playerState: PlayerState,
+    sleepTimer: SleepTimer,
     onClick: () -> Unit,
     onPlayPause: () -> Unit,
     modifier: Modifier = Modifier
@@ -59,6 +62,8 @@ fun MiniPlayer(
 
     val isThisStation = playerState.currentStation?.url == station.url
     val isPlaying = isThisStation && playerState.status == PlaybackStatus.PLAYING
+
+    val sleepTimerState by sleepTimer.state.collectAsState()
 
     // Segunda línea del mini reproductor: el título de la canción solo se
     // muestra mientras la emisora está en reproducción. En pausa, conectando,
@@ -131,6 +136,26 @@ fun MiniPlayer(
                     contentDescription = stringResource(R.string.radio_live),
                     modifier = Modifier.size(28.dp)
                 )
+            }
+            // Temporizador para dormir: icono de reloj y tiempo restante.
+            if (sleepTimerState.active) {
+                val totalSecs = sleepTimerState.remainingMillis / 1000
+                val mins = totalSecs / 60
+                val secs = totalSecs % 60
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Filled.Schedule,
+                        contentDescription = stringResource(R.string.sleep_timer),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = String.format("%d:%02d", mins, secs),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 2.dp)
+                    )
+                }
             }
             IconButton(onClick = onPlayPause) {
                 Icon(
