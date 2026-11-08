@@ -134,9 +134,10 @@ fun StationItem(
 
             // Estado de reproducción (olas animadas o pausa)
             if (isPlaying) {
-                WavesIcon(
+                AnimatedWavesIcon(
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(28.dp)
+                    contentDescription = "En directo",
+                    modifier = Modifier.size(33.dp)
                 )
             } else if (isPaused) {
                 Icon(
@@ -196,20 +197,6 @@ fun StationItem(
             }
         }
     }
-}
-
-/** Ícono de ondas para indicar reproducción en directo. */
-@Composable
-private fun WavesIcon(
-    tint: androidx.compose.ui.graphics.Color,
-    modifier: Modifier = Modifier
-) {
-    Icon(
-        imageVector = Icons.Filled.GraphicEq,
-        contentDescription = "En directo",
-        tint = tint,
-        modifier = modifier
-    )
 }
 
 /**

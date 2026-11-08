@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -90,10 +89,10 @@ fun MiniPlayer(
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Logo corporativo de la emisora (favicon) o icono por defecto si no hay.
+            // Logo corporativo de la emisora (favicon) o nota musical si no hay.
             if (station.imageUrl.isNullOrBlank()) {
                 Icon(
-                    imageVector = if (isPlaying) Icons.Filled.GraphicEq else Icons.Filled.MusicNote,
+                    imageVector = Icons.Filled.MusicNote,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(36.dp)
@@ -102,7 +101,7 @@ fun MiniPlayer(
                 MiniPlayerLogo(
                     imageUrl = station.imageUrl,
                     name = station.name,
-                    fallbackIcon = if (isPlaying) Icons.Filled.GraphicEq else Icons.Filled.MusicNote,
+                    fallbackIcon = Icons.Filled.MusicNote,
                     fallbackTint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -125,6 +124,14 @@ fun MiniPlayer(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+// Icono animado de ondas mientras suena, a la izquierda del botón.
+            if (isPlaying) {
+                AnimatedWavesIcon(
+                    tint = MaterialTheme.colorScheme.primary,
+                    contentDescription = stringResource(R.string.radio_live),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
             IconButton(onClick = onPlayPause) {
                 Icon(
                     imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
@@ -139,7 +146,7 @@ fun MiniPlayer(
  * Logo corporativo de la emisora en el minireproductor, cargado con Coil.
  *
  * Se muestra en una miniatura redondeada. Mientras carga o si falla, muestra el
- * [fallbackIcon] (la onda si está sonando, o la nota musical) como respaldo.
+ * [fallbackIcon] (la nota musical) como respaldo.
  */
 @Composable
 private fun MiniPlayerLogo(
