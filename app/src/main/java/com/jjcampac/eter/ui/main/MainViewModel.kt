@@ -34,7 +34,7 @@ enum class SearchSource { LOCAL, INTERNET }
 /** Estado de la pantalla principal. */
 data class MainUiState(
     val query: String = "",
-    val source: SearchSource = SearchSource.LOCAL,
+    val source: SearchSource = SearchSource.INTERNET,
     val country: String = DEFAULT_COUNTRY,
     val genre: String = "",
     val stations: List<Station> = emptyList(),

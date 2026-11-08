@@ -58,6 +58,7 @@ import com.jjcampac.eter.ui.components.MiniPlayer
 import com.jjcampac.eter.ui.main.FavoritesScreen
 import com.jjcampac.eter.ui.main.MainScreen
 import com.jjcampac.eter.ui.main.MainViewModel
+import com.jjcampac.eter.ui.main.SearchSource
 import com.jjcampac.eter.ui.player.PlayerScreen
 import com.jjcampac.eter.ui.player.PlayerViewModel
 import com.jjcampac.eter.ui.settings.SettingsScreen
@@ -237,7 +238,9 @@ class MainActivity : ComponentActivity() {
                     }
                 },
                 floatingActionButton = {
-                    if (selectedTab == 1) {
+                    // FAB "Añadir emisora": solo visible en la pestaña de
+                    // Estaciones y cuando el origen seleccionado es "Mis emisoras".
+                    if (selectedTab == 1 && mainUiState.source == SearchSource.LOCAL) {
                         FloatingActionButton(
                             onClick = {
                                 editingStationId = null

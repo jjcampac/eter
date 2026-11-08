@@ -76,14 +76,14 @@ fun MainScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(
-                selected = uiState.source == SearchSource.LOCAL,
-                onClick = { mainViewModel.onSourceChange(SearchSource.LOCAL) },
-                label = { Text(stringResource(R.string.search_source_local)) }
-            )
-            FilterChip(
                 selected = uiState.source == SearchSource.INTERNET,
                 onClick = { mainViewModel.onSourceChange(SearchSource.INTERNET) },
                 label = { Text(stringResource(R.string.search_source_internet)) }
+            )
+            FilterChip(
+                selected = uiState.source == SearchSource.LOCAL,
+                onClick = { mainViewModel.onSourceChange(SearchSource.LOCAL) },
+                label = { Text(stringResource(R.string.search_source_local)) }
             )
         }
 
