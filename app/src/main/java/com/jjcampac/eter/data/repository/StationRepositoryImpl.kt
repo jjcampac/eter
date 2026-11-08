@@ -60,7 +60,8 @@ fun StationEntity.toDomain(): Station = Station(
     country = country,
     genre = genre,
     isFavorite = isFavorite,
-    isCustom = isCustom
+    isCustom = isCustom,
+    imageUrl = imageUrl
 )
 
 /** Mapeo de modelo de dominio a entidad Room. */
@@ -71,5 +72,6 @@ fun Station.toEntity(): StationEntity = StationEntity(
     country = country,
     genre = genre,
     isFavorite = isFavorite,
-    isCustom = isCustom
+    isCustom = isCustom,
+    imageUrl = imageUrl
 )

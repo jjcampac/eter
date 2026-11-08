@@ -10,7 +10,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -67,6 +69,11 @@ private val LightColors = lightColorScheme(
     error = EterErrorLight,
     onError = EterOnErrorLight
 )
+/** Expone si el tema REAL aplicado es oscuro (respeta el ThemeMode elegido por el
+ * usuario: SISTEMA/CLARO/OSCURO), para que los colores auxiliares de ui/theme
+ * (EterOutlineColor y similares) coincidan con el tema que se está mostrando. */
+val LocalEterDarkTheme = staticCompositionLocalOf { false }
+
 /**
  * Tema de la app. Respeta el tema del sistema por defecto.
  * Todas las pantallas deben usar MaterialTheme.colorScheme y no colores sueltos.
@@ -100,9 +107,11 @@ fun EterTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = EterTypography,
-        content = content
-    )
+    CompositionLocalProvider(LocalEterDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = EterTypography,
+            content = content
+        )
+    }
 }

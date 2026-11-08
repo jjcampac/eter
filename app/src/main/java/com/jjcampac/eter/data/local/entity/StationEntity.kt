@@ -19,5 +19,7 @@ data class StationEntity(
     val country: String? = null,
     val genre: String? = null,
     val isFavorite: Boolean = false,
-    val isCustom: Boolean = false
+    val isCustom: Boolean = false,
+    /** URL de la imagen corporativa (logo) de la emisora. */
+    val imageUrl: String? = null
 )

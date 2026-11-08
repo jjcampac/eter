@@ -258,9 +258,7 @@ class MainActivity : ComponentActivity() {
                             mainViewModel = mainViewModel,
                             playerViewModel = playerViewModel,
                             onStationClick = openStation,
-                            onToggleFavorite = { station -> mainViewModel.toggleFavorite(station) },
-                            onEditStation = editStation,
-                            onDeleteStation = { station -> mainViewModel.deleteStation(station) }
+                            onToggleFavorite = { station -> mainViewModel.toggleFavorite(station) }
                         )
                         1 -> MainScreen(
                             mainViewModel = mainViewModel,

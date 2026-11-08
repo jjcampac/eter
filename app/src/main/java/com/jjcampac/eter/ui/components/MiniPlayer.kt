@@ -4,12 +4,17 @@
  */
 package com.jjcampac.eter.ui.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.MusicNote
@@ -21,11 +26,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
 import com.jjcampac.eter.R
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.player.PlayerState
@@ -79,12 +90,22 @@ fun MiniPlayer(
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = if (isPlaying) Icons.Filled.GraphicEq else Icons.Filled.MusicNote,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(36.dp)
-            )
+            // Logo corporativo de la emisora (favicon) o icono por defecto si no hay.
+            if (station.imageUrl.isNullOrBlank()) {
+                Icon(
+                    imageVector = if (isPlaying) Icons.Filled.GraphicEq else Icons.Filled.MusicNote,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(36.dp)
+                )
+            } else {
+                MiniPlayerLogo(
+                    imageUrl = station.imageUrl,
+                    name = station.name,
+                    fallbackIcon = if (isPlaying) Icons.Filled.GraphicEq else Icons.Filled.MusicNote,
+                    fallbackTint = MaterialTheme.colorScheme.primary
+                )
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -110,6 +131,52 @@ fun MiniPlayer(
                     contentDescription = stringResource(if (isPlaying) R.string.pause else R.string.play)
                 )
             }
+        }
+    }
+}
+
+/**
+ * Logo corporativo de la emisora en el minireproductor, cargado con Coil.
+ *
+ * Se muestra en una miniatura redondeada. Mientras carga o si falla, muestra el
+ * [fallbackIcon] (la onda si está sonando, o la nota musical) como respaldo.
+ */
+@Composable
+private fun MiniPlayerLogo(
+    imageUrl: String,
+    name: String,
+    fallbackIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    fallbackTint: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier
+) {
+    val painter = rememberAsyncImagePainter(imageUrl)
+    val state by painter.state.collectAsState()
+
+    Box(
+        modifier = modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+        contentAlignment = Alignment.Center
+    ) {
+        when (state) {
+            is AsyncImagePainter.State.Error,
+            is AsyncImagePainter.State.Empty,
+            is AsyncImagePainter.State.Loading -> Icon(
+                imageVector = fallbackIcon,
+                contentDescription = null,
+                tint = fallbackTint,
+                modifier = Modifier.size(24.dp)
+            )
+
+            is AsyncImagePainter.State.Success -> Image(
+                painter = painter,
+                contentDescription = "Logo de $name",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(2.dp)
+            )
         }
     }
 }

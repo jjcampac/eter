@@ -21,6 +21,9 @@ room = "2.7.2"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 
+# Carga de imágenes (logos de emisoras) — Fase 5
+coil = "3.3.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -58,6 +61,10 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 
 # Red (Retrofit/OkHttp) — Fase 4
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+
+# Carga de imágenes (Coil 3 + red OkHttp) — logos de emisoras
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 

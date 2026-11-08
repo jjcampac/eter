@@ -19,7 +19,9 @@ data class Station(
     val country: String? = null,
     val genre: String? = null,
     val isFavorite: Boolean = false,
-    val isCustom: Boolean = false
+    val isCustom: Boolean = false,
+    /** URL de la imagen corporativa (logo) de la emisora, si la aporta la fuente. */
+    val imageUrl: String? = null
 ) {
     /** Etiqueta secundaria mostrada en las listas (país · género). */
     val subtitle: String

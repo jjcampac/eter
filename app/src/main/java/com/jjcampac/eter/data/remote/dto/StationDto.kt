@@ -26,5 +26,11 @@ data class StationDto(
     val country: String?,
     /** Géneros separados por comas (pop, rock, news...). */
     @SerializedName("tags")
-    val tags: String?
+    val tags: String?,
+    /** URL del favicon/logo de la emisora (imagen corporativa). */
+    @SerializedName("favicon")
+    val favicon: String?,
+    /** URL del logo en mayor resolución (si la emisora lo aporta). */
+    @SerializedName("logo_300x300")
+    val logo300x300: String?
 )

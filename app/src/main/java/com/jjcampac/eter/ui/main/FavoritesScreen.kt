@@ -49,8 +49,6 @@ fun FavoritesScreen(
     playerViewModel: PlayerViewModel,
     onStationClick: (Station) -> Unit,
     onToggleFavorite: (Station) -> Unit,
-    onEditStation: (Station) -> Unit,
-    onDeleteStation: (Station) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
@@ -99,9 +97,9 @@ fun FavoritesScreen(
                         isPaused = playerState.currentStation?.url == station.url &&
                             playerState.status == PlaybackStatus.PAUSED,
                         onClick = { onStationClick(station) },
-                        onFavoriteToggle = { onToggleFavorite(station) },
-                        onEdit = if (station.isCustom) { { onEditStation(station) } } else null,
-                        onDelete = if (station.isCustom) { { onDeleteStation(station) } } else null
+                        onFavoriteToggle = { onToggleFavorite(station) }
+                        // En Favoritas no se muestran editar/borrar: todas las
+                        // tarjetas tienen la misma estructura (solo favorita).
                     )
                 }
             }

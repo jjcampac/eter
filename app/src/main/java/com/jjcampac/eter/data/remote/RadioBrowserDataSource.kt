@@ -172,6 +172,10 @@ class RadioBrowserDataSource {
         val streamUrl = urlResolved?.trim()?.takeIf { it.isNotEmpty() }
             ?: url?.trim()?.takeIf { it.isNotEmpty() }
             ?: return null
+        // Imagen corporativa: se prefiere el logo en mayor resolución; si no hay,
+        // se usa el favicon. Ambos deben ser URLs absolutas http(s).
+        val logoUrl = logo300x300?.trim()?.takeIf { it.startsWith("http") }
+            ?: favicon?.trim()?.takeIf { it.startsWith("http") }
         return Station(
             id = id,
             name = nombre,
@@ -183,7 +187,8 @@ class RadioBrowserDataSource {
                 ?.filter { it.isNotEmpty() }
                 ?.joinToString(" / ")
                 ?.takeIf { it.isNotEmpty() },
-            isCustom = false
+            isCustom = false,
+            imageUrl = logoUrl
         )
     }
 }

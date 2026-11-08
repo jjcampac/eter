@@ -4,14 +4,19 @@
  */
 package com.jjcampac.eter.ui.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -26,10 +31,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.ui.theme.EterOutlineColor
 import com.jjcampac.eter.ui.theme.EterShapeCard
@@ -60,23 +71,19 @@ fun StationItem(
     // Surface de color surface con tonalElevation = 12.dp). Así el overlay del surfaceTint
     // (naranja de marca) aclara la tarjeta y deja de confundirse con el fondo de la app.
     // En el estado actual/reproduciendo se mantiene el realce con primaryContainer y borde.
-    val cardColor = if (isCurrent || isPlaying) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
+    // El fondo de la tarjeta es SIEMPRE el mismo (surface), tanto para la emisora
+    // actual/en reproducción como para el resto. La selección solo se remarca con
+    // el borde (EterOutlineColor), que se atenúa en el tema oscuro para no brillar.
     val hasBorder = isCurrent || isPlaying
+    val cardColor = MaterialTheme.colorScheme.surface
 
     Surface(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
         shape = EterShapeCard,
         color = cardColor,
-        contentColor = if (isCurrent || isPlaying)
-            MaterialTheme.colorScheme.onPrimaryContainer
-        else
-            MaterialTheme.colorScheme.onSurface,
-        tonalElevation = if (isCurrent || isPlaying) 0.dp else 12.dp,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        tonalElevation = 12.dp,
         border = if (hasBorder)
             androidx.compose.foundation.BorderStroke(2.dp, EterOutlineColor())
         else null
@@ -87,16 +94,21 @@ fun StationItem(
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
-            // Ícono de emisora (onda si es la actual/reproduciendo, nota musical si no)
-            Icon(
-                imageVector = if (isCurrent || isPlaying) Icons.Filled.GraphicEq else Icons.Filled.MusicNote,
-                contentDescription = if (isCurrent || isPlaying) "Emisora actual" else null,
-                tint = if (isCurrent || isPlaying)
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(40.dp)
-            )
+            // Imagen corporativa de la emisora (logo) o icono por defecto si no hay logo.
+            if (station.imageUrl.isNullOrBlank()) {
+                Icon(
+                    imageVector = if (isCurrent || isPlaying) Icons.Filled.GraphicEq else Icons.Filled.MusicNote,
+                    contentDescription = if (isCurrent || isPlaying) "Emisora actual" else null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(40.dp)
+                )
+            } else {
+                StationLogo(
+                    imageUrl = station.imageUrl,
+                    name = station.name,
+                    fallbackTint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(16.dp))
 
@@ -107,20 +119,14 @@ fun StationItem(
                 Text(
                     text = station.name,
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (isCurrent || isPlaying)
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    else
-                        MaterialTheme.colorScheme.onSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = station.subtitle.ifEmpty { station.url },
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (isCurrent || isPlaying)
-                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -204,4 +210,50 @@ private fun WavesIcon(
         tint = tint,
         modifier = modifier
     )
+}
+
+/**
+ * Logo corporativo de la emisora cargado desde Internet con Coil.
+ *
+ * Se muestra dentro de una miniatura (fondo algo más oscuro que el de la tarjeta).
+ * Mientras carga o si la descarga falla, se muestra la [Icons.Filled.MusicNote] como
+ * respaldo, con el mismo color que usaría el icono por defecto de la emisora.
+ */
+@Composable
+private fun StationLogo(
+    imageUrl: String,
+    name: String,
+    fallbackTint: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier
+) {
+    val painter = rememberAsyncImagePainter(imageUrl)
+    val state by painter.state.collectAsState()
+
+    Box(
+        modifier = modifier
+            .size(40.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+        contentAlignment = Alignment.Center
+    ) {
+        when (state) {
+            is AsyncImagePainter.State.Error,
+            is AsyncImagePainter.State.Empty,
+            is AsyncImagePainter.State.Loading -> Icon(
+                imageVector = Icons.Filled.MusicNote,
+                contentDescription = null,
+                tint = fallbackTint,
+                modifier = Modifier.size(28.dp)
+            )
+
+            is AsyncImagePainter.State.Success -> Image(
+                painter = painter,
+                contentDescription = "Logo de $name",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp)
+            )
+        }
+    }
 }
