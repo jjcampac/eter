@@ -41,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
+import com.jjcampac.eter.ui.components.EterWatermark
 import com.jjcampac.eter.ui.components.StationItem
 import com.jjcampac.eter.ui.player.PlayerViewModel
 
@@ -186,7 +187,8 @@ private fun LocalStationsSection(
         else -> {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 96.dp)
+                contentPadding = PaddingValues(bottom = 96.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 items(filtered, key = { it.id }) { station ->
                     val row: @Composable () -> Unit = {
@@ -216,7 +218,10 @@ private fun InternetStationsSection(
     onToggleFavorite: (Station) -> Unit,
     onRetry: () -> Unit
 ) {
-    when {
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Marca de agua (dibujo representativo de la app de radio) de fondo.
+        EterWatermark(modifier = Modifier.fillMaxSize())
+        when {
         uiState.isSearching -> {
             Box(
                 modifier = Modifier
@@ -253,7 +258,8 @@ private fun InternetStationsSection(
         else -> {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 96.dp)
+                contentPadding = PaddingValues(bottom = 96.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 items(uiState.internetStations, key = { it.id }) { station ->
                     StationItem(
@@ -271,6 +277,7 @@ private fun InternetStationsSection(
                 }
             }
         }
+    }
     }
 }
 

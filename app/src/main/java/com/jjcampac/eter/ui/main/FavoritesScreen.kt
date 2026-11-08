@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
+import com.jjcampac.eter.ui.components.EterWatermark
 import com.jjcampac.eter.ui.components.StationItem
 import com.jjcampac.eter.ui.player.PlayerViewModel
 
@@ -81,23 +82,28 @@ fun FavoritesScreen(
             )
         }
     } else {
-        LazyColumn(
-            modifier = modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 96.dp)
-        ) {
-            items(favorites, key = { it.id }) { station ->
-                StationItem(
-                    station = station,
-                    isCurrent = playerState.currentStation?.url == station.url,
-                    isPlaying = playerState.status == PlaybackStatus.PLAYING &&
-                        playerState.currentStation?.url == station.url,
-                    isPaused = playerState.currentStation?.url == station.url &&
-                        playerState.status == PlaybackStatus.PAUSED,
-                    onClick = { onStationClick(station) },
-                    onFavoriteToggle = { onToggleFavorite(station) },
-                    onEdit = if (station.isCustom) { { onEditStation(station) } } else null,
-                    onDelete = if (station.isCustom) { { onDeleteStation(station) } } else null
-                )
+        Box(modifier = modifier.fillMaxSize()) {
+            // Marca de agua (dibujo representativo de la app de radio) de fondo.
+            EterWatermark(modifier = Modifier.fillMaxSize())
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 96.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                items(favorites, key = { it.id }) { station ->
+                    StationItem(
+                        station = station,
+                        isCurrent = playerState.currentStation?.url == station.url,
+                        isPlaying = playerState.status == PlaybackStatus.PLAYING &&
+                            playerState.currentStation?.url == station.url,
+                        isPaused = playerState.currentStation?.url == station.url &&
+                            playerState.status == PlaybackStatus.PAUSED,
+                        onClick = { onStationClick(station) },
+                        onFavoriteToggle = { onToggleFavorite(station) },
+                        onEdit = if (station.isCustom) { { onEditStation(station) } } else null,
+                        onDelete = if (station.isCustom) { { onDeleteStation(station) } } else null
+                    )
+                }
             }
         }
     }

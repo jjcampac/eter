@@ -4,7 +4,6 @@
  */
 package com.jjcampac.eter.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,11 +20,10 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,6 +56,10 @@ fun StationItem(
     onDelete: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    // Las tarjetas usan el MISMO componente y tono que el mini reproductor (MiniPlayer.kt:
+    // Surface de color surface con tonalElevation = 12.dp). Así el overlay del surfaceTint
+    // (naranja de marca) aclara la tarjeta y deja de confundirse con el fondo de la app.
+    // En el estado actual/reproduciendo se mantiene el realce con primaryContainer y borde.
     val cardColor = if (isCurrent || isPlaying) {
         MaterialTheme.colorScheme.primaryContainer
     } else {
@@ -65,24 +67,19 @@ fun StationItem(
     }
     val hasBorder = isCurrent || isPlaying
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = cardColor,
-            contentColor = if (isCurrent || isPlaying)
-                MaterialTheme.colorScheme.onPrimaryContainer
-            else
-                MaterialTheme.colorScheme.onSurface
-        ),
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
         shape = EterShapeCard,
+        color = cardColor,
+        contentColor = if (isCurrent || isPlaying)
+            MaterialTheme.colorScheme.onPrimaryContainer
+        else
+            MaterialTheme.colorScheme.onSurface,
+        tonalElevation = if (isCurrent || isPlaying) 0.dp else 12.dp,
         border = if (hasBorder)
             androidx.compose.foundation.BorderStroke(2.dp, EterOutlineColor())
-        else null,
-        elevation = androidx.compose.material3.CardDefaults.cardElevation(
-            defaultElevation = if (isCurrent || isPlaying) 8.dp else 3.dp
-        )
+        else null
     ) {
         androidx.compose.foundation.layout.Row(
             modifier = Modifier

@@ -8,8 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 
 // Formas según los mock-ups de Eter
-// Tarjetas y paneles: esquinas de 12-18 dp
-val EterShapeCard = RoundedCornerShape(16.dp)
+// Tarjetas sin redondeo (esquinas rectas) para las listas de emisoras.
+val EterShapeCard = RoundedCornerShape(0.dp)
 val EterShapePanel = RoundedCornerShape(18.dp)
 
 // Botones de acción: circulares
