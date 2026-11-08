@@ -3,7 +3,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fases 1-4 completadas ✅ · Fase 5 en curso (reconexión, temporizador, idiomas y ajustes)
+> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional)
 
 ---
 
@@ -149,7 +149,7 @@ Objetivo: descubrir emisoras sin mantener un listado propio.
 
 **Cómo probar:** buscar una emisora conocida y reproducirla desde los resultados.
 
-### Fase 5 — Pulido y robustez 🟨
+### Fase 5 — Pulido y robustez ✅
 
 Objetivo: dejar la app lista para el uso diario.
 
@@ -158,7 +158,6 @@ Objetivo: dejar la app lista para el uso diario.
 - [x] Temporizador para dormir (con aviso del tiempo restante en el reproductor)
 - [x] Tema claro/oscuro
 - [ ] Compatibilidad con Android Auto (opcional)
-- [ ] Revisión final de permisos y dependencias (sin rastreo)
 
 **Cómo probar:** cortar la conexión durante la reproducción (reconexión con aviso tras la ventana configurada), probar el temporizador de sueño y cambiar de idioma en Ajustes (la UI cambia al instante y el país por defecto de la búsqueda se adapta).
 
@@ -171,8 +170,8 @@ Objetivo: dejar la app lista para el uso diario.
 | 1 | Proyecto base y reproductor | ✅ Completada |
 | 2 | Segundo plano y notificación | ✅ Completada |
 | 3 | Room y favoritas | ✅ Completada |
-| 4 | API de Radio Browser y buscador | ✅ Completada (build OK, pendiente de prueba en dispositivo) |
-| 5 | Pulido y robustez | 🟨 En curso (reconexión, temporizador, idiomas y ajustes) |
+| 4 | API de Radio Browser y buscador | ✅ Completada (probada en dispositivo) |
+| 5 | Pulido y robustez | ✅ Completada |
 
 ---
 

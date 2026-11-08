@@ -89,4 +89,7 @@
     <string name="sleep_60">60 minutos</string>
     <string name="sleep_timer_active">Se apagará en %1$s</string>
 
+    <!-- Aviso de error (Fase 5) -->
+    <string name="ok">Aceptar</string>
+
 </resources>

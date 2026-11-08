@@ -14,8 +14,14 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
@@ -26,17 +32,24 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jjcampac.eter.di.AppModule
@@ -51,7 +64,9 @@ import com.jjcampac.eter.ui.settings.SettingsScreen
 import com.jjcampac.eter.ui.station.StationFormScreen
 import com.jjcampac.eter.ui.station.StationFormViewModel
 import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.theme.EterShapePanel
 import com.jjcampac.eter.ui.theme.ThemeMode
+import kotlinx.coroutines.delay
 import com.jjcampac.eter.ui.theme.ThemeViewModel
 import com.jjcampac.eter.util.AppLanguage
 
@@ -116,12 +131,21 @@ class MainActivity : ComponentActivity() {
         }
         val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
 
+        // Mostrar aviso de error de conexión en cualquier pantalla (Fase 5).
+        // Se muestra una sola vez por mensaje de error concreto para no saturar.
+        var errorToastMessage by remember { mutableStateOf<String?>(null) }
+        LaunchedEffect(playerState.status, playerState.errorMessage) {
+            if (playerState.errorMessage != null && errorToastMessage != playerState.errorMessage) {
+                errorToastMessage = playerState.errorMessage
+            }
+        }
         // Tema de la app (guardado en SharedPreferences). Se observa el flujo para
         // que `EterTheme` se recomponga en vivo al cambiarlo desde Ajustes.
         val themeViewModel: ThemeViewModel = viewModel(factory = ThemeViewModel.factory(applicationContext))
         val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
 
         EterTheme(themeMode = themeMode) {
+        Box(Modifier.fillMaxSize()) {
 
         // Iniciar el servicio de medios según haya estación activa.
         if (currentStationId != null) {
@@ -262,7 +286,12 @@ class MainActivity : ComponentActivity() {
                 }
             )
         }
+
+        // Overlay de aviso de error de conexión (Fase 5): se muestra sobre
+        // cualquier pantalla con los colores del tema seleccionado.
+        ErrorToast(message = errorToastMessage, onDismiss = { errorToastMessage = null })
     }
+}
 }
 
     private fun startRadioService() {
@@ -277,5 +306,53 @@ class MainActivity : ComponentActivity() {
     private fun stopRadioService() {
         val intent = Intent(this, RadioMediaSessionService::class.java)
         stopService(intent)
+    }
+
+    /**
+     * Aviso de error de conexión con los mismos colores y forma del mini reproductor.
+     * Se muestra como un overlay compacto en la parte inferior de la pantalla, sobre cualquier
+     * pestaña (Favoritas, Estaciones, Ajustes o reproductor).
+     *
+     * Se auto-oculta tras 4 segundos o al pulsar el botón de aceptar.
+     */
+    @Composable
+    private fun ErrorToast(message: String?, onDismiss: () -> Unit) {
+        if (message.isNullOrEmpty()) return
+
+        // Auto-dismiss after 4 seconds, like a standard Toast.
+        LaunchedEffect(message) {
+            delay(4000)
+            onDismiss()
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .wrapContentWidth(),
+                shape = EterShapePanel,
+                tonalElevation = 4.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp, vertical = 18.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
     }
 }

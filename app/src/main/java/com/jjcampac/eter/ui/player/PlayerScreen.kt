@@ -6,6 +6,7 @@ package com.jjcampac.eter.ui.player
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -26,19 +27,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import android.util.Log
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
+import com.jjcampac.eter.ui.components.AnimatedWavesIcon
 import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.player.SleepTimer
-import com.jjcampac.eter.ui.components.AnimatedWavesIcon
-import android.util.Log
 
 private const val TAG = "PlayerScreen"
 
@@ -89,40 +95,37 @@ fun PlayerScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp, vertical = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
+            AnimatedWavesIcon(tint = MaterialTheme.colorScheme.primary)
 
-            val isCurrentPlaying = playerState.status == PlaybackStatus.PLAYING &&
-                playerState.currentStation?.url == station.url
-            if (isCurrentPlaying) {
-                AnimatedWavesIcon(
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(width = 110.dp, height = 96.dp)
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Filled.GraphicEq,
-                    contentDescription = null,
-                    modifier = Modifier.size(96.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            // Segunda línea del mini reproductor: el título de la canción solo se
+            // muestra mientras la emisora está en reproducción. En pausa, conectando,
+            // con error o parado se muestra el estado en lenguaje claro.
+            val secondLine = when (playerState.status) {
+                PlaybackStatus.PLAYING ->
+                    playerState.metadataTitle?.takeIf { it.isNotEmpty() }
+                        ?: stringResource(R.string.radio_live)
+                PlaybackStatus.PAUSED -> stringResource(R.string.radio_paused)
+                PlaybackStatus.LOADING -> stringResource(R.string.buffering)
+                PlaybackStatus.ERROR ->
+                    playerState.errorMessage ?: stringResource(R.string.error_unknown)
+                PlaybackStatus.IDLE -> stringResource(R.string.tap_to_play)
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = station.name,
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
             Text(
-                text = station.subtitle,
-                style = MaterialTheme.typography.bodyMedium,
+                text = secondLine,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(16.dp))

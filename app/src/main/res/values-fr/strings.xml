@@ -87,4 +87,8 @@
     <string name="sleep_45">45 minutes</string>
     <string name="sleep_60">60 minutes</string>
     <string name="sleep_timer_active">S\'éteindra dans %1$s</string>
+
+    <!-- Avertissement d'erreur (Phase 5) -->
+    <string name="ok">OK</string>
+
 </resources>
