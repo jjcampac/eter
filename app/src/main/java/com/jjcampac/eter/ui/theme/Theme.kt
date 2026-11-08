@@ -4,12 +4,16 @@
  */
 package com.jjcampac.eter.ui.theme
 
+import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 // ============================================================
 // ColorScheme de Material 3 para tema claro y oscuro
@@ -78,6 +82,24 @@ fun EterTheme(
         ThemeMode.OSCURO -> true
     }
     val colorScheme = if (darkTheme) DarkColors else LightColors
+
+    // Barras del sistema: ajusta el contraste de sus iconos al tema REAL de la app
+    // (oscuro -> iconos claros; claro -> iconos oscuros). Con enableEdgeToEdge() en
+    // MainActivity las barras ya son transparentes y el fondo lo dibuja Compose; aquí
+    // solo se decide la apariencia de la hora/wi-fi/batería y de los botones de
+    // navegación. Es el único sitio donde se conoce darkTheme y se recompone en vivo
+    // ante cambios de tema de la app, del sistema o rotación.
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val insetsController = WindowCompat.getInsetsController(
+                (view.context as Activity).window, view
+            )
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
+        }
+    }
+
     MaterialTheme(
         colorScheme = colorScheme,
         typography = EterTypography,

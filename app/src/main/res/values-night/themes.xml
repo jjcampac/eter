@@ -3,11 +3,11 @@
 
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Tema base (oscuro). El contenido completo se dibuja con Jetpack Compose (Material 3). -->
+    <!-- Tema base (oscuro). El contenido completo se dibuja con Jetpack Compose (Material 3).
+         Las barras del sistema son transparentes (enableEdgeToEdge) y el contraste de sus
+         iconos (claro/oscuro) lo decide en tiempo de ejecución el tema de la app en ui/theme,
+         por lo que aquí NO se fijan statusBarColor ni windowLightStatusBar. -->
     <style name="Theme.Eter" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/background_dark</item>
-        <item name="android:statusBarColor">@color/background_dark</item>
-        <item name="android:navigationBarColor">@color/background_dark</item>
-        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>
