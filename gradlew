@@ -1,4 +1,5 @@
 #!/bin/sh
+# Autor: jjcampac - IA: cline
 
 #
 # Copyright © 2015 the original authors.

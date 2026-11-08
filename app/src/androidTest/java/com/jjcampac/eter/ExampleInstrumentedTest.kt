@@ -1,3 +1,7 @@
+/*
+ * Autor: jjcampac
+ * IA: cline
+ */
 package com.jjcampac.eter
 
 import androidx.test.platform.app.InstrumentationRegistry

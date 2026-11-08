@@ -1,3 +1,4 @@
+<!-- Autor: jjcampac - IA: cline -->
 # Simple Radio
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
@@ -186,4 +187,16 @@ Objetivo: dejar la app lista para el uso diario.
 
 ## Licencia
 
-_(Por definir)_
+Esta aplicación se distribuye bajo la licencia **Creative Commons Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)**, disponible en: https://creativecommons.org/licenses/by-nc/4.0/deed.es
+
+Puedes **usar, copiar, modificar y compartir libremente** el software, pero solo con fines no comerciales. El uso con fines comerciales está prohibido sin permiso expreso del autor.
+
+La única condición es que, en cualquier copia o trabajo derivado, siempre debes:
+- Mencionar al autor (**jjcampac**).
+- Mencionar el nombre de la aplicación (**Simple Radio**).
+- Indicar la URL del repositorio original (**https://github.com/jjcampac/eter**).
+- Indicar si se han realizado cambios.
+
+El software se ofrece "tal cual" (**as is**), sin garantía de ningún tipo.
+
+La licencia completa y el aviso de copyright se encuentran en el archivo [LICENSE](LICENSE).

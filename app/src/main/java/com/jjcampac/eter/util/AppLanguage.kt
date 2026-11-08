@@ -1,3 +1,7 @@
+/*
+ * Autor: jjcampac
+ * IA: cline
+ */
 package com.jjcampac.eter.util
 
 import android.content.Context

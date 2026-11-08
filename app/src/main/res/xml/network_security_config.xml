@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Autor: jjcampac - IA: cline -->
+
+
 <!--
     Permite tráfico HTTP (cleartext) porque los streams de las emisoras pueden
     estar en dominios arbitrarios que no se pueden enumerar a priori (decisión

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Autor: jjcampac - IA: cline -->
+
+
 <resources>
     <color name="background_light">#FAF8FF</color>
     <color name="background_dark">#181A23</color>

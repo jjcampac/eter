@@ -1,3 +1,7 @@
+/*
+ * Autor: jjcampac
+ * IA: cline
+ */
 package com.jjcampac.eter.ui.main
 
 import androidx.compose.foundation.clickable

@@ -1,3 +1,7 @@
+/*
+ * Autor: jjcampac
+ * IA: cline
+ */
 package com.jjcampac.eter.data.local.entity
 
 import androidx.room.Entity

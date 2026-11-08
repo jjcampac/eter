@@ -1,3 +1,7 @@
+/*
+ * Autor: jjcampac
+ * IA: cline
+ */
 package com.jjcampac.eter.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape

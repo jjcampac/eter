@@ -1,3 +1,7 @@
+/*
+ * Autor: jjcampac
+ * IA: cline
+ */
 package com.jjcampac.eter.domain.repository
 
 import com.jjcampac.eter.domain.model.Station

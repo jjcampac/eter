@@ -1,3 +1,7 @@
+/*
+ * Autor: jjcampac
+ * IA: cline
+ */
 package com.jjcampac.eter.data.remote
 
 import com.jjcampac.eter.data.remote.dto.ServerDto

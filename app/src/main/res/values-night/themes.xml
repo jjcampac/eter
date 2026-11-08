@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Autor: jjcampac - IA: cline -->
+
+
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Tema base (oscuro). El contenido completo se dibuja con Jetpack Compose (Material 3). -->
     <style name="Theme.Eter" parent="android:Theme.Material.NoActionBar">

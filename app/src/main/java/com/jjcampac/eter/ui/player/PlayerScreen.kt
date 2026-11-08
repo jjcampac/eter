@@ -1,3 +1,7 @@
+/*
+ * Autor: jjcampac
+ * IA: cline
+ */
 package com.jjcampac.eter.ui.player
 
 import androidx.compose.foundation.layout.Arrangement

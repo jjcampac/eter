@@ -1,3 +1,7 @@
+/*
+ * Autor: jjcampac
+ * IA: cline
+ */
 package com.jjcampac.eter.ui.components
 
 import androidx.compose.animation.core.LinearEasing
