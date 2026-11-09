@@ -3,7 +3,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo.
+> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo. Notificación multimedia del sistema (tarjeta de la cortina con emisora, canción, estado y controles) ✅ compilada, pendiente de prueba en dispositivo.
 
 ---
 
@@ -47,6 +47,18 @@ El objetivo es disponer de un reproductor de radio sencillo, limpio y respetuoso
 10. Tema claro/oscuro (Sistema / Claro / Oscuro) con cambio en vivo.
 11. Iconos dinámicos en la lista: ondas animadas mientras suena, pausa clásica cuando está pausada.
 12. Reordenar las **favoritas** arrastrando con el dedo (pulsación larga) o mediante las acciones de accesibilidad "Mover arriba"/"Mover abajo". El orden se conserva al cerrar la app.
+13. **Notificación multimedia del sistema**: al desplegar la cortina desde el borde superior aparece la tarjeta nativa de reproducción con el logo de la emisora de fondo, su nombre como título, la canción en curso (metadatos ICY) o el estado ("Conectando…", "Error de conexión") como texto, el botón grande de reproducir/pausar, el selector de salida de audio ("Este teléfono"), flechas anterior/siguiente entre favoritas **que solo aparecen si hay otra emisora antes o después en la lista**, y una estrella que únicamente permite **añadir** la emisora en curso a favoritas (quitarla se hace desde la app).
+
+### Controles de la tarjeta de notificación
+
+1. Reproducir una emisora y desplegar la cortina desde el borde superior de la pantalla.
+2. La tarjeta muestra el icono de la app en la esquina, el logo de la emisora de
+   fondo, su nombre y la canción o el estado.
+3. El botón central reproduce o pausa. Las flechas cambian de favorita y solo se
+   muestran cuando existen emisora anterior o siguiente (en la primera no hay
+   "anterior" y en la última no hay "siguiente").
+4. La estrella añade la emisora en curso a favoritas y desaparece cuando ya lo es.
+5. Deslizar la tarjeta hacia un lado descarta la notificación y detiene la reproducción.
 
 ---
 
@@ -81,7 +93,7 @@ app/src/main/java/com/jjcampac/eter/
 ├── player/
 │   ├── RadioPlayer.kt        # Wrapper de ExoPlayer con reconexión controlada
 │   ├── SleepTimer.kt         # Temporizador para dormir (Fase 5)
-│   └── service/              # RadioMediaSessionService + PlayerNotification
+│   └── service/              # RadioMediaSessionService + RadioNotifications
 ├── ui/
 │   ├── components/           # Componentes reutilizables (StationItem, MiniPlayer…)
 │   ├── main/                 # Pestañas Favoritas/Estaciones (buscador) + ViewModels
@@ -174,6 +186,7 @@ Objetivo: dejar la app lista para el uso diario.
 | 4 | API de Radio Browser y buscador | ✅ Completada (probada en dispositivo) |
 | 5 | Pulido y robustez | ✅ Completada |
 | Post-5 | Reordenamiento de Favoritas (drag & drop + accesibilidad) | ✅ Completada (probada en dispositivo) |
+| Post-5 | Notificación multimedia del sistema (tarjeta con emisora, canción, estado y controles) | ✅ Compilada (pendiente de prueba en dispositivo) |
 
 ---
 

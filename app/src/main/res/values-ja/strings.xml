@@ -54,7 +54,6 @@
     <string name="settings_language">言語</string>
     <string name="settings_language_desc">日本語</string>
     <string name="settings_version">バージョン</string>
-    <string name="settings_version_desc">1.0</string>
     <string name="settings_pending">今後のアップデートで利用可能</string>
     <string name="theme_system">システム</string>
     <string name="theme_system_desc">端末の設定に従う</string>
@@ -88,4 +87,8 @@
     <string name="sleep_45">45分</string>
     <string name="sleep_60">60分</string>
     <string name="sleep_timer_active">%1$s後にオフになります</string>
+    <!-- メディア通知：局の情報 -->
+    <string name="notification_channel_name">ラジオプレーヤー</string>
+    <string name="state_error">接続エラー</string>
+
 </resources>

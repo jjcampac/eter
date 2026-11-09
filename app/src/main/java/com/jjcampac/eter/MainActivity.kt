@@ -340,12 +340,26 @@ class MainActivity : ComponentActivity() {
 }
 }
 
+    /**
+     * Arranca el servicio de medios.
+     *
+     * Solo se usa `startForegroundService` cuando hay reproducción en marcha
+     * (Media3 mantiene el servicio en primer plano con la notificación
+     * multimedia). En el resto de casos basta `startService`, que aquí siempre
+     * se llama con la interfaz en primer plano: así se evita el contrato de los
+     * 5 segundos de `startForegroundService` cuando aún no suena nada.
+     */
     private fun startRadioService() {
         val intent = Intent(this, RadioMediaSessionService::class.java)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
+        val reproduciendo = (application as EterApplication).getRadioPlayer().exoPlayer.playWhenReady
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && reproduciendo) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "No se pudo iniciar el servicio de radio: ${e.message}")
         }
     }
 

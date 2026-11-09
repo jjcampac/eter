@@ -54,7 +54,6 @@
     <string name="settings_language">Idioma</string>
     <string name="settings_language_desc">Español (España)</string>
     <string name="settings_version">Versión</string>
-    <string name="settings_version_desc">0.9.2</string>
     <string name="settings_pending">Disponible en una próxima actualización</string>
     <!-- Selector de tema (Ajustes) -->
     <string name="theme_system">Sistema</string>
@@ -99,5 +98,9 @@
 
     <!-- Aviso de error (Fase 5) -->
     <string name="ok">Aceptar</string>
+
+    <!-- Notificación multimedia: información de la emisora -->
+    <string name="notification_channel_name">Reproductor de radio</string>
+    <string name="state_error">Error de conexión</string>
 
 </resources>

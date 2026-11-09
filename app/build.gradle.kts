@@ -10,7 +10,7 @@ plugins {
 
 /** Versión base de la app (sin sufijo de build). El sufijo "d"/"r" se añade
  *  en cada build type para distinguir debug de release. */
-val baseVersionName = "0.9.2"
+val baseVersionName = "0.9.3"
 
 android {
     namespace = "com.jjcampac.eter"
@@ -22,7 +22,7 @@ android {
         applicationId = "com.jjcampac.eter"
         minSdk = 26
         targetSdk = 37
-        versionCode = 3
+        versionCode = 4
         versionName = baseVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

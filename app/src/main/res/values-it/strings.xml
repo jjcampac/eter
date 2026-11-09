@@ -54,7 +54,6 @@
     <string name="settings_language">Lingua</string>
     <string name="settings_language_desc">Italiano</string>
     <string name="settings_version">Versione</string>
-    <string name="settings_version_desc">1.0</string>
     <string name="settings_pending">Disponibile in un futuro aggiornamento</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_system_desc">Segue la preferenza del dispositivo</string>
@@ -91,5 +90,9 @@
 
     <!-- Avviso di errore (Fase 5) -->
     <string name="ok">OK</string>
+
+    <!-- Notifica multimediale: informazioni sulla stazione -->
+    <string name="notification_channel_name">Lettore radio</string>
+    <string name="state_error">Errore di connessione</string>
 
 </resources>

@@ -54,7 +54,6 @@
     <string name="settings_language">Language</string>
     <string name="settings_language_desc">English</string>
     <string name="settings_version">Version</string>
-    <string name="settings_version_desc">1.0</string>
     <string name="settings_pending">Available in a future update</string>
     <string name="theme_system">System</string>
     <string name="theme_system_desc">Follows the device setting</string>
@@ -91,5 +90,9 @@
 
     <!-- Error notice (Phase 5) -->
     <string name="ok">OK</string>
+
+    <!-- Media notification: station information -->
+    <string name="notification_channel_name">Radio player</string>
+    <string name="state_error">Connection error</string>
 
 </resources>

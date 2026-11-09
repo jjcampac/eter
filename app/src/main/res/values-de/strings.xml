@@ -54,7 +54,6 @@
     <string name="settings_language">Sprache</string>
     <string name="settings_language_desc">Deutsch</string>
     <string name="settings_version">Version</string>
-    <string name="settings_version_desc">1.0</string>
     <string name="settings_pending">In einem zukünftigen Update verfügbar</string>
     <string name="theme_system">System</string>
     <string name="theme_system_desc">Folgt der Geräteeinstellung</string>
@@ -91,5 +90,9 @@
 
     <!-- Fehlerhinweis (Phase 5) -->
     <string name="ok">OK</string>
+
+    <!-- Medienbenachrichtigung: Senderinformationen -->
+    <string name="notification_channel_name">Radio-Player</string>
+    <string name="state_error">Verbindungsfehler</string>
 
 </resources>

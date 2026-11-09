@@ -17,6 +17,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.jjcampac.eter.EterApplication
+import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.util.ReconnectPreferences
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -103,6 +107,10 @@ class RadioPlayer(context: Context) {
     private val reconnectScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var reconnectJob: Job? = null
     private var reconnectWindowStartMs = 0L
+
+    // --- Metadatos de la notificación multimedia ---
+    /** Ámbito que mantiene al día el texto secundario de la notificación. */
+    private val metadataScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     /** Intervalo entre reintentos de conexión. */
     private val RECONNECT_INTERVAL_MS = 5_000L
@@ -196,6 +204,61 @@ class RadioPlayer(context: Context) {
 
         // Aplicar el volumen inicial (1.0) al reproductor.
         applyVolume()
+
+        // Texto secundario de la notificación multimedia: canción (ICY),
+        // "Conectando…" o el estado de error. Se actualiza sin reiniciar el
+        // directo porque el elemento se sustituye manteniendo la misma URL.
+        metadataScope.launch {
+            _state
+                .map { textoNotificacion(it) }
+                .distinctUntilChanged()
+                .collect { texto -> aplicarTextoNotificacion(texto) }
+        }
+    }
+
+    /**
+     * Texto secundario que muestra la tarjeta multimedia del sistema: la
+     * canción en curso si la emisora envía metadatos ICY y, si no, el estado
+     * de reproducción o la etiqueta de la emisora (país · género).
+     */
+    private fun textoNotificacion(state: PlayerState): String? = when (state.status) {
+        PlaybackStatus.ERROR -> appContext.getString(R.string.state_error)
+        PlaybackStatus.LOADING -> state.metadataTitle ?: appContext.getString(R.string.buffering)
+        else -> state.metadataTitle ?: state.currentStation?.subtitle?.takeIf { it.isNotBlank() }
+    }
+
+    /**
+     * Construye el elemento reproducible con los metadatos que el sistema usa
+     * en la notificación multimedia y en la pantalla de bloqueo: título (nombre
+     * de la emisora), texto secundario (canción o estado) y carátula (logo).
+     */
+    private fun construirItem(station: Station, texto: String?): MediaItem =
+        MediaItem.Builder()
+            .setUri(station.url)
+            .setMediaId(station.id)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(station.name)
+                    .setArtist(texto ?: station.subtitle.takeIf { it.isNotBlank() })
+                    .setArtworkUri(station.imageUrl?.takeIf { it.isNotBlank() }?.let { Uri.parse(it) })
+                    .setIsPlayable(true)
+                    .setIsBrowsable(false)
+                    .build()
+            )
+            .build()
+
+    /**
+     * Sustituye el elemento en reproducción por uno equivalente cuyo único
+     * cambio son los metadatos, de modo que Media3 reconstruya la notificación
+     * sin cortar el directo.
+     */
+    private fun aplicarTextoNotificacion(texto: String?) {
+        val station = _state.value.currentStation ?: return
+        if (exoPlayer.mediaItemCount == 0) return
+        val actual = exoPlayer.getMediaItemAt(0).mediaMetadata.artist?.toString()
+        if (actual == (texto ?: station.subtitle.takeIf { it.isNotBlank() })) return
+        Log.d(TAG, "texto de la notificación: $texto")
+        exoPlayer.replaceMediaItem(0, construirItem(station, texto))
     }
 
     /** Carga una emisora y comienza la reproducción. */
@@ -208,7 +271,10 @@ class RadioPlayer(context: Context) {
 
         _state.value = PlayerState(status = PlaybackStatus.LOADING, currentStation = station)
         try {
-            exoPlayer.setMediaItem(MediaItem.fromUri(station.url))
+            // Los metadatos del elemento alimentan la notificación multimedia
+            // (título, canción y logo de la emisora como carátula). Mientras
+            // conecta se muestra "Conectando…" como texto secundario.
+            exoPlayer.setMediaItem(construirItem(station, texto = textoNotificacion(_state.value)))
             exoPlayer.prepare()
             exoPlayer.playWhenReady = true
         } catch (e: Exception) {
@@ -306,6 +372,7 @@ class RadioPlayer(context: Context) {
         Log.d(TAG, "release()")
         resetReconnect()
         reconnectScope.cancel()
+        metadataScope.cancel()
         exoPlayer.release()
     }
 
