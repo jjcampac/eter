@@ -47,13 +47,14 @@
 
     <!-- Ajustes -->
     <string name="settings_about">Acerca de Simple Radio</string>
-    <string name="settings_about_desc">App de radio por internet, sin publicidad y sin cuentas.\nTe conectas directamente a los streams de las emisoras.</string>
+    <string name="settings_about_desc">App de radio por internet, sin publicidad y sin cuentas. Versión 0.9.0.
+Te conectas directamente a los streams de las emisoras.</string>
     <string name="settings_theme">Tema de la app</string>
     <string name="settings_theme_desc">Sigue la preferencia del sistema</string>
     <string name="settings_language">Idioma</string>
     <string name="settings_language_desc">Español (España)</string>
     <string name="settings_version">Versión</string>
-    <string name="settings_version_desc">1.0</string>
+    <string name="settings_version_desc">0.9.0</string>
     <string name="settings_pending">Disponible en una próxima actualización</string>
     <!-- Selector de tema (Ajustes) -->
     <string name="theme_system">Sistema</string>

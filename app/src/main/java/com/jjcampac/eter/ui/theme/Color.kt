@@ -33,6 +33,8 @@ val EterOnBackgroundLight = Color(0xFF1A1C20)
 val EterSurfaceLight = Color(0xFFF0EDE6)
 val EterOnSurfaceLight = Color(0xFF1A1C20)
 val EterSurfaceInputLight = Color(0xFFFFFFFF)
+
+val EterSurfaceCardLight = Color(0xFFEDEDE9)
 val EterSurfaceVariantLight = Color(0xFFE8E4DC)
 val EterOnSurfaceVariantLight = Color(0xFF5E6068)
 val EterOutlineLight = Color(0xFF9AA0A6)  // borde de selección: gris claro

@@ -45,6 +45,7 @@ import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.ui.theme.EterOutlineColor
 import com.jjcampac.eter.ui.theme.EterShapeCard
 import com.jjcampac.eter.ui.theme.EterSurfaceCardDark
+import com.jjcampac.eter.ui.theme.EterSurfaceCardLight
 import com.jjcampac.eter.ui.theme.LocalEterDarkTheme
 
 /**
@@ -78,7 +79,7 @@ fun StationItem(
     // el borde (EterOutlineColor), que se atenúa en el tema oscuro para no brillar.
     // Usar color de tarjeta específico para tema oscuro: #1f2126
     val hasBorder = isCurrent || isPlaying
-    val cardColor = if (LocalEterDarkTheme.current) EterSurfaceCardDark else MaterialTheme.colorScheme.surface
+    val cardColor = if (LocalEterDarkTheme.current) EterSurfaceCardDark else EterSurfaceCardLight
 
     Surface(
         modifier = modifier.fillMaxWidth(),
