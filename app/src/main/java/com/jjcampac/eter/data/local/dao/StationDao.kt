@@ -9,6 +9,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.jjcampac.eter.data.local.entity.StationEntity
 import kotlinx.coroutines.flow.Flow
@@ -46,6 +47,17 @@ interface StationDao {
     /** Actualiza el orden de visualización de una emisora favorita. */
     @Query("UPDATE stations SET sortOrder = :sortOrder WHERE id = :id")
     suspend fun updateSortOrder(id: String, sortOrder: Int)
+
+    /**
+     * Reordena todas las favoritas en una sola transacción, asignando sortOrder según la
+     * lista de ids proporcionada (primero en la lista = sortOrder 0, etc.).
+     */
+    @Transaction
+    suspend fun reorderFavorites(orderedIds: List<String>) {
+        orderedIds.forEachIndexed { index, id ->
+            updateSortOrder(id, index)
+        }
+    }
 
     /** Devuelve el siguiente sortOrder disponible (max + 1, o 0 si no hay favoritas). */
     @Query("SELECT COALESCE(MAX(sortOrder), -1) + 1 FROM stations WHERE isFavorite = 1")

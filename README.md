@@ -3,7 +3,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional)
+> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo.
 
 ---
 
@@ -46,13 +46,14 @@ El objetivo es disponer de un reproductor de radio sencillo, limpio y respetuoso
 9. Interfaz en 6 idiomas (español, inglés, alemán, francés, italiano y japonés) con cambio al instante.
 10. Tema claro/oscuro (Sistema / Claro / Oscuro) con cambio en vivo.
 11. Iconos dinámicos en la lista: ondas animadas mientras suena, pausa clásica cuando está pausada.
+12. Reordenar las **favoritas** arrastrando con el dedo (pulsación larga) o mediante las acciones de accesibilidad "Mover arriba"/"Mover abajo". El orden se conserva al cerrar la app.
 
 ---
 
 ## Requisitos técnicos
 
 - Permitir tráfico `http` mediante `network_security_config` (base-config con cleartext permitido, decisión de Fase 4) porque muchas emisoras usan stream `http` o HLS en dominios arbitrarios que no pueden prefijarse. No se activa `usesCleartextTraffic` de forma global.
-- Permisos mínimos: `INTERNET`, `FOREGROUND_SERVICE` (tipo `mediaPlayback`) y `POST_NOTIFICATIONS`.
+- Permisos mínimos: `INTERNET`, `FOREGROUND_SERVICE` (tipo `mediaPlayback`), `POST_NOTIFICATIONS` y `VIBRATE` (vibración háptica al iniciar el arrastre de favoritas).
 - Cero SDKs de publicidad, analítica o rastreo.
 - Tema claro/oscuro y textos en varios idiomas (español, inglés, alemán, francés, italiano y japonés).
 - Para Radio Browser: usar un mirror aleatorio y un `User-Agent` propio de la app.
@@ -172,6 +173,7 @@ Objetivo: dejar la app lista para el uso diario.
 | 3 | Room y favoritas | ✅ Completada |
 | 4 | API de Radio Browser y buscador | ✅ Completada (probada en dispositivo) |
 | 5 | Pulido y robustez | ✅ Completada |
+| Post-5 | Reordenamiento de Favoritas (drag & drop + accesibilidad) | ✅ Completada (probada en dispositivo) |
 
 ---
 

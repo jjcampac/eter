@@ -83,7 +83,6 @@ fun StationItem(
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        onClick = onClick,
         shape = EterShapeCard,
         color = cardColor,
         contentColor = MaterialTheme.colorScheme.onSurface,

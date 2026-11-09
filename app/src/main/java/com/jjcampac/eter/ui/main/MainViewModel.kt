@@ -65,6 +65,10 @@ class MainViewModel(
     private val _uiState = MutableStateFlow(MainUiState(country = defaultCountry))
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
+    /** Favoritas ordenadas por sortOrder (para reordenamiento drag & drop). */
+    private val _favorites = MutableStateFlow<List<Station>>(emptyList())
+    val favorites: StateFlow<List<Station>> = _favorites.asStateFlow()
+
     private var searchJob: Job? = null
 
     init {
@@ -79,6 +83,7 @@ class MainViewModel(
         viewModelScope.launch {
             repository.getFavorites().collect { favorites ->
                 _uiState.update { it.copy(favoriteIds = favorites.map { f -> f.id }.toSet()) }
+                _favorites.value = favorites
             }
         }
         // País por defecto según el idioma de la UI: al cambiar idioma en Ajustes

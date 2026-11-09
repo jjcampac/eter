@@ -10,6 +10,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Vibración háptica al iniciar el arrastre en Favoritas (permiso normal, se otorga en instalación).
+         Obligatorio en Android 12+ para Vibrator.vibrate(); sin él la app crashea con SecurityException. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".EterApplication"

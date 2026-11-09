@@ -48,11 +48,8 @@ class StationRepositoryImpl(
     override suspend fun getFavoritesList(): List<Station> =
         dao.getFavorites().map { it.toDomain() }
 
-    override suspend fun reorderFavorites(orderedIds: List<String>) {
-        orderedIds.forEachIndexed { index, id ->
-            dao.updateSortOrder(id, index)
-        }
-    }
+    override suspend fun reorderFavorites(orderedIds: List<String>) =
+        dao.reorderFavorites(orderedIds)
 
     override suspend fun nextFavoriteSortOrder(): Int = dao.nextSortOrder()
 
