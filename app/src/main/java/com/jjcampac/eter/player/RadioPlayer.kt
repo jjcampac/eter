@@ -148,6 +148,28 @@ class RadioPlayer(context: Context) {
                 }
             }
 
+            /**
+             * Cambio de elemento desde fuera de la app (Android Auto, asistente de
+             * voz, etc.): la sesión de medios carga el elemento directamente en el
+             * reproductor, sin pasar por [play]. Aquí se recupera la emisora por su
+             * id para que la UI, el mini reproductor y la notificación sigan
+             * mostrando la emisora correcta.
+             */
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                val id = mediaItem?.mediaId ?: return
+                if (id == _state.value.currentStation?.id) return
+                Log.d(TAG, "onMediaItemTransition() externo mediaId=$id reason=$reason")
+                metadataScope.launch {
+                    val app = appContext as? EterApplication ?: return@launch
+                    val emisora = app.getStationRepository().getStation(id) ?: return@launch
+                    app.saveLastStationUrl(emisora.url)
+                    _state.update { current ->
+                        current.copy(currentStation = emisora, errorMessage = null)
+                    }
+                    Log.d(TAG, "emisora cambiada desde fuera: ${emisora.name}")
+                }
+            }
+
             override fun onPlayerError(error: PlaybackException) {
                 Log.e(TAG, "onPlayerError() code=${error.errorCode} message=${error.message}")
                 val errorMessage = when (error.errorCode) {
@@ -260,6 +282,13 @@ class RadioPlayer(context: Context) {
         Log.d(TAG, "texto de la notificación: $texto")
         exoPlayer.replaceMediaItem(0, construirItem(station, texto))
     }
+
+    /**
+     * Construye el elemento reproducible de una emisora con los metadatos que
+     * usa la notificación (título, texto secundario y logo). La sesión lo usa
+     * también para resolver las emisoras que llegan de Android Auto.
+     */
+    fun itemPara(station: Station): MediaItem = construirItem(station, texto = null)
 
     /** Carga una emisora y comienza la reproducción. */
     fun play(station: Station) {

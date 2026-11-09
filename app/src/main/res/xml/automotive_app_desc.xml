@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Autor: jjcampac - IA: cline -->
+<!--
+    Declaración para Android Auto.
+
+    Eter se anuncia como app de *audio* ("media"): Android Auto usa la tarjeta
+    multimedia y el navegador del sistema, sin pantallas propias. No requiere
+    permisos ni componentes adicionales en el manifiesto.
+-->
+<automotiveApp>
+    <uses name="media" />
+</automotiveApp>

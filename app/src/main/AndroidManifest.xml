@@ -36,6 +36,14 @@
             </intent-filter>
         </activity>
 
+        <!--
+            Declara Eter como app de audio para Android Auto (sin pantallas propias):
+            Android Auto usa la tarjeta multimedia y el navegador del sistema.
+        -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
         <!-- Servicio de medios en segundo plano (se completa en Fase 2) -->
         <service
             android:name=".player.service.RadioMediaSessionService"
@@ -43,6 +51,8 @@
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService" />
+                <!-- Navegador de medios: lo usa Android Auto para listar la biblioteca. -->
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
     </application>

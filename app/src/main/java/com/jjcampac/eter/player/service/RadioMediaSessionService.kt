@@ -6,17 +6,25 @@ package com.jjcampac.eter.player.service
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
+import androidx.media3.session.LibraryResult
+import androidx.media3.session.MediaLibraryService
+import androidx.media3.session.MediaLibraryService.LibraryParams
+import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
-import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
+import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.SettableFuture
 import com.jjcampac.eter.EterApplication
 import com.jjcampac.eter.MainActivity
 import com.jjcampac.eter.R
@@ -30,6 +38,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -54,11 +63,16 @@ private const val TAG = "RadioMediaSessionService"
  * El [RadioPlayer] se obtiene de [EterApplication] para sobrevivir a la
  * recreación de la actividad. Las constantes de canal e identificador viven en
  * [RadioNotifications] (mismo paquete).
+ *
+ * Al ser un [MediaLibraryService] la app también es visible en **Android Auto**
+ * (declarada como app de audio en `res/xml/automotive_app_desc.xml`): el sistema
+ * pide la biblioteca (raíz → "Favoritas" / "Todas" → emisoras) y reproduce la
+ * emisora elegida con la misma sesión. No hay pantallas propias en el coche.
  */
 @androidx.annotation.OptIn(UnstableApi::class)
-class RadioMediaSessionService : MediaSessionService() {
+class RadioMediaSessionService : MediaLibraryService() {
 
-    private var mediaSession: MediaSession? = null
+    private var mediaSession: MediaLibrarySession? = null
     private lateinit var radioPlayer: RadioPlayer
     private lateinit var sleepTimer: SleepTimer
     private lateinit var repository: StationRepository
@@ -86,10 +100,9 @@ class RadioMediaSessionService : MediaSessionService() {
         // Notificación multimedia del sistema (MediaStyle) construida por Media3.
         setMediaNotificationProvider(crearProveedorNotificacion())
 
-        val sesion = MediaSession.Builder(this, radioPlayer.exoPlayer)
+        val sesion = MediaLibrarySession.Builder(this, radioPlayer.exoPlayer, SesionCallback())
             .setSessionActivity(intentActividad())
             .setMediaButtonPreferences(botonesMedia())
-            .setCallback(SesionCallback())
             .build()
         mediaSession = sesion
         addSession(sesion)
@@ -133,7 +146,7 @@ class RadioMediaSessionService : MediaSessionService() {
         return START_STICKY
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
         mediaSession
 
     override fun onDestroy() {
@@ -286,22 +299,96 @@ class RadioMediaSessionService : MediaSessionService() {
         }
     }
 
+    // --- Biblioteca para Android Auto -----------------------------------------
+    //
+    // Android Auto pide el árbol de la biblioteca a la MediaLibrarySession:
+    //
+    //     raíz → "Favoritas" / "Todas" → emisoras
+    //
+    // Al elegir una emisora, Media3 llama a onAddMediaItems para resolver su
+    // mediaId (el id de la emisora) en la URL del stream. La reproducción usa la
+    // misma sesión, así que la notificación y los controles del coche funcionan
+    // igual que en el móvil.
+
+    /** Elemento raíz de la biblioteca (solo navegable). */
+    private fun itemRaiz(): MediaItem = itemCarpeta(ID_RAIZ, getString(R.string.app_name))
+
+    /** Carpeta navegable de la biblioteca. */
+    private fun itemCarpeta(id: String, titulo: String): MediaItem =
+        MediaItem.Builder()
+            .setMediaId(id)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(titulo)
+                    .setIsBrowsable(true)
+                    .setIsPlayable(false)
+                    .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
+                    .build()
+            )
+            .build()
+
+    /** Emisora como elemento navegable y reproducible de la biblioteca. */
+    private fun itemEmisora(station: Station): MediaItem =
+        MediaItem.Builder()
+            .setMediaId(station.id)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(station.name)
+                    .setArtist(station.subtitle.takeIf { it.isNotBlank() })
+                    .setArtworkUri(
+                        station.imageUrl?.takeIf { it.isNotBlank() }?.let { Uri.parse(it) }
+                    )
+                    .setIsBrowsable(false)
+                    .setIsPlayable(true)
+                    .setMediaType(MediaMetadata.MEDIA_TYPE_RADIO_STATION)
+                    .build()
+            )
+            .build()
+
+    /** Aplica la página que pide el navegador (si pagina; si no, todo). */
+    private fun paginaDe(items: List<MediaItem>, page: Int, pageSize: Int): List<MediaItem> =
+        if (pageSize <= 0) items else items.drop(page * pageSize).take(pageSize)
+
     /**
-     * Comandos propios de la sesión: los botones anterior, siguiente y estrella
-     * de la notificación no son comandos del reproductor (la app solo tiene un
-     * elemento cargado), así que se declaran como comandos de sesión.
+     * Ejecuta un bloque suspend y entrega su [LibraryResult] como futuro, que es
+     * lo que espera la sesión de biblioteca. Room no se puede consultar en el
+     * hilo principal, de ahí el salto a la corrutina.
      */
-    private inner class SesionCallback : MediaSession.Callback {
+    private fun <T> resultadoAsincrono(
+        bloque: suspend () -> LibraryResult<T>
+    ): ListenableFuture<LibraryResult<T>> {
+        val futuro = SettableFuture.create<LibraryResult<T>>()
+        scope.launch {
+            try {
+                futuro.set(bloque())
+            } catch (e: Exception) {
+                Log.e(TAG, "error en la biblioteca: ${e.message}")
+                // Media3 convierte el fallo del futuro en un error para el navegador.
+                futuro.setException(e)
+            }
+        }
+        return futuro
+    }
+
+    /**
+     * Comandos propios de la sesión (los botones de la notificación no son
+     * comandos del reproductor, porque la app solo tiene un elemento cargado) y
+     * árbol de la biblioteca que consume Android Auto.
+     */
+    private inner class SesionCallback : MediaLibrarySession.Callback {
 
         override fun onConnect(
             session: MediaSession,
             controller: MediaSession.ControllerInfo
         ): MediaSession.ConnectionResult {
-            val comandos = MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon().apply {
-                add(SessionCommand(ACCION_FAVORITA_ANTERIOR, Bundle.EMPTY))
-                add(SessionCommand(ACCION_FAVORITA_SIGUIENTE, Bundle.EMPTY))
-                add(SessionCommand(ACCION_ANADIR_FAVORITA, Bundle.EMPTY))
-            }.build()
+            // Se parte de los comandos de sesión **y de biblioteca**: sin los
+            // segundos, Android Auto no puede navegar por las emisoras.
+            val comandos =
+                MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon().apply {
+                    add(SessionCommand(ACCION_FAVORITA_ANTERIOR, Bundle.EMPTY))
+                    add(SessionCommand(ACCION_FAVORITA_SIGUIENTE, Bundle.EMPTY))
+                    add(SessionCommand(ACCION_ANADIR_FAVORITA, Bundle.EMPTY))
+                }.build()
             return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
                 .setAvailableSessionCommands(comandos)
                 .build()
@@ -324,6 +411,83 @@ class RadioMediaSessionService : MediaSessionService() {
             }
             return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
         }
+
+        override fun onGetLibraryRoot(
+            session: MediaLibrarySession,
+            browser: MediaSession.ControllerInfo,
+            params: LibraryParams?
+        ): ListenableFuture<LibraryResult<MediaItem>> =
+            Futures.immediateFuture(LibraryResult.ofItem(itemRaiz(), params))
+
+        override fun onGetItem(
+            session: MediaLibrarySession,
+            browser: MediaSession.ControllerInfo,
+            mediaId: String
+        ): ListenableFuture<LibraryResult<MediaItem>> = resultadoAsincrono {
+            when (mediaId) {
+                ID_RAIZ -> LibraryResult.ofItem(itemRaiz(), null)
+                ID_FAVORITAS -> LibraryResult.ofItem(
+                    itemCarpeta(ID_FAVORITAS, getString(R.string.favorites)), null
+                )
+                ID_TODAS -> LibraryResult.ofItem(
+                    itemCarpeta(ID_TODAS, getString(R.string.all_stations)), null
+                )
+                else -> repository.getStation(mediaId)?.let { emisora ->
+                    LibraryResult.ofItem(itemEmisora(emisora), null)
+                } ?: LibraryResult.ofError<MediaItem>(LibraryResult.RESULT_ERROR_UNKNOWN)
+            }
+        }
+
+        override fun onGetChildren(
+            session: MediaLibrarySession,
+            browser: MediaSession.ControllerInfo,
+            parentId: String,
+            page: Int,
+            pageSize: Int,
+            params: LibraryParams?
+        ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> = resultadoAsincrono {
+            val items = when (parentId) {
+                ID_RAIZ -> listOf(
+                    itemCarpeta(ID_FAVORITAS, getString(R.string.favorites)),
+                    itemCarpeta(ID_TODAS, getString(R.string.all_stations))
+                )
+                ID_FAVORITAS -> repository.getFavoritesList().map { itemEmisora(it) }
+                ID_TODAS -> repository.getAllStations().first().map { itemEmisora(it) }
+                else -> emptyList()
+            }
+            Log.d(TAG, "onGetChildren() $parentId → ${items.size} elementos")
+            LibraryResult.ofItemList(ImmutableList.copyOf(paginaDe(items, page, pageSize)), params)
+        }
+
+        /**
+         * Resuelve los elementos que llegan desde Android Auto (solo llevan el
+         * mediaId de la emisora) a elementos reproducibles con su URL y metadatos.
+         */
+        override fun onAddMediaItems(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            mediaItems: MutableList<MediaItem>
+        ): ListenableFuture<MutableList<MediaItem>> {
+            val futuro = SettableFuture.create<MutableList<MediaItem>>()
+            scope.launch {
+                val resueltos = mediaItems.mapNotNull { item ->
+                    if (item.localConfiguration != null) {
+                        item
+                    } else {
+                        val emisora = repository.getStation(item.mediaId)
+                        if (emisora == null) {
+                            Log.w(TAG, "onAddMediaItems(): emisora desconocida ${item.mediaId}")
+                            null
+                        } else {
+                            Log.d(TAG, "onAddMediaItems(): ${emisora.name}")
+                            radioPlayer.itemPara(emisora)
+                        }
+                    }
+                }.toMutableList()
+                futuro.set(resueltos)
+            }
+            return futuro
+        }
     }
 
     private companion object {
@@ -335,5 +499,14 @@ class RadioMediaSessionService : MediaSessionService() {
 
         /** Añadir la emisora en curso a favoritas (la notificación no permite quitarla). */
         const val ACCION_ANADIR_FAVORITA = "com.jjcampac.eter.ACTION_ANADIR_FAVORITA"
+
+        /** Id del elemento raíz de la biblioteca de Android Auto. */
+        const val ID_RAIZ = "eter:raiz"
+
+        /** Id de la carpeta de favoritas. */
+        const val ID_FAVORITAS = "eter:favoritas"
+
+        /** Id de la carpeta con todas las emisoras. */
+        const val ID_TODAS = "eter:todas"
     }
 }
