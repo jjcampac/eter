@@ -3,7 +3,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo. Notificación multimedia del sistema (tarjeta de la cortina con emisora, canción, estado y controles) ✅ compilada, pendiente de prueba en dispositivo. Android Auto (app de audio con biblioteca de emisoras) ✅ compilada, pendiente de prueba en coche/DHU.
+> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo. Notificación multimedia del sistema (tarjeta de la cortina con emisora, canción, estado y controles) ✅ compilada, pendiente de prueba en dispositivo. Android Auto (app de audio con biblioteca de emisoras) ✅ probada en coche.
 
 ---
 
@@ -186,7 +186,7 @@ Objetivo: que Eter aparezca en el coche como app de audio, sin desarrollar panta
 - [x] Si la reproducción arranca desde el coche, la app sincroniza la emisora en curso (UI, mini reproductor y notificación) y guarda la última URL
 - [x] Sin librerías nuevas: solo se usa `media3-session`, ya presente en el proyecto
 
-**Cómo probar:** instalar la app en el móvil y conectarla al coche (o usar el Desktop Head Unit). En el lanzador de Android Auto debe aparecer Eter: entrar en "Favoritas" o "Todas", reproducir una emisora y comprobar los controles del volante y de la pantalla. Si no aparece, activarla en Android Auto → Personalizar lanzador.
+**Validado en coche:** Nothing Phone (3a) + Android Auto. Eter aparece en el lanzador, navega por "Favoritas" y "Todas", reproduce la emisora elegida en la misma sesión (controles del volante y de la pantalla) y la app sincroniza la emisora en curso al volver al móvil. Para repetir la prueba: instalar la app, conectar con el coche y, si no aparece Eter, activarla en Android Auto → Personalizar lanzador.
 
 ---
 
@@ -201,7 +201,7 @@ Objetivo: que Eter aparezca en el coche como app de audio, sin desarrollar panta
 | 5 | Pulido y robustez | ✅ Completada |
 | Post-5 | Reordenamiento de Favoritas (drag & drop + accesibilidad) | ✅ Completada (probada en dispositivo) |
 | Post-5 | Notificación multimedia del sistema (tarjeta con emisora, canción, estado y controles) | ✅ Compilada (pendiente de prueba en dispositivo) |
-| Post-5 | Android Auto (app de audio: biblioteca de favoritas y todas las emisoras) | ✅ Compilada (pendiente de prueba en coche/DHU) |
+| Post-5 | Android Auto (app de audio: biblioteca de favoritas y todas las emisoras) | ✅ Completada (probada en coche) |
 
 ---
 

@@ -65,4 +65,4 @@ Dispositivo de pruebas: Nothing Phone (3a).
 - Fase 5: completada (aplicación base funcional probada en dispositivo).
 - Reordenamiento de Favoritas (drag & drop + accesibilidad): completado y probado en dispositivo.
 - Notificación multimedia del sistema (tarjeta de la cortina con logo, emisora, canción/estado, reproducir/pausar, flechas anterior/siguiente entre favoritas solo cuando existen y estrella que únicamente añade a favoritas): completado (build OK y tests OK, pendiente de prueba en dispositivo).
-- Android Auto (app de audio con `MediaLibraryService`: raíz → Favoritas/Todas → emisoras, reproducción en la misma sesión y sincronización de la emisora si arranca desde el coche): completado (build OK y tests OK, pendiente de prueba en coche/DHU).
+- Android Auto (app de audio con `MediaLibraryService`: raíz → Favoritas/Todas → emisoras, reproducción en la misma sesión y sincronización de la emisora si arranca desde el coche): completado, build OK, tests OK y probado en coche.
