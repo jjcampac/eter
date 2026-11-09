@@ -3,7 +3,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo. Notificación multimedia del sistema (tarjeta de la cortina con emisora, canción, estado y controles) ✅ compilada, pendiente de prueba en dispositivo. Android Auto (app de audio con biblioteca de emisoras) ✅ probada en coche.
+> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo. Notificación multimedia del sistema (tarjeta de la cortina con emisora, canción, estado y controles) ✅ compilada, pendiente de prueba en dispositivo. Android Auto (app de audio con biblioteca de emisoras) ✅ probada en coche. Build release (despliegue desde Android Studio, R8 y firma) ✅ corregido y probado en dispositivo.
 
 ---
 
@@ -202,6 +202,7 @@ Objetivo: que Eter aparezca en el coche como app de audio, sin desarrollar panta
 | Post-5 | Reordenamiento de Favoritas (drag & drop + accesibilidad) | ✅ Completada (probada en dispositivo) |
 | Post-5 | Notificación multimedia del sistema (tarjeta con emisora, canción, estado y controles) | ✅ Compilada (pendiente de prueba en dispositivo) |
 | Post-5 | Android Auto (app de audio: biblioteca de favoritas y todas las emisoras) | ✅ Completada (probada en coche) |
+| Post-5 | Build release: despliegue desde Android Studio (sin `.dm`) y R8 sin `packageScope` | ✅ Completada (probada en dispositivo) |
 
 ---
 
@@ -211,6 +212,7 @@ Objetivo: que Eter aparezca en el coche como app de audio, sin desarrollar panta
 - No se añaden librerías fuera de las indicadas sin consultarlo antes.
 - Las URLs de los streams pueden cambiar: la app debe permitir editarlas.
 - Si la app llegara a publicarse, comprobar que las emisoras permiten su retransmisión.
+- **Release:** la firma se lee de `keystore.properties` (no versionado; ver `keystore/eter-release.jks`). Si el fichero no existe, release se firma con la keystore de debug. No usar `optimization.packageScope` (R8 gradual, experimental, genera un dex inválido con `IllegalAccessError`) ni generar los `.dm` (`installation.enableBaselineProfile = false`): así Android Studio no falla con `INSTALL_BASELINE_PROFILE_FAILED`. El perfil de arranque sigue dentro del APK y lo aplica `androidx.profileinstaller` en el primer arranque.
 
 ---
 

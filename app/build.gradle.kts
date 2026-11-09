@@ -2,6 +2,8 @@
  * Autor: jjcampac
  * IA: cline
  */
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -11,6 +13,16 @@ plugins {
 /** Versión base de la app (sin sufijo de build). El sufijo "d"/"r" se añade
  *  en cada build type para distinguir debug de release. */
 val baseVersionName = "1.0.0"
+
+/** Credenciales de la keystore de release. El fichero no se versiona (contiene
+ *  contraseñas). Si no existe, la variante release se firma con la keystore de
+ *  debug para poder instalar desde Android Studio en el móvil de pruebas. */
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
+}
 
 android {
     namespace = "com.jjcampac.eter"
@@ -28,17 +40,55 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        // Solo se crea si hay credenciales locales (keystore.properties).
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             versionNameSuffix = "d"
         }
         release {
             versionNameSuffix = "r"
+            // Con keystore propia se usa esa firma; si no hay fichero de
+            // credenciales, se firma con la de debug para poder desplegar
+            // desde Android Studio en el móvil de pruebas.
+            signingConfig = signingConfigs.findByName("release")
+                ?: signingConfigs.getByName("debug")
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
+                // OJO: no usar `packageScope`. Con AGP 9.5 activa el modo "gradual R8"
+                // (android.r8.gradual.support, experimental) y genera un dex inválido:
+                // deja clases package-private accesibles desde otro paquete, lo que
+                // provoca IllegalAccessError al abrir la base de datos Room
+                // (kotlin.text.i extendida por wf2). Sin packageScope se usa el
+                // pipeline estándar de R8 (equivale a "**").
             }
         }
+    }
+
+    /**
+     * No generar los ficheros de metadatos de dex (.dm) junto al APK.
+     *
+     * Android Studio, al desplegar, comprueba justo después de instalar que el perfil
+     * de arranque (baseline profile) haya quedado aplicado: ejecuta `pm art dump` y
+     * exige ver "status=speed-profile". Si el .dm no se envía en esa instalación (o
+     * el sistema compila con el filtro "verify"), el despliegue falla con
+     * INSTALL_BASELINE_PROFILE_FAILED aunque la app se haya instalado bien.
+     *
+     * El perfil sigue dentro del APK (assets/dexopt/baseline.prof) y
+     * androidx.profileinstaller lo instala en el primer arranque de la app.
+     */
+    installation {
+        enableBaselineProfile = false
     }
 
     buildFeatures {
