@@ -18,6 +18,9 @@ val EterShapeButton = RoundedCornerShape(24.dp)  // circular aproximado para bot
 // Chips: esquinas de 20 dp
 val EterShapeChip = RoundedCornerShape(20.dp)
 
+// Icono de iniciales de la emisora: cuadrado con esquinas de 12 dp (mock-ups)
+val EterShapeInitials = RoundedCornerShape(12.dp)
+
 // Panel inferior: esquinas superiores de 28 dp
 val EterShapeBottomPanel = RoundedCornerShape(
     topStart = 28.dp,

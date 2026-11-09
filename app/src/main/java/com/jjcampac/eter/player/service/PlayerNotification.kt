@@ -8,12 +8,18 @@ import android.app.NotificationChannel
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.MainActivity
+import kotlin.math.max
+
+private const val TAG = "PlayerNotification"
 
 /** Canal de notificación para el reproductor (Android 8.0+). */
 const val NOTIFICATION_CHANNEL_ID = "com.jjcampac.eter.player"
@@ -55,14 +61,19 @@ fun ensureNotificationChannel(context: Context) {
 
 /**
  * Construye la notificación persistente del reproductor con controles de
- * play/pausa y siguiente/anterior (estos últimos sin efecto hasta la Fase 3,
- * cuando existan favoritas persistentes en Room).
+ * play/pausa y siguiente/anterior.
+ *
+ * Si el stream entrega carátula embebida ([artworkData]) se muestra como imagen
+ * grande (big picture). No se sustituye el icono de la emisora en las listas;
+ * esto solo afecta a la notificación. El artwork llega como bytes de Media3
+ * (`MediaMetadata.artworkData`), sin peticiones de red adicionales.
  */
 fun buildNotification(
     context: Context,
     station: Station?,
     status: PlaybackStatus,
-    metadataTitle: String?
+    metadataTitle: String?,
+    artworkData: ByteArray? = null
 ): android.app.Notification {
     val isPlaying = status == PlaybackStatus.PLAYING
 
@@ -145,5 +156,40 @@ fun buildNotification(
             )
         )
 
+    // Carátula embebida del stream: imagen grande + icono de estado (paso c).
+    // Decodificación acotada a 512 px por lado para no disparar la memoria.
+    if (artworkData != null) {
+        decodeArtwork(artworkData)?.let { artwork ->
+            builder
+                .setLargeIcon(artwork)
+                .setStyle(
+                    NotificationCompat.BigPictureStyle()
+                        .bigPicture(artwork)
+                        .bigLargeIcon(null as Bitmap?)
+                )
+        }
+    }
+
     return builder.build()
+}
+
+/**
+ * Decodifica la carátula del stream acotando el tamaño (muestreo) para evitar
+ * consumir demasiada memoria o ralentizar el hilo que reconstruye la
+ * notificación (que es el principal). Devuelve `null` si no se puede decodificar.
+ */
+private fun decodeArtwork(data: ByteArray): Bitmap? = try {
+    // Primer pase: dimensiones reales sin decodificar la imagen completa.
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    BitmapFactory.decodeByteArray(data, 0, data.size, bounds)
+    val maxSide = max(bounds.outWidth, bounds.outHeight)
+    var sample = 1
+    while (maxSide / (sample * 2) >= 512) sample *= 2
+
+    // Segundo pase: imagen real con muestreo.
+    val options = BitmapFactory.Options().apply { inSampleSize = sample }
+    BitmapFactory.decodeByteArray(data, 0, data.size, options)
+} catch (e: Exception) {
+    Log.w(TAG, "No se pudo decodificar la carátula: ${e.message}")
+    null
 }

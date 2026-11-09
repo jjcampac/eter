@@ -97,7 +97,16 @@ class RadioMediaSessionService : MediaSessionService() {
         val currentState = radioPlayer.state.value
         if (currentState.currentStation != null) {
             updateNotification(currentState)
-            startForeground(NOTIFICATION_ID, buildNotification(this, currentState.currentStation, currentState.status, currentState.metadataTitle))
+            startForeground(
+                NOTIFICATION_ID,
+                buildNotification(
+                    this,
+                    currentState.currentStation,
+                    currentState.status,
+                    currentState.metadataTitle,
+                    currentState.streamArtworkData
+                )
+            )
         } else {
             stopForeground(true)
         }
@@ -160,7 +169,8 @@ class RadioMediaSessionService : MediaSessionService() {
             this,
             state.currentStation,
             state.status,
-            state.metadataTitle
+            state.metadataTitle,
+            state.streamArtworkData
         )
         notificationManager?.notify(NOTIFICATION_ID, notification)
 

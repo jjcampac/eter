@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,12 +26,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,11 +35,12 @@ import androidx.compose.ui.unit.dp
 import android.util.Log
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-import com.jjcampac.eter.ui.components.AnimatedWavesIcon
 import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.player.SleepTimer
+import com.jjcampac.eter.ui.components.CaratulaStream
+import com.jjcampac.eter.ui.theme.EterCoverSize
 
 private const val TAG = "PlayerScreen"
 
@@ -97,7 +93,18 @@ fun PlayerScreen(
                 .padding(horizontal = 24.dp, vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AnimatedWavesIcon(tint = MaterialTheme.colorScheme.primary)
+            // Carátula del reproductor: la del stream si llega en los metadatos (paso c);
+            // si no, icono de la emisora con su cadena de respaldo. Decorativa: el nombre
+            // de la emisora está en el texto contiguo.
+            CaratulaStream(
+                nombre = station.name,
+                imageUrl = station.imageUrl,
+                streamArtworkData = playerState.streamArtworkData,
+                streamArtworkUri = playerState.streamArtworkUri,
+                size = EterCoverSize
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Segunda línea del mini reproductor: el título de la canción solo se
             // muestra mientras la emisora está en reproducción. En pausa, conectando,

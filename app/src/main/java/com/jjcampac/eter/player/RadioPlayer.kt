@@ -5,11 +5,13 @@
 package com.jjcampac.eter.player
 
 import android.content.Context
+import android.net.Uri
 import android.os.SystemClock
 import android.util.Log
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -38,16 +40,22 @@ enum class PlaybackStatus { IDLE, LOADING, PLAYING, PAUSED, ERROR }
 /**
  * Estado observable del reproductor.
  *
- * @param currentStation Emisora cargada en el reproductor.
- * @param errorMessage   Mensaje de error en español (nulo si no hay error).
- * @param metadataTitle  Título de canción recibido vía metadatos ICY (nulo si no hay).
+ * @param currentStation   Emisora cargada en el reproductor.
+ * @param errorMessage     Mensaje de error en español (nulo si no hay error).
+ * @param metadataTitle    Título de canción recibido vía metadatos ICY (nulo si no hay).
+ * @param streamArtworkData Carátula incrustada en el stream (ID3 APIC, etc.) como bytes,
+ *                          recibida de `MediaMetadata.artworkData` de Media3.
+ * @param streamArtworkUri  Carátula del stream como URI (MediaMetadata.artworkUri), si la
+ *                          entrega el contenedor. Poco habitual en directo.
  */
 data class PlayerState(
     val status: PlaybackStatus = PlaybackStatus.IDLE,
     val currentStation: Station? = null,
     val errorMessage: String? = null,
     val metadataTitle: String? = null,
-    val volume: Float = 1.0f
+    val volume: Float = 1.0f,
+    val streamArtworkData: ByteArray? = null,
+    val streamArtworkUri: Uri? = null
 )
 
 /**
@@ -165,6 +173,22 @@ class RadioPlayer(context: Context) {
                     if (clean != null) {
                         _state.update { it.copy(metadataTitle = clean) }
                         return
+                    }
+                }
+            }
+
+            // Carátula incrustada en el stream (Media3: MediaMetadata de la pista).
+            // Solo se guarda cuando el contenedor entrega imagen (ID3 APIC, etc.).
+            override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+                val artData = mediaMetadata.artworkData
+                val artUri = mediaMetadata.artworkUri
+                if (artData != null || artUri != null) {
+                    Log.d(
+                        TAG,
+                        "Carátula de stream recibida data=${artData?.size} bytes uri=$artUri"
+                    )
+                    _state.update {
+                        it.copy(streamArtworkData = artData, streamArtworkUri = artUri)
                     }
                 }
             }
