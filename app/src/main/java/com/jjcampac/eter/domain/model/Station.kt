@@ -21,7 +21,9 @@ data class Station(
     val isFavorite: Boolean = false,
     val isCustom: Boolean = false,
     /** URL de la imagen corporativa (logo) de la emisora, si la aporta la fuente. */
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    /** Orden de visualización en listas ordenables (favoritas). */
+    val sortOrder: Int = 0
 ) {
     /** Etiqueta secundaria mostrada en las listas (país · género). */
     val subtitle: String

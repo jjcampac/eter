@@ -17,6 +17,7 @@ val EterOnBackgroundDark = Color(0xFFF2F0EA)
 val EterSurfaceDark = Color(0xFF1E2229)
 val EterOnSurfaceDark = Color(0xFFF2F0EA)
 val EterSurfaceInputDark = Color(0xFF1C2027)
+val EterSurfaceCardDark = Color(0xFF1F2126)
 val EterSurfaceVariantDark = Color(0xFF232730)
 val EterOnSurfaceVariantDark = Color(0xFFA8AAB0)
 val EterOutlineDark = Color(0xFF9AA0A6)  // borde de selección: gris claro

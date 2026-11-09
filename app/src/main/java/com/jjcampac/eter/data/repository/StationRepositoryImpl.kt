@@ -48,6 +48,14 @@ class StationRepositoryImpl(
     override suspend fun getFavoritesList(): List<Station> =
         dao.getFavorites().map { it.toDomain() }
 
+    override suspend fun reorderFavorites(orderedIds: List<String>) {
+        orderedIds.forEachIndexed { index, id ->
+            dao.updateSortOrder(id, index)
+        }
+    }
+
+    override suspend fun nextFavoriteSortOrder(): Int = dao.nextSortOrder()
+
     override suspend fun searchRemote(query: String, country: String, genre: String?): List<Station> =
         remote?.searchStations(query, country, genre) ?: emptyList()
 }
@@ -61,7 +69,8 @@ fun StationEntity.toDomain(): Station = Station(
     genre = genre,
     isFavorite = isFavorite,
     isCustom = isCustom,
-    imageUrl = imageUrl
+    imageUrl = imageUrl,
+    sortOrder = sortOrder
 )
 
 /** Mapeo de modelo de dominio a entidad Room. */
@@ -73,5 +82,6 @@ fun Station.toEntity(): StationEntity = StationEntity(
     genre = genre,
     isFavorite = isFavorite,
     isCustom = isCustom,
-    imageUrl = imageUrl
+    imageUrl = imageUrl,
+    sortOrder = sortOrder
 )

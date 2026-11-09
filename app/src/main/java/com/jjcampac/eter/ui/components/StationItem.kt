@@ -44,6 +44,8 @@ import coil3.compose.rememberAsyncImagePainter
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.ui.theme.EterOutlineColor
 import com.jjcampac.eter.ui.theme.EterShapeCard
+import com.jjcampac.eter.ui.theme.EterSurfaceCardDark
+import com.jjcampac.eter.ui.theme.LocalEterDarkTheme
 
 /**
  * Fila de una emisora en las listas de la app.
@@ -74,8 +76,9 @@ fun StationItem(
     // El fondo de la tarjeta es SIEMPRE el mismo (surface), tanto para la emisora
     // actual/en reproducción como para el resto. La selección solo se remarca con
     // el borde (EterOutlineColor), que se atenúa en el tema oscuro para no brillar.
+    // Usar color de tarjeta específico para tema oscuro: #1f2126
     val hasBorder = isCurrent || isPlaying
-    val cardColor = MaterialTheme.colorScheme.surface
+    val cardColor = if (LocalEterDarkTheme.current) EterSurfaceCardDark else MaterialTheme.colorScheme.surface
 
     Surface(
         modifier = modifier.fillMaxWidth(),

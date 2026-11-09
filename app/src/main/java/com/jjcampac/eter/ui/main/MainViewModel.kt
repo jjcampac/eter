@@ -138,7 +138,9 @@ class MainViewModel(
             } else {
                 // Las emisoras de Internet no están en Room: se guardan al marcarlas
                 // como favoritas (upsert) y quedan accesibles sin conexión.
-                repository.addStation(station.copy(isFavorite = true))
+                // Se asigna sortOrder = siguiente orden disponible para que aparezca al final.
+                val nextOrder = repository.nextFavoriteSortOrder()
+                repository.addStation(station.copy(isFavorite = true, sortOrder = nextOrder))
             }
         }
     }
@@ -146,6 +148,13 @@ class MainViewModel(
     fun deleteStation(station: Station) {
         viewModelScope.launch {
             repository.deleteStation(station)
+        }
+    }
+
+    /** Reordena las favoritas según la nueva secuencia de ids. */
+    fun reorderFavorites(orderedIds: List<String>) {
+        viewModelScope.launch {
+            repository.reorderFavorites(orderedIds)
         }
     }
 

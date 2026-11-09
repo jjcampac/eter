@@ -19,7 +19,7 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.9.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -79,6 +79,8 @@ dependencies {
     // Carga de imágenes (Coil 3 + red OkHttp) — logos de emisoras
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    // Listas reordenables (drag & drop en Favoritas)
+    implementation(libs.reorderable)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

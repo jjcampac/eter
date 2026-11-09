@@ -21,5 +21,7 @@ data class StationEntity(
     val isFavorite: Boolean = false,
     val isCustom: Boolean = false,
     /** URL de la imagen corporativa (logo) de la emisora. */
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    /** Orden de visualización en listas ordenables (favoritas). */
+    val sortOrder: Int = 0
 )

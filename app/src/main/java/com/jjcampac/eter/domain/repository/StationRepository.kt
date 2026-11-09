@@ -36,6 +36,15 @@ interface StationRepository {
     suspend fun getFavoritesList(): List<Station>
 
     /**
+     * Reordena las favoritas según la lista de ids proporcionada.
+     * Cada emisora recibe un sortOrder según su posición en la lista.
+     */
+    suspend fun reorderFavorites(orderedIds: List<String>)
+
+    /** Siguiente orden disponible para una nueva favorita (se añade al final). */
+    suspend fun nextFavoriteSortOrder(): Int
+
+    /**
      * Busca emisoras en la API pública de Radio Browser.
      * Devuelve lista vacía si el repositorio no tiene fuente remota configurada.
      *

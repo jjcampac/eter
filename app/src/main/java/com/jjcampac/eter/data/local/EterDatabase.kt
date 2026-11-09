@@ -16,7 +16,7 @@ import com.jjcampac.eter.data.local.entity.StationEntity
 /**
  * Base de datos Room de la aplicación (emisoras y favoritas).
  */
-@Database(entities = [StationEntity::class], version = 2, exportSchema = false)
+@Database(entities = [StationEntity::class], version = 3, exportSchema = false)
 abstract class EterDatabase : RoomDatabase() {
 
     abstract fun stationDao(): StationDao
@@ -32,6 +32,13 @@ abstract class EterDatabase : RoomDatabase() {
             }
         }
 
+        /** v2 → v3: añade la columna `sortOrder` para ordenar favoritas manualmente. */
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE stations ADD COLUMN sortOrder INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun getDatabase(context: Context): EterDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -39,7 +46,7 @@ abstract class EterDatabase : RoomDatabase() {
                     EterDatabase::class.java,
                     "eter_database"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                 INSTANCE = instance
                 instance
