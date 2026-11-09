@@ -15,6 +15,7 @@ import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.player.PlayerState
 import com.jjcampac.eter.player.RadioPlayer
+import com.jjcampac.eter.player.SleepTimer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -43,6 +44,7 @@ class RadioMediaSessionService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
     private lateinit var radioPlayer: RadioPlayer
+    private lateinit var sleepTimer: SleepTimer
     private var notificationManager: android.app.NotificationManager? = null
     private val job = Job()
     private val scope = CoroutineScope(job + Dispatchers.Main.immediate)
@@ -52,6 +54,7 @@ class RadioMediaSessionService : MediaSessionService() {
         Log.d(TAG, "onCreate()")
         val app = application as EterApplication
         radioPlayer = app.getRadioPlayer()
+        sleepTimer = app.getSleepTimer()
         val player = radioPlayer.exoPlayer
         mediaSession = MediaSession.Builder(this, player).build()
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
@@ -62,6 +65,16 @@ class RadioMediaSessionService : MediaSessionService() {
             radioPlayer.state.collect { state ->
                 Log.d(TAG, "state collected: status=${state.status} station=${state.currentStation?.name} metadata=${state.metadataTitle}")
                 updateNotification(state)
+            }
+        }
+
+        // Atenuación del volumen del temporizador para dormir: el volumen fluctúa
+        // (1.0 al inicio → 0.0 al final) y se aplica en tiempo real al ExoPlayer,
+        // también con la pantalla apagada mientras la notificación está activa.
+        scope.launch {
+            sleepTimer.volume.collect { vol ->
+                Log.d(TAG, "volumen del temporizador: $vol")
+                radioPlayer.setVolume(vol)
             }
         }
     }

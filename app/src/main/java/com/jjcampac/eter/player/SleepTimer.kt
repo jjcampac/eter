@@ -17,9 +17,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -36,10 +38,11 @@ private const val TAG = "SleepTimer"
  */
 class SleepTimer(context: Context) {
 
-    /** Estado observable por la UI (si está activo y tiempo restante). */
+    /** Estado observable por la UI (si está activo, tiempo restante y volumen). */
     data class State(
         val active: Boolean = false,
-        val remainingMillis: Long = 0L
+        val remainingMillis: Long = 0L,
+        val volume: Float = 1.0f
     )
 
     private val appContext = context.applicationContext
@@ -49,6 +52,10 @@ class SleepTimer(context: Context) {
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
 
+    /** Flujo de solo lectura del volumen actual (0.0 a 1.0). */
+    val volume: Flow<Float>
+        get() = _state.map { it.volume }
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var countdownJob: Job? = null
     private var endElapsedMs = 0L
@@ -56,26 +63,39 @@ class SleepTimer(context: Context) {
     /** Minutos elegidos en Ajustes (0 = desactivado), persistidos en prefs. */
     fun selectedMinutes(): Int = prefs.getInt(PREF_SLEEP_MINUTES, UNSELECTED)
 
-    /** Inicia (o reinicia) el temporizador con `minutes` minutos. */
-    fun start(minutes: Int) {
+    /** Inicia (o reinicia) el temporizador con `minutes` minutos (UI / Ajustes). */
+    fun start(minutes: Int) = startForMillis(minutes * 60_000L, DEFAULT_FADE_MS)
+
+    /** Inicia el temporizador con `totalMillis` milisegundos de duración y una
+     *  ventana de atenuación de volumen de `fadeMillis` al final. Útil para
+     *  pruebas rápidas (p. ej. 30 segundos) y usado por la UI con minutos. */
+    fun startForMillis(totalMillis: Long, fadeMillis: Long) {
         stop()
-        if (minutes <= 0) return
+        if (totalMillis <= 0L) return
+        val minutes = (totalMillis / 60_000L).toInt()
         prefs.edit().putInt(PREF_SLEEP_MINUTES, minutes).apply()
-        endElapsedMs = SystemClock.elapsedRealtime() + minutes * 60_000L
-        _state.value = State(active = true, remainingMillis = minutes * 60_000L)
-        Log.d(TAG, "start($minutes min)")
+        endElapsedMs = SystemClock.elapsedRealtime() + totalMillis
+        _state.value = State(active = true, remainingMillis = totalMillis, volume = 1.0f)
+        Log.d(TAG, "startForMillis($totalMillis ms, fade=$fadeMillis ms)")
         countdownJob = scope.launch {
             while (isActive) {
                 delay(TICK_MS)
                 val remaining = endElapsedMs - SystemClock.elapsedRealtime()
                 if (remaining <= 0L) {
-                    Log.d(TAG, "Tiempo agotado: apagando la reproducción.")
-                    _state.value = State(active = false, remainingMillis = 0L)
+                    Log.d(TAG, "Tiempo agotado: pausando reproducción con volumen atenuado.")
+                    _state.value = State(active = false, remainingMillis = 0L, volume = 0.0f)
                     prefs.edit().remove(PREF_SLEEP_MINUTES).apply()
                     notifyExpired()
                     break
                 }
-                _state.value = State(active = true, remainingMillis = remaining)
+                // Atenuar el volumen de forma gradual de 1.0 a 0.0 durante la
+                // ventana final de `fadeMillis` para un apagado suave.
+                var volumeFactor = 1.0f
+                if (remaining <= fadeMillis && fadeMillis > 0L) {
+                    val progress = (fadeMillis - remaining).toFloat() / fadeMillis.toFloat()
+                    volumeFactor = 1.0f - progress.coerceIn(0.0f, 1.0f)
+                }
+                _state.value = State(active = true, remainingMillis = remaining, volume = volumeFactor)
             }
         }
     }
@@ -85,7 +105,7 @@ class SleepTimer(context: Context) {
         countdownJob?.cancel()
         countdownJob = null
         prefs.edit().remove(PREF_SLEEP_MINUTES).apply()
-        _state.value = State(active = false, remainingMillis = 0L)
+        _state.value = State(active = false, remainingMillis = 0L, volume = 1.0f)
     }
 
     /** Pide al servicio de medios que pause y quite la notificación. */
@@ -104,5 +124,8 @@ class SleepTimer(context: Context) {
         const val PREF_SLEEP_MINUTES = "pref_sleep_minutes"
         const val UNSELECTED = 0
         const val TICK_MS = 1_000L
+
+        /** Ventana de atenuación del volumen (5 min) al final del temporizador. */
+        const val DEFAULT_FADE_MS = 5 * 60_000L
     }
 }

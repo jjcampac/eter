@@ -46,7 +46,8 @@ data class PlayerState(
     val status: PlaybackStatus = PlaybackStatus.IDLE,
     val currentStation: Station? = null,
     val errorMessage: String? = null,
-    val metadataTitle: String? = null
+    val metadataTitle: String? = null,
+    val volume: Float = 1.0f
 )
 
 /**
@@ -72,6 +73,23 @@ class RadioPlayer(context: Context) {
 
     private val _state = MutableStateFlow(PlayerState())
     val state: StateFlow<PlayerState> = _state.asStateFlow()
+
+    /** Flujo de solo lectura del volumen actual (0.0 a 1.0). */
+    private val volume = MutableStateFlow(1.0f)
+    val volumeFlow: StateFlow<Float> = volume.asStateFlow()
+
+    /** Aplica el volumen actual al ExoPlayer. */
+    private fun applyVolume() {
+        val vol = volume.value
+        exoPlayer.setVolume(vol)
+        Log.d(TAG, "applyVolume($vol)")
+    }
+
+    /** Establece el volumen del reproductor (0.0 a 1.0). */
+    fun setVolume(vol: Float) {
+        volume.value = vol.coerceIn(0.0f, 1.0f)
+        applyVolume()
+    }
 
     // --- Reconexión automática controlada ---
     private val reconnectScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -151,6 +169,9 @@ class RadioPlayer(context: Context) {
                 }
             }
         })
+
+        // Aplicar el volumen inicial (1.0) al reproductor.
+        applyVolume()
     }
 
     /** Carga una emisora y comienza la reproducción. */
