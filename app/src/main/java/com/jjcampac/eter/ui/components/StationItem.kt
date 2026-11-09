@@ -4,6 +4,7 @@
  */
 package com.jjcampac.eter.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -71,7 +72,12 @@ fun StationItem(
     val cardColor = if (LocalEterDarkTheme.current) EterSurfaceCardDark else EterSurfaceCardLight
 
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        // Toda la fila es pulsable: selecciona y reproduce la emisora (y hace
+        // aparecer el mini reproductor). Los IconButton de la derecha consumen
+        // sus propios toques, así que no interfieren.
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = EterShapeCard,
         color = cardColor,
         contentColor = MaterialTheme.colorScheme.onSurface,

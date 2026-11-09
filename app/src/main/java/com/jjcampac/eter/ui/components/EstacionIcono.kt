@@ -48,6 +48,8 @@ import com.jjcampac.eter.ui.theme.EterShapeInitials
  * @param nombre   Nombre de la emisora, del que se derivan las iniciales de respaldo.
  * @param imageUrl URL del logo de la emisora (`null` o vacía si no tiene).
  * @param size     Lado del cuadrado del icono (los tamaños cambian por contexto de uso).
+ * @param shape    Forma del cuadrado. Por defecto 12 dp (listas); la carátula grande
+ *                 del reproductor usa esquinas más redondeadas.
  */
 @Composable
 fun EstacionIcono(
@@ -55,9 +57,9 @@ fun EstacionIcono(
     imageUrl: String?,
     size: Dp,
     modifier: Modifier = Modifier,
-    contentDescription: String? = null
+    contentDescription: String? = null,
+    shape: Shape = EterShapeInitials
 ) {
-    val shape: Shape = EterShapeInitials
     val iniciales = remember(nombre) { calcularIniciales(nombre) }
     val fontSize = (size.value * 0.4f).sp
     val hayUrl = !imageUrl.isNullOrBlank()

@@ -128,11 +128,23 @@ class MainActivity : ComponentActivity() {
         // Estado de la pantalla principal: permite localizar emisoras de Internet
         // (Radio Browser) que aún no están guardadas en Room.
         val mainUiState by mainViewModel.uiState.collectAsStateWithLifecycle()
+        // Favoritas guardadas: habilitan los saltos anterior/siguiente del reproductor.
+        val favorites by mainViewModel.favorites.collectAsStateWithLifecycle()
         val currentStation = remember(currentStationId, stations, mainUiState.internetStations) {
             stations.firstOrNull { it.id == currentStationId }
                 ?: mainUiState.internetStations.firstOrNull { it.id == currentStationId }
         }
         val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+
+        // Si el reproductor cambia de emisora (saltos anterior/siguiente o controles
+        // del sistema) mientras el detalle está abierto, se actualiza el id para que
+        // la pantalla siga mostrando la emisora que realmente suena.
+        LaunchedEffect(playerState.currentStation?.id) {
+            val playingId = playerState.currentStation?.id
+            if (currentStationId != null && playingId != null && currentStationId != playingId) {
+                currentStationId = playingId
+            }
+        }
 
         // Mostrar aviso de error de conexión en cualquier pantalla (Fase 5).
         // Se muestra una sola vez por mensaje de error concreto para no saturar.
@@ -295,9 +307,14 @@ class MainActivity : ComponentActivity() {
                 }
             }
         } else {
+            val station = currentStation
+            // Posición de la emisora que suena dentro de las favoritas: permite
+            // deshabilitar "anterior" en la primera y "siguiente" en la última.
+            val currentFavoriteIndex =
+                favorites.indexOfFirst { it.url == playerState.currentStation?.url }
             BackHandler(onBack = { currentStationId = null })
             PlayerScreen(
-                station = currentStation,
+                station = station,
                 playerViewModel = playerViewModel,
                 sleepTimer = sleepTimer,
                 onBack = {
@@ -306,7 +323,13 @@ class MainActivity : ComponentActivity() {
                     // mini reproductor. ExoPlayer comparte el proceso y Android
                     // lo mataría a los ~30s si dejáramos de estar en primer plano.
                     currentStationId = null
-                }
+                },
+                onToggleFavorite = { favoriteStation ->
+                    mainViewModel.toggleFavorite(favoriteStation)
+                },
+                canSkipPrevious = favorites.isNotEmpty() && currentFavoriteIndex != 0,
+                canSkipNext = favorites.isNotEmpty() &&
+                    currentFavoriteIndex != favorites.lastIndex
             )
         }
 

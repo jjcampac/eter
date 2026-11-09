@@ -4,7 +4,6 @@
  */
 package com.jjcampac.eter.ui.main
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -203,11 +202,6 @@ fun FavoritesScreen(
                                         )
                                     }
                                 }
-                                .clickable(
-                                    onClick = {
-                                        if (!itemIsDragging) onStationClick(station)
-                                    }
-                                )
                         ) {
                             StationItem(
                                 station = station,
@@ -216,7 +210,9 @@ fun FavoritesScreen(
                                     playerState.currentStation?.url == station.url,
                                 isPaused = playerState.currentStation?.url == station.url &&
                                     playerState.status == PlaybackStatus.PAUSED,
-                                onClick = { },
+                                onClick = {
+                                    if (!itemIsDragging) onStationClick(station)
+                                },
                                 onFavoriteToggle = { onToggleFavorite(station) },
                                 modifier = Modifier
                             )

@@ -37,6 +37,7 @@ import com.jjcampac.eter.ui.theme.EterShapeInitials
  *
  * @param streamArtworkData Carátula del stream como bytes (`MediaMetadata.artworkData`).
  * @param streamArtworkUri  Carátula del stream como URI (`MediaMetadata.artworkUri`).
+ * @param shape             Forma de la carátula; por defecto esquinas de 12 dp.
  */
 @Composable
 fun CaratulaStream(
@@ -46,7 +47,8 @@ fun CaratulaStream(
     streamArtworkUri: Uri?,
     size: Dp,
     modifier: Modifier = Modifier,
-    contentDescription: String? = null
+    contentDescription: String? = null,
+    shape: Shape = EterShapeInitials
 ) {
     val artworkBytes = streamArtworkData?.takeIf { it.isNotEmpty() }
     val hayCaratula = artworkBytes != null || streamArtworkUri != null
@@ -58,13 +60,13 @@ fun CaratulaStream(
             imageUrl = imageUrl,
             size = size,
             modifier = modifier,
-            contentDescription = contentDescription
+            contentDescription = contentDescription,
+            shape = shape
         )
         return
     }
 
-    val shape: Shape = EterShapeInitials
-    // Mismo aspecto caja que el icono de emisora: fondo surfaceVariant y esquinas 12 dp.
+    // Mismo aspecto de caja que el icono de emisora: fondo surfaceVariant + la forma dada.
     Box(
         modifier = modifier
             .size(size)
@@ -87,7 +89,8 @@ fun CaratulaStream(
                     nombre = nombre,
                     imageUrl = imageUrl,
                     size = size,
-                    contentDescription = contentDescription
+                    contentDescription = contentDescription,
+                    shape = shape
                 )
             }
         }
