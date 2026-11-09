@@ -47,7 +47,8 @@
 
     <!-- Einstellungen -->
     <string name="settings_about">Über Simple Radio</string>
-    <string name="settings_about_desc">Version 0.9.0\nWerbefreie Internet-Radio-App ohne Konten.\nDu verbindest dich direkt mit den Streams der Sender.</string>
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_desc">Werbefreie Internet-Radio-App ohne Konten.\nDu verbindest dich direkt mit den Streams der Sender.</string>
     <string name="settings_theme">App-Design</string>
     <string name="settings_theme_desc">Folgt der Systemeinstellung</string>
     <string name="settings_language">Sprache</string>

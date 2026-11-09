@@ -8,6 +8,10 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+/** Versión base de la app (sin sufijo de build). El sufijo "d"/"r" se añade
+ *  en cada build type para distinguir debug de release. */
+val baseVersionName = "0.9.1"
+
 android {
     namespace = "com.jjcampac.eter"
     compileSdk {
@@ -19,13 +23,17 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 2
-        versionName = "0.9.1"
+        versionName = baseVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            versionNameSuffix = "d"
+        }
         release {
+            versionNameSuffix = "r"
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
@@ -35,6 +43,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {

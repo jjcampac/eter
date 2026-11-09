@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jjcampac.eter.BuildConfig
 import com.jjcampac.eter.R
 import com.jjcampac.eter.di.AppModule
 import com.jjcampac.eter.player.SleepTimer
@@ -322,7 +323,15 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 )
             },
             headlineContent = { Text(stringResource(R.string.settings_about)) },
-            supportingContent = { Text(stringResource(R.string.settings_about_desc)) }
+            supportingContent = {
+                // La versión se obtiene del gradle (BuildConfig) para que "Acerca de"
+                // siempre coincida con el versionName, combinada con la descripción
+                // traducida de la app.
+                Text(
+                    stringResource(R.string.settings_about_version, BuildConfig.VERSION_NAME) +
+                        "\n" + stringResource(R.string.settings_about_desc)
+                )
+            }
         )
     }
 }
