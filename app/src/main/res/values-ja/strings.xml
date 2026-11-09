@@ -47,7 +47,7 @@
 
     <!-- 設定 -->
     <string name="settings_about">Simple Radioについて</string>
-    <string name="settings_about_desc">広告なし・アカウント不要のインターネットラジオアプリです。\n放送局のストリームに直接接続します。</string>
+    <string name="settings_about_desc">Version 0.9.0\n広告なし・アカウント不要のインターネットラジオアプリです。\n放送局のストリームに直接接続します。</string>
     <string name="settings_theme">アプリのテーマ</string>
     <string name="settings_theme_desc">システム設定に従う</string>
     <string name="settings_language">言語</string>

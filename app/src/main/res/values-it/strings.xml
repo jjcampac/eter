@@ -47,7 +47,7 @@
 
     <!-- Impostazioni -->
     <string name="settings_about">Informazioni su Simple Radio</string>
-    <string name="settings_about_desc">App radio su internet, senza pubblicità e senza account.\nTi connetti direttamente ai flussi delle stazioni.</string>
+    <string name="settings_about_desc">Version 0.9.0\nApp radio su internet, senza pubblicità e senza account.\nTi connetti direttamente ai flussi delle stazioni.</string>
     <string name="settings_theme">Tema dell\'app</string>
     <string name="settings_theme_desc">Segue la preferenza del sistema</string>
     <string name="settings_language">Lingua</string>

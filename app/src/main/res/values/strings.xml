@@ -47,8 +47,7 @@
 
     <!-- Ajustes -->
     <string name="settings_about">Acerca de Simple Radio</string>
-    <string name="settings_about_desc">App de radio por internet, sin publicidad y sin cuentas. Versión 0.9.0.
-Te conectas directamente a los streams de las emisoras.</string>
+    <string name="settings_about_desc">Versión 0.9.0\nAplicación de radio por internet, sin publicidad y sin cuentas. \nTe conectas directamente a los streams de las emisoras.</string>
     <string name="settings_theme">Tema de la app</string>
     <string name="settings_theme_desc">Sigue la preferencia del sistema</string>
     <string name="settings_language">Idioma</string>
