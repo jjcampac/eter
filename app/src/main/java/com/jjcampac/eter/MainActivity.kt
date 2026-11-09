@@ -167,6 +167,7 @@ class MainActivity : ComponentActivity() {
         // Al pulsar una tarjeta se reproduce directamente (sin abrir detalle).
         val playStation: (com.jjcampac.eter.domain.model.Station) -> Unit = { station ->
             playerViewModel.play(station)
+            startRadioService()
         }
         val editStation: (com.jjcampac.eter.domain.model.Station) -> Unit = { station ->
             editingStationId = station.id
