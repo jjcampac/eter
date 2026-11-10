@@ -325,10 +325,11 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             headlineContent = { Text(stringResource(R.string.settings_about)) },
             supportingContent = {
                 // La versión se obtiene del gradle (BuildConfig) para que "Acerca de"
-                // siempre coincida con el versionName, combinada con la descripción
-                // traducida de la app.
+                // siempre coincida con el versionName. Debajo va la autoría de la app
+                // (texto fijo, no traducible) y, por último, la descripción traducida.
                 Text(
                     stringResource(R.string.settings_about_version, BuildConfig.VERSION_NAME) +
+                        "\n" + stringResource(R.string.settings_about_author) +
                         "\n" + stringResource(R.string.settings_about_desc)
                 )
             }
