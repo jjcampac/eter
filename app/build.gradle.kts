@@ -65,6 +65,12 @@ android {
                 ?: signingConfigs.getByName("debug")
             optimization {
                 enable = true
+                // Reglas propias de R8 (imprescindibles): ver app/proguard-rules.pro.
+                // Solo se conservan las clases del modelo de Radio Browser, que
+                // Retrofit y Gson leen por reflexión.
+                keepRules {
+                    files.add(file("proguard-rules.pro"))
+                }
                 // OJO: no usar `packageScope`. Con AGP 9.5 activa el modo "gradual R8"
                 // (android.r8.gradual.support, experimental) y genera un dex inválido:
                 // deja clases package-private accesibles desde otro paquete, lo que

@@ -81,7 +81,13 @@ class RadioBrowserDataSource {
                 if (port != null && port > 0) "$scheme://$host:$port/" else "$scheme://$host/"
             } ?: FALLBACK_MIRROR
         } catch (e: Exception) {
-            Log.w(TAG, "No se pudo resolver mirrors (${e.message}). Usando fallback.")
+            // Diagnóstico: se incluye la excepción completa (clase y stacktrace) para
+            // poder distinguir red, HTTP y conversión también al resolver el mirror.
+            Log.w(
+                TAG,
+                "No se pudo resolver mirrors (${e.javaClass.name}: ${e.message}). Usando fallback.",
+                e
+            )
             FALLBACK_MIRROR
         }
     }
