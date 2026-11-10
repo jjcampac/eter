@@ -326,12 +326,20 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             supportingContent = {
                 // La versión se obtiene del gradle (BuildConfig) para que "Acerca de"
                 // siempre coincida con el versionName. Debajo va la autoría de la app
-                // (texto fijo, no traducible) y, por último, la descripción traducida.
-                Text(
-                    stringResource(R.string.settings_about_version, BuildConfig.VERSION_NAME) +
-                        "\n" + stringResource(R.string.settings_about_author) +
-                        "\n" + stringResource(R.string.settings_about_desc)
-                )
+                // (texto fijo, no traducible), después una línea separadora y, por
+                // último, la descripción traducida.
+                Column {
+                    Text(
+                        stringResource(R.string.settings_about_version, BuildConfig.VERSION_NAME) +
+                                "\n" + stringResource(R.string.settings_about_author)
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    Text(stringResource(R.string.settings_about_desc))
+                }
             }
         )
     }
