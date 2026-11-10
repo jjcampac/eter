@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -57,7 +56,6 @@ fun StationItem(
     onClick: () -> Unit,
     onFavoriteToggle: (() -> Unit)? = null,
     onEdit: (() -> Unit)? = null,
-    onDelete: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     // Las tarjetas usan el MISMO componente y tono que el mini reproductor (MiniPlayer.kt:
@@ -143,7 +141,7 @@ fun StationItem(
 
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
 
-            // Acciones a la derecha (favorita, editar, borrar)
+            // Acciones a la derecha (favorita y editar)
             Row(
                 modifier = Modifier.padding(start = 4.dp),
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
@@ -174,15 +172,6 @@ fun StationItem(
                         Icon(
                             Icons.Filled.Edit,
                             contentDescription = "Editar",
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-                }
-                if (station.isCustom && onDelete != null) {
-                    IconButton(onClick = onDelete) {
-                        Icon(
-                            Icons.Filled.Delete,
-                            contentDescription = "Borrar",
                             modifier = Modifier.size(28.dp)
                         )
                     }

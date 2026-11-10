@@ -36,6 +36,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjcampac.eter.R
@@ -191,18 +194,27 @@ private fun LocalStationsSection(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 items(filtered, key = { it.id }) { station ->
-                    val row: @Composable () -> Unit = {
+                    // Las emisoras manuales se eliminan deslizando la tarjeta a la
+                    // izquierda. Para que TalkBack pueda hacerlo sin gesto, se añade
+                    // la misma acción a la propia fila.
+                    val etiquetaEliminar = stringResource(R.string.delete_station)
+                    SwipeToDelete(onDelete = { onDeleteStation(station) }) {
                         LocalStationRow(
                             station = station,
                             playerState = playerState,
                             onStationClick = onStationClick,
                             onToggleFavorite = onToggleFavorite,
                             onEditStation = onEditStation,
-                            onDeleteStation = onDeleteStation
+                            modifier = Modifier.semantics {
+                                customActions = listOf(
+                                    CustomAccessibilityAction(etiquetaEliminar) {
+                                        onDeleteStation(station)
+                                        true
+                                    }
+                                )
+                            }
                         )
                     }
-                    // Las emisoras manuales se pueden eliminar deslizando a la izquierda.
-                    SwipeToDelete(onDelete = { onDeleteStation(station) }, content = row)
                 }
             }
         }
@@ -271,8 +283,7 @@ private fun InternetStationsSection(
                             playerState.status == PlaybackStatus.PAUSED,
                         onClick = { onStationClick(station) },
                         onFavoriteToggle = { onToggleFavorite(station) },
-                        onEdit = null,
-                        onDelete = null
+                        onEdit = null
                     )
                 }
             }
@@ -298,7 +309,7 @@ private fun EmptyStateMessage(text: String) {
     }
 }
 
-/** Fila de una emisora de la lista local, con sus acciones (editar/borrar). */
+/** Fila de una emisora de la lista local, con sus acciones (editar). */
 @Composable
 private fun LocalStationRow(
     station: Station,
@@ -306,7 +317,7 @@ private fun LocalStationRow(
     onStationClick: (Station) -> Unit,
     onToggleFavorite: (Station) -> Unit,
     onEditStation: (Station) -> Unit,
-    onDeleteStation: (Station) -> Unit
+    modifier: Modifier = Modifier
 ) {
     StationItem(
         station = station,
@@ -318,7 +329,7 @@ private fun LocalStationRow(
         onClick = { onStationClick(station) },
         onFavoriteToggle = { onToggleFavorite(station) },
         onEdit = if (station.isCustom) { { onEditStation(station) } } else null,
-        onDelete = if (station.isCustom) { { onDeleteStation(station) } } else null
+        modifier = modifier
     )
 }
 
