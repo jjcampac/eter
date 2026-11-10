@@ -204,6 +204,8 @@ Objetivo: que Eter aparezca en el coche como app de audio, sin desarrollar panta
 | Post-5 | Android Auto (app de audio: biblioteca de favoritas y todas las emisoras) | ✅ Completada (probada en coche) |
 | Post-5 | Build release: despliegue desde Android Studio (sin `.dm`) y R8 sin `packageScope` | ✅ Completada (probada en dispositivo) |
 | Post-5 | Búsqueda en Radio Browser en release (R8 borraba los DTO → `ClassCastException` en Retrofit; arreglado con `proguard-rules.pro` mínimo) | ✅ Completada (probada en dispositivo) |
+| Post-5 | Formulario de emisora: alta siempre en blanco al pulsar el FAB y cierre al guardar | ✅ Completada (probada en dispositivo) |
+| Post-5 | Tarjeta de emisora sin botón de borrar (solo deslizar, con acción accesible para TalkBack) | ✅ Completada (probada en dispositivo) |
 
 ---
 
