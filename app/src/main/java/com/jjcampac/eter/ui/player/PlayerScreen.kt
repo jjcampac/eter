@@ -112,6 +112,17 @@ fun PlayerScreen(
     // aunque el id con el que se abrió el detalle siga siendo el mismo.
     val displayedStation = playerState.currentStation ?: station
 
+    // El botón de favorita necesita el estado real de Room. La copia que guarda el
+    // reproductor (`playerState.currentStation`) es una foto fija de cuando arrancó la
+    // reproducción, así que no cambia al marcar o desmarcar la emisora. Si el reproductor
+    // y la pantalla muestran la misma emisora se usa `station` (que viene de Room y se
+    // actualiza al instante); si no, se recurre a la copia del reproductor.
+    val isFavoriteStation = if (station.id == displayedStation.id) {
+        station.isFavorite
+    } else {
+        displayedStation.isFavorite
+    }
+
     val isThisStation = playerState.currentStation?.url == displayedStation.url
     val isPlaying = isThisStation && playerState.status == PlaybackStatus.PLAYING
     val isError = isThisStation && playerState.status == PlaybackStatus.ERROR
@@ -184,16 +195,16 @@ fun PlayerScreen(
                         modifier = Modifier.align(Alignment.CenterEnd)
                     ) {
                         Icon(
-                            imageVector = if (displayedStation.isFavorite) {
+                            imageVector = if (isFavoriteStation) {
                                 Icons.Filled.Favorite
                             } else {
                                 Icons.Filled.FavoriteBorder
                             },
                             contentDescription = stringResource(
-                                if (displayedStation.isFavorite) R.string.favorite_remove
+                                if (isFavoriteStation) R.string.favorite_remove
                                 else R.string.favorite_add
                             ),
-                            tint = if (displayedStation.isFavorite) {
+                            tint = if (isFavoriteStation) {
                                 MaterialTheme.colorScheme.error
                             } else {
                                 MaterialTheme.colorScheme.onSurfaceVariant
