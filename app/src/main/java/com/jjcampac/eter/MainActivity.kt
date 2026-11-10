@@ -123,6 +123,13 @@ class MainActivity : ComponentActivity() {
         var showForm by rememberSaveable { mutableStateOf(false) }
         var editingStationId by rememberSaveable { mutableStateOf<String?>(null) }
         var selectedTab by rememberSaveable { mutableStateOf(0) }
+        // Formulario de emisora: el ViewModel se crea una sola vez y sobrevive al
+        // cierre del formulario (lo mantiene el ViewModelStore de la Activity).
+        // Por eso cada apertura llama a `open(...)`, que reinicia su estado: así el
+        // alta aparece siempre en blanco y la edición carga su propia emisora.
+        val formViewModel: StationFormViewModel = viewModel(
+            factory = StationFormViewModel.factory(stationRepository, editingStationId)
+        )
         val stations by stationRepository.getAllStations()
             .collectAsStateWithLifecycle(initialValue = emptyList())
         // Estado de la pantalla principal: permite localizar emisoras de Internet
@@ -183,13 +190,12 @@ class MainActivity : ComponentActivity() {
         }
         val editStation: (com.jjcampac.eter.domain.model.Station) -> Unit = { station ->
             editingStationId = station.id
+            // Reinicia el formulario con la emisora a editar antes de mostrarlo.
+            formViewModel.open(station.id)
             showForm = true
         }
 
         if (showForm) {
-            val formViewModel: StationFormViewModel = viewModel(
-                factory = StationFormViewModel.factory(stationRepository, editingStationId)
-            )
             BackHandler(onBack = {
                 showForm = false
                 editingStationId = null
@@ -278,6 +284,8 @@ class MainActivity : ComponentActivity() {
                         FloatingActionButton(
                             onClick = {
                                 editingStationId = null
+                                // Formulario en blanco en cada pulsación del FAB.
+                                formViewModel.open(null)
                                 showForm = true
                             }
                         ) {
