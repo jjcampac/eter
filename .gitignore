@@ -11,3 +11,7 @@
 local.properties
 # Credenciales de firma (contraseñas): nunca versionar
 /keystore.properties
+# Keystore de firma de release (clave privada): no versionar
+/keystore/
+# Artefactos del build de release (APK y mapping.txt de R8): no versionar
+/app/release/
