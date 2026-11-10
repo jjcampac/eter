@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -58,7 +60,10 @@ fun StationFormScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                // Con el teclado abierto y cinco campos, el formulario puede no caber
+                // en pantallas pequeñas: se permite desplazarlo para llegar a Guardar.
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedTextField(
@@ -72,6 +77,15 @@ fun StationFormScreen(
                 value = state.url,
                 onValueChange = viewModel::onUrlChange,
                 label = { Text("URL del stream") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            // Favicon/logo de la emisora: opcional. Se muestra en las listas, en la
+            // carátula del reproductor y en la notificación.
+            OutlinedTextField(
+                value = state.imageUrl,
+                onValueChange = viewModel::onImageUrlChange,
+                label = { Text("URL del favicon (opcional)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )

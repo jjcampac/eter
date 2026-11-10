@@ -24,13 +24,30 @@ data class StationFormUiState(
     val url: String = "",
     val country: String = "",
     val genre: String = "",
+    /** URL del favicon/logo de la emisora (opcional). */
+    val imageUrl: String = "",
     val isCustom: Boolean = true,
     val isEditing: Boolean = false,
     val isSaving: Boolean = false,
     val error: String? = null
 ) {
+    /**
+     * URL del stream sin espacios ni saltos de línea: los tecleos y los pegados suelen
+     * colarlos y en una URL son siempre un error (rompen la reproducción).
+     */
+    val urlSinEspacios: String
+        get() = url.filterNot { it.isWhitespace() }
+
+    /** Favicon sin espacios ni saltos de línea; vacío si no se ha escrito. */
+    val imageUrlSinEspacios: String
+        get() = imageUrl.filterNot { it.isWhitespace() }
+
     val isValid: Boolean
-        get() = name.isNotBlank() && url.isNotBlank() && url.startsWith("http")
+        get() = name.isNotBlank() && urlSinEspacios.startsWith("http")
+
+    /** El favicon es opcional; si se escribe, debe ser una URL http/https. */
+    val hasValidImageUrl: Boolean
+        get() = imageUrlSinEspacios.isEmpty() || imageUrlSinEspacios.startsWith("http")
 }
 
 /**
@@ -75,6 +92,7 @@ class StationFormViewModel(
                 url = station.url,
                 country = station.country ?: "",
                 genre = station.genre ?: "",
+                imageUrl = station.imageUrl ?: "",
                 isCustom = station.isCustom
             )
         }
@@ -84,6 +102,9 @@ class StationFormViewModel(
     fun onUrlChange(value: String) { _uiState.value = _uiState.value.copy(url = value, error = null) }
     fun onCountryChange(value: String) { _uiState.value = _uiState.value.copy(country = value) }
     fun onGenreChange(value: String) { _uiState.value = _uiState.value.copy(genre = value) }
+    fun onImageUrlChange(value: String) {
+        _uiState.value = _uiState.value.copy(imageUrl = value, error = null)
+    }
 
     fun save(onSaved: () -> Unit) {
         val state = _uiState.value
@@ -91,14 +112,21 @@ class StationFormViewModel(
             _uiState.value = state.copy(error = "Nombre y URL válida (http/https) son obligatorios")
             return
         }
+        if (!state.hasValidImageUrl) {
+            _uiState.value = state.copy(
+                error = "El favicon debe ser una URL que empiece por http o https"
+            )
+            return
+        }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSaving = true)
             val station = Station(
                 id = state.id ?: UUID.randomUUID().toString(),
                 name = state.name.trim(),
-                url = state.url.trim(),
+                url = state.urlSinEspacios,
                 country = state.country.trim().ifBlank { null },
                 genre = state.genre.trim().ifBlank { null },
+                imageUrl = state.imageUrlSinEspacios.ifBlank { null },
                 isCustom = state.isCustom
             )
             try {
