@@ -12,7 +12,7 @@ plugins {
 
 /** Versión base de la app (sin sufijo de build). El sufijo "d"/"r" se añade
  *  en cada build type para distinguir debug de release. */
-val baseVersionName = "1.0.0"
+val baseVersionName = "1.0.1"
 
 /** Credenciales de la keystore de release. El fichero no se versiona (contiene
  *  contraseñas). Si no existe, la variante release se firma con la keystore de
@@ -34,7 +34,7 @@ android {
         applicationId = "com.jjcampac.eter"
         minSdk = 26
         targetSdk = 37
-        versionCode = 5
+        versionCode = 6
         versionName = baseVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
