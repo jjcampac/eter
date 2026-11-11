@@ -223,8 +223,16 @@ Objetivo: que Eter aparezca en el coche como app de audio, sin desarrollar panta
 
 ## Licencia
 
-Esta aplicación se distribuye bajo la licencia **Apache License 2.0**, disponible en: https://www.apache.org/licenses/LICENSE-2.0
+Esta aplicación se distribuye bajo la licencia **Creative Commons Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)**, disponible en: https://creativecommons.org/licenses/by-nc/4.0/deed.es
 
-Puedes usar, copiar, modificar y distribuir el software, con o sin fines comerciales, siempre que conserves el aviso de copyright y el texto de la licencia. El software se ofrece "tal cual" (**as is**), sin garantía de ningún tipo.
+Puedes **usar, copiar, modificar y compartir libremente** el software, pero solo con fines no comerciales. El uso con fines comerciales está prohibido sin permiso expreso del autor.
 
-La licencia completa se encuentra en [LICENSE](LICENSE) y el aviso de copyright en [NOTICE](NOTICE).
+La única condición es que, en cualquier copia o trabajo derivado, siempre debes:
+- Mencionar al autor (**jjcampac**).
+- Mencionar el nombre de la aplicación (**Simple Radio**).
+- Indicar la URL del repositorio original (**https://github.com/jjcampac/eter**).
+- Indicar si se han realizado cambios.
+
+El software se ofrece "tal cual" (**as is**), sin garantía de ningún tipo.
+
+La licencia completa y el aviso de copyright se encuentran en el archivo [LICENSE](LICENSE).
