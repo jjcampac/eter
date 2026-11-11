@@ -92,7 +92,7 @@
     <string name="sleep_timer_active">Se apagará en %1$s</string>
     <!-- Botón del temporizador en el reproductor -->
     <string name="timer_button">Temporizador</string>
-    <string name="timer_button_active">Temporizador: %1$d min</string>
+    <string name="timer_button_active">Temporizador: %1$d:%2$02d</string>
 
     <!-- Favoritas en el reproductor -->
     <string name="favorite_add">Añadir a favoritas</string>

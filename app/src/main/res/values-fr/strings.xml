@@ -87,6 +87,9 @@
     <string name="sleep_45">45 minutes</string>
     <string name="sleep_60">60 minutes</string>
     <string name="sleep_timer_active">S\'éteindra dans %1$s</string>
+    <!-- Bouton du minuteur dans le lecteur -->
+    <string name="timer_button">Minuteur</string>
+    <string name="timer_button_active">Minuteur : %1$d:%2$02d</string>
 
     <!-- Avertissement d'erreur (Phase 5) -->
     <string name="ok">OK</string>

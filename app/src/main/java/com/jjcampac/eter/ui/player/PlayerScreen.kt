@@ -345,11 +345,13 @@ fun PlayerScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             // --- 5. Temporizador para dormir ---
-            val remainingMinutes = if (sleepTimerState.active) {
-                ceil(sleepTimerState.remainingMillis / 60_000.0).toInt().coerceAtLeast(1)
+            val remainingSeconds = if (sleepTimerState.active) {
+                ceil(sleepTimerState.remainingMillis / 1_000.0).toInt().coerceAtLeast(1)
             } else {
                 0
             }
+            val remainingMinutes = remainingSeconds / 60
+            val remainingSecondsPart = remainingSeconds % 60
             OutlinedButton(
                 onClick = { showTimerDialog = true },
                 shape = RoundedCornerShape(50),
@@ -357,7 +359,11 @@ fun PlayerScreen(
             ) {
                 Text(
                     text = if (sleepTimerState.active) {
-                        stringResource(R.string.timer_button_active, remainingMinutes)
+                        stringResource(
+                            R.string.timer_button_active,
+                            remainingMinutes,
+                            remainingSecondsPart
+                        )
                     } else {
                         stringResource(R.string.timer_button)
                     },

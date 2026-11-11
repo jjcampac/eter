@@ -87,6 +87,9 @@
     <string name="sleep_45">45分</string>
     <string name="sleep_60">60分</string>
     <string name="sleep_timer_active">%1$s後にオフになります</string>
+    <!-- プレーヤーのタイマーボタン -->
+    <string name="timer_button">タイマー</string>
+    <string name="timer_button_active">タイマー: %1$d:%2$02d</string>
     <!-- メディア通知：局の情報 -->
     <string name="notification_channel_name">ラジオプレーヤー</string>
     <string name="state_error">接続エラー</string>
