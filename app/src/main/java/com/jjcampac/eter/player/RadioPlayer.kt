@@ -1,4 +1,20 @@
 /*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2026 jjcampac
+ */
+
+/*
  * Autor: jjcampac
  * IA: cline
  */
@@ -18,6 +34,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.jjcampac.eter.EterApplication
 import com.jjcampac.eter.R
+import com.jjcampac.eter.diag.diag
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.util.ReconnectPreferences
 import kotlinx.coroutines.CoroutineScope
@@ -120,6 +137,11 @@ class RadioPlayer(context: Context) {
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 Log.d(TAG, "onPlaybackStateChanged() state=$playbackState playWhenReady=${exoPlayer.playWhenReady}")
+                diag(
+                    "onPlaybackStateChanged state=$playbackState " +
+                        "playWhenReady=${exoPlayer.playWhenReady} isPlaying=${exoPlayer.isPlaying}",
+                    exoPlayer
+                )
                 if (playbackState == Player.STATE_READY) {
                     // Conexión recuperada: se cierra la ventana de reintentos.
                     resetReconnect()
@@ -138,6 +160,12 @@ class RadioPlayer(context: Context) {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 Log.d(TAG, "onIsPlayingChanged() isPlaying=$isPlaying currentStatus=${_state.value.status}")
+                diag(
+                    "onIsPlayingChanged isPlaying=$isPlaying status=${_state.value.status} " +
+                        "playWhenReady=${exoPlayer.playWhenReady} " +
+                        "suppression=${exoPlayer.playbackSuppressionReason}",
+                    exoPlayer
+                )
                 _state.update { current ->
                     current.copy(
                         status =
@@ -146,6 +174,26 @@ class RadioPlayer(context: Context) {
                         else current.status
                     )
                 }
+            }
+
+            /**
+             * Cambios de playWhenReady y de supresión (foco de audio): son los
+             * eventos que muestran pérdidas/ganancias de foco y pausas del sistema.
+             */
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                diag(
+                    "onPlayWhenReadyChanged playWhenReady=$playWhenReady reason=$reason " +
+                        "state=${exoPlayer.playbackState} suppression=${exoPlayer.playbackSuppressionReason}",
+                    exoPlayer
+                )
+            }
+
+            override fun onPlaybackSuppressionReasonChanged(reason: Int) {
+                diag(
+                    "onPlaybackSuppressionReasonChanged reason=$reason " +
+                        "playWhenReady=${exoPlayer.playWhenReady} isPlaying=${exoPlayer.isPlaying}",
+                    exoPlayer
+                )
             }
 
             /**
@@ -159,6 +207,7 @@ class RadioPlayer(context: Context) {
                 val id = mediaItem?.mediaId ?: return
                 if (id == _state.value.currentStation?.id) return
                 Log.d(TAG, "onMediaItemTransition() externo mediaId=$id reason=$reason")
+                diag("onMediaItemTransition mediaId=$id reason=$reason", exoPlayer)
                 metadataScope.launch {
                     val app = appContext as? EterApplication ?: return@launch
                     val emisora = app.getStationRepository().getStation(id) ?: return@launch
@@ -172,6 +221,7 @@ class RadioPlayer(context: Context) {
 
             override fun onPlayerError(error: PlaybackException) {
                 Log.e(TAG, "onPlayerError() code=${error.errorCode} message=${error.message}")
+                diag("onPlayerError code=${error.errorCode} message=${error.message}", exoPlayer)
                 val errorMessage = when (error.errorCode) {
                     PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
                     PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT,
@@ -188,6 +238,11 @@ class RadioPlayer(context: Context) {
             // Cortes de red inesperados: se recupera al instante solo si NO hay una
             // ventana de reintentos activa (esa ventana la gestiona [startReconnect]).
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                diag(
+                    "onPlayerStateChanged playWhenReady=$playWhenReady state=$playbackState " +
+                        "items=${exoPlayer.mediaItemCount}",
+                    exoPlayer
+                )
                 if (playbackState == Player.STATE_IDLE && exoPlayer.mediaItemCount > 0 &&
                     playWhenReady && reconnectWindowStartMs == 0L
                 ) {
@@ -226,6 +281,9 @@ class RadioPlayer(context: Context) {
 
         // Aplicar el volumen inicial (1.0) al reproductor.
         applyVolume()
+
+        // Instrumentación temporal: identidad del reproductor único de la app.
+        diag("RadioPlayer.init (creado)", this, exoPlayer)
 
         // Texto secundario de la notificación multimedia: canción (ICY),
         // "Conectando…" o el estado de error. Se actualiza sin reiniciar el
@@ -293,6 +351,7 @@ class RadioPlayer(context: Context) {
     /** Carga una emisora y comienza la reproducción. */
     fun play(station: Station) {
         Log.d(TAG, "play() station=${station.name} url=${station.url}")
+        diag("play() station=${station.name} url=${station.url}", this, exoPlayer)
         // Detener cualquier reproducción previa para evitar conflictos
         stop()
         // Persistir para auto-reanudar tras muerte del proceso (pantalla apagada, etc.)
@@ -321,6 +380,7 @@ class RadioPlayer(context: Context) {
     /** Pausa la reproducción actual (deja el stream cargado). */
     fun pause() {
         Log.d(TAG, "pause()")
+        diag("pause()", this, exoPlayer)
         exoPlayer.pause()
         _state.update { it.copy(status = PlaybackStatus.PAUSED, errorMessage = null) }
     }
@@ -328,6 +388,7 @@ class RadioPlayer(context: Context) {
     /** Reanuda la emisora actual si estaba pausada. */
     fun resume() {
         Log.d(TAG, "resume()")
+        diag("resume()", this, exoPlayer)
         exoPlayer.playWhenReady = true
         _state.update { it.copy(status = PlaybackStatus.PLAYING, errorMessage = null) }
     }
@@ -335,6 +396,7 @@ class RadioPlayer(context: Context) {
     /** Detiene y libera la emisora actual. */
     fun stop() {
         Log.d(TAG, "stop()")
+        diag("stop()", this, exoPlayer)
         resetReconnect()
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
@@ -350,6 +412,7 @@ class RadioPlayer(context: Context) {
      * ventana es "sin límite" (0), reintenta indefinidamente.
      */
     private fun startReconnect(errorMessage: String) {
+        diag("startReconnect error=$errorMessage", this, exoPlayer)
         reconnectJob?.cancel()
         val windowMs = reconnectWindowMs()
         if (reconnectWindowStartMs == 0L) {
@@ -391,6 +454,7 @@ class RadioPlayer(context: Context) {
 
     /** Cancela la ventana de reintentos activa (al recuperar, detener o liberar). */
     private fun resetReconnect() {
+        diag("resetReconnect()", this, exoPlayer)
         reconnectJob?.cancel()
         reconnectJob = null
         reconnectWindowStartMs = 0L
@@ -399,6 +463,7 @@ class RadioPlayer(context: Context) {
     /** Libera los recursos del reproductor. No debe usarse después de llamarlo. */
     fun release() {
         Log.d(TAG, "release()")
+        diag("release() del RadioPlayer", this, exoPlayer)
         resetReconnect()
         reconnectScope.cancel()
         metadataScope.cancel()
@@ -417,7 +482,9 @@ class RadioPlayer(context: Context) {
      * canción (p. ej. `PRIV` que envían los streams HLS) para no mostrar basura.
      * Si no se encuentra ninguna etiqueta razonable, devuelve `null`.
      */
-    private fun cleanMetadataTitle(raw: String?): String? {
+}
+
+internal fun cleanMetadataTitle(raw: String?): String? {
         if (raw.isNullOrBlank()) return null
         val trimmed = raw.trim()
 
@@ -454,5 +521,4 @@ class RadioPlayer(context: Context) {
             .trim('\'')
             .trim('"')
             .takeIf { it.isNotEmpty() }
-    }
 }

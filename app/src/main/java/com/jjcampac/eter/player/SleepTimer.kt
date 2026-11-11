@@ -1,4 +1,20 @@
 /*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2026 jjcampac
+ */
+
+/*
  * Autor: jjcampac
  * IA: cline
  */
@@ -10,6 +26,7 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
+import com.jjcampac.eter.diag.diag
 import com.jjcampac.eter.player.service.ACTION_SLEEP_TIMER
 import com.jjcampac.eter.player.service.RadioMediaSessionService
 import kotlinx.coroutines.CoroutineScope
@@ -64,12 +81,16 @@ class SleepTimer(context: Context) {
     fun selectedMinutes(): Int = prefs.getInt(PREF_SLEEP_MINUTES, UNSELECTED)
 
     /** Inicia (o reinicia) el temporizador con `minutes` minutos (UI / Ajustes). */
-    fun start(minutes: Int) = startForMillis(minutes * 60_000L, DEFAULT_FADE_MS)
+    fun start(minutes: Int) {
+        diag("SleepTimer.start(minutes=$minutes)", this)
+        startForMillis(minutes * 60_000L, DEFAULT_FADE_MS)
+    }
 
     /** Inicia el temporizador con `totalMillis` milisegundos de duración y una
      *  ventana de atenuación de volumen de `fadeMillis` al final. Útil para
      *  pruebas rápidas (p. ej. 30 segundos) y usado por la UI con minutos. */
     fun startForMillis(totalMillis: Long, fadeMillis: Long) {
+        diag("SleepTimer.startForMillis(total=$totalMillis fade=$fadeMillis)", this)
         stop()
         if (totalMillis <= 0L) return
         val minutes = (totalMillis / 60_000L).toInt()
@@ -102,6 +123,7 @@ class SleepTimer(context: Context) {
 
     /** Cancela el temporizador (Ajustes → "Desactivado"). */
     fun stop() {
+        diag("SleepTimer.stop()", this)
         countdownJob?.cancel()
         countdownJob = null
         prefs.edit().remove(PREF_SLEEP_MINUTES).apply()
@@ -110,6 +132,7 @@ class SleepTimer(context: Context) {
 
     /** Pide al servicio de medios que pause y quite la notificación. */
     private fun notifyExpired() {
+        diag("SleepTimer.notifyExpired → startForegroundService ACTION_SLEEP_TIMER", this)
         val intent = Intent(appContext, RadioMediaSessionService::class.java)
             .setAction(ACTION_SLEEP_TIMER)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

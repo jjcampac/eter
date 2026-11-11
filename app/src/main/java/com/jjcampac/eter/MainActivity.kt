@@ -1,4 +1,20 @@
 /*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2026 jjcampac
+ */
+
+/*
  * Autor: jjcampac
  * IA: cline
  */
@@ -55,6 +71,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jjcampac.eter.di.AppModule
+import com.jjcampac.eter.diag.diag
 import com.jjcampac.eter.player.service.RadioMediaSessionService
 import com.jjcampac.eter.ui.components.MiniPlayer
 import com.jjcampac.eter.ui.main.FavoritesScreen
@@ -102,10 +119,26 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // --- Instrumentación temporal del ciclo de vida de la Activity ---
+
+    override fun onStart() {
+        super.onStart()
+        diag("MainActivity.onStart", this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        diag("MainActivity.onStop", this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        diag("MainActivity.onDestroy", this)
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun RootContent() {
-        val radioPlayer = remember { AppModule.radioPlayer(applicationContext) }
         val stationRepository = remember { AppModule.stationRepository(applicationContext) }
         val sleepTimer = remember { AppModule.sleepTimer(applicationContext) }
 
@@ -116,7 +149,7 @@ class MainActivity : ComponentActivity() {
             )
         )
         val playerViewModel: PlayerViewModel =
-            viewModel(factory = PlayerViewModel.factory(radioPlayer, stationRepository))
+            viewModel(factory = PlayerViewModel.factory(applicationContext, stationRepository))
 
         // Pantalla actual: `null` = pestañas; id = reproductor de esa emisora.
         var currentStationId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -359,20 +392,22 @@ class MainActivity : ComponentActivity() {
      */
     private fun startRadioService() {
         val intent = Intent(this, RadioMediaSessionService::class.java)
-        val reproduciendo = (application as EterApplication).getRadioPlayer().exoPlayer.playWhenReady
+        diag("startRadioService", this)
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && reproduciendo) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 startForegroundService(intent)
             } else {
                 startService(intent)
             }
         } catch (e: Exception) {
             Log.w(TAG, "No se pudo iniciar el servicio de radio: ${e.message}")
+            diag("startRadioService ERROR: ${e.message}", this)
         }
     }
 
     private fun stopRadioService() {
         val intent = Intent(this, RadioMediaSessionService::class.java)
+        diag("stopRadioService", this)
         stopService(intent)
     }
 

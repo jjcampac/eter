@@ -1,4 +1,20 @@
 /*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2026 jjcampac
+ */
+
+/*
  * Autor: jjcampac
  * IA: cline
  */
@@ -19,6 +35,7 @@ import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaLibraryService.LibraryParams
 import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
@@ -28,12 +45,14 @@ import com.google.common.util.concurrent.SettableFuture
 import com.jjcampac.eter.EterApplication
 import com.jjcampac.eter.MainActivity
 import com.jjcampac.eter.R
+import com.jjcampac.eter.diag.diag
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.domain.repository.StationRepository
 import com.jjcampac.eter.player.RadioPlayer
 import com.jjcampac.eter.player.SleepTimer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -93,12 +112,24 @@ class RadioMediaSessionService : MediaLibraryService() {
         super.onCreate()
         Log.d(TAG, "onCreate()")
         val app = application as EterApplication
-        radioPlayer = app.getRadioPlayer()
+        // El servicio es el dueño único del reproductor: nadie más lo crea.
+        radioPlayer = RadioPlayer(app)
         sleepTimer = app.getSleepTimer()
         repository = app.getStationRepository()
+        diag("onCreate() inicio", this, radioPlayer.exoPlayer)
 
         // Notificación multimedia del sistema (MediaStyle) construida por Media3.
         setMediaNotificationProvider(crearProveedorNotificacion())
+
+        // Listener de Media3: avisa si el sistema impide iniciar en primer plano.
+        setListener(object : MediaSessionService.Listener {
+            override fun onForegroundServiceStartNotAllowedException() {
+                diag(
+                    "onForegroundServiceStartNotAllowedException (no se pudo iniciar en primer plano)",
+                    this@RadioMediaSessionService, mediaSession, radioPlayer.exoPlayer
+                )
+            }
+        })
 
         val sesion = MediaLibrarySession.Builder(this, radioPlayer.exoPlayer, SesionCallback())
             .setSessionActivity(intentActividad())
@@ -106,6 +137,7 @@ class RadioMediaSessionService : MediaLibraryService() {
             .build()
         mediaSession = sesion
         addSession(sesion)
+        diag("onCreate() sesión creada y añadida", this, sesion, radioPlayer.exoPlayer)
 
         // Botones de la notificación: se recalculan al cambiar de emisora o al
         // modificar las favoritas (desde la app o desde la propia notificación,
@@ -132,12 +164,24 @@ class RadioMediaSessionService : MediaLibraryService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand() action=${intent?.action}")
+        diag(
+            "onStartCommand action=${intent?.action} flags=$flags startId=$startId " +
+                "isPlaybackOngoing=${isPlaybackOngoing()} " +
+                "playWhenReady=${radioPlayer.exoPlayer.playWhenReady} " +
+                "state=${radioPlayer.exoPlayer.playbackState} " +
+                "items=${radioPlayer.exoPlayer.mediaItemCount}",
+            this, mediaSession, radioPlayer.exoPlayer
+        )
         // Media3 atiende aquí los botones de la notificación (play/pausa,
         // anterior/siguiente, estrella y el descarte de la tarjeta).
         super.onStartCommand(intent, flags, startId)
 
         if (intent?.action == ACTION_SLEEP_TIMER) {
             Log.d(TAG, "ACTION_SLEEP_TIMER: deteniendo la reproducción y quitando la notificación.")
+            diag(
+                "ACTION_SLEEP_TIMER → radioPlayer.stop() + stopForeground + stopSelf()",
+                this, mediaSession, radioPlayer.exoPlayer
+            )
             radioPlayer.stop()
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
@@ -146,20 +190,66 @@ class RadioMediaSessionService : MediaLibraryService() {
         return START_STICKY
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
-        mediaSession
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? {
+        diag(
+            "onGetSession controller=${controllerInfo.packageName}",
+            this, mediaSession, radioPlayer.exoPlayer
+        )
+        return mediaSession
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        diag(
+            "onTaskRemoved rootIntent=$rootIntent isPlaybackOngoing=${isPlaybackOngoing()} " +
+                "isPlaying=${radioPlayer.exoPlayer.isPlaying} " +
+                "playWhenReady=${radioPlayer.exoPlayer.playWhenReady} " +
+                "state=${radioPlayer.exoPlayer.playbackState} " +
+                "items=${radioPlayer.exoPlayer.mediaItemCount}",
+            this, mediaSession, radioPlayer.exoPlayer
+        )
+        super.onTaskRemoved(rootIntent)
+    }
+
+    override fun onUpdateNotification(
+        session: MediaSession,
+        startInForegroundRequired: Boolean
+    ) {
+        diag(
+            "onUpdateNotification startInForegroundRequired=$startInForegroundRequired " +
+                "isPlaybackOngoing=${isPlaybackOngoing()} " +
+                "playWhenReady=${radioPlayer.exoPlayer.playWhenReady} " +
+                "state=${radioPlayer.exoPlayer.playbackState} " +
+                "items=${radioPlayer.exoPlayer.mediaItemCount}",
+            this, session, radioPlayer.exoPlayer
+        )
+        super.onUpdateNotification(session, startInForegroundRequired)
+    }
 
     override fun onDestroy() {
         Log.d(TAG, "onDestroy()")
+        diag(
+            "onDestroy() inicio isPlaybackOngoing=${isPlaybackOngoing()} " +
+                "isPlaying=${radioPlayer.exoPlayer.isPlaying} " +
+                "playWhenReady=${radioPlayer.exoPlayer.playWhenReady} " +
+                "state=${radioPlayer.exoPlayer.playbackState} " +
+                "items=${radioPlayer.exoPlayer.mediaItemCount}",
+            this, mediaSession, radioPlayer.exoPlayer
+        )
         job.cancel()
         // Quitar la sesión del servicio retira también la notificación asociada
         // antes de liberar la sesión (evita tarjetas huérfanas en la cortina).
         mediaSession?.let { sesion ->
+            diag("onDestroy() removeSession + release de la sesión", this, sesion, radioPlayer.exoPlayer)
             removeSession(sesion)
             sesion.release()
         }
         mediaSession = null
+        // El dueño del reproductor lo libera aquí: si el servicio muere, no queda
+        // un ExoPlayer huérfano reproduciendo sin sesión ni primer plano.
+        radioPlayer.release()
+        scope.cancel()
         super.onDestroy()
+        diag("onDestroy() fin", this, radioPlayer)
     }
 
     /**
@@ -381,6 +471,12 @@ class RadioMediaSessionService : MediaLibraryService() {
             session: MediaSession,
             controller: MediaSession.ControllerInfo
         ): MediaSession.ConnectionResult {
+            diag(
+                "SesionCallback.onConnect controller=${controller.packageName} " +
+                    "notification=${session.isMediaNotificationController(controller)} " +
+                    "auto=${session.isAutoCompanionController(controller)}",
+                this@RadioMediaSessionService, session, radioPlayer.exoPlayer
+            )
             // Se parte de los comandos de sesión **y de biblioteca**: sin los
             // segundos, Android Auto no puede navegar por las emisoras.
             val comandos =
@@ -401,6 +497,11 @@ class RadioMediaSessionService : MediaLibraryService() {
             args: Bundle
         ): ListenableFuture<SessionResult> {
             Log.d(TAG, "onCustomCommand() action=${customCommand.customAction}")
+            diag(
+                "onCustomCommand action=${customCommand.customAction} " +
+                    "controller=${controller.packageName}",
+                this@RadioMediaSessionService, session, radioPlayer.exoPlayer
+            )
             when (customCommand.customAction) {
                 ACCION_FAVORITA_ANTERIOR -> reproducirFavorita(anterior = true)
                 ACCION_FAVORITA_SIGUIENTE -> reproducirFavorita(anterior = false)
@@ -410,6 +511,30 @@ class RadioMediaSessionService : MediaLibraryService() {
                 )
             }
             return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+        }
+
+        override fun onDisconnected(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo
+        ) {
+            diag(
+                "SesionCallback.onDisconnected controller=${controller.packageName} " +
+                    "notification=${session.isMediaNotificationController(controller)}",
+                this@RadioMediaSessionService, session, radioPlayer.exoPlayer
+            )
+            super.onDisconnected(session, controller)
+        }
+
+        override fun onPlayerCommandRequest(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            command: Int
+        ): Int {
+            diag(
+                "onPlayerCommandRequest controller=${controller.packageName} command=$command",
+                this@RadioMediaSessionService, session, radioPlayer.exoPlayer
+            )
+            return super.onPlayerCommandRequest(session, controller, command)
         }
 
         override fun onGetLibraryRoot(
@@ -469,6 +594,10 @@ class RadioMediaSessionService : MediaLibraryService() {
             mediaItems: MutableList<MediaItem>
         ): ListenableFuture<MutableList<MediaItem>> {
             val futuro = SettableFuture.create<MutableList<MediaItem>>()
+            diag(
+                "onAddMediaItems count=${mediaItems.size} controller=${controller.packageName}",
+                this@RadioMediaSessionService, session, radioPlayer.exoPlayer
+            )
             scope.launch {
                 val resueltos = mediaItems.mapNotNull { item ->
                     if (item.localConfiguration != null) {
@@ -490,7 +619,7 @@ class RadioMediaSessionService : MediaLibraryService() {
         }
     }
 
-    private companion object {
+    internal companion object {
         /** Anterior favorita. */
         const val ACCION_FAVORITA_ANTERIOR = "com.jjcampac.eter.ACTION_FAVORITA_ANTERIOR"
 
