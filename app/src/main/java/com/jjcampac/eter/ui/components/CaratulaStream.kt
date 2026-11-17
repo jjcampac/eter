@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -96,7 +98,11 @@ fun CaratulaStream(
             contentScale = ContentScale.Fit,
             modifier = Modifier.fillMaxSize()
         ) {
-            when (painter.state.value) {
+            // Observar el estado como State de Compose (collectAsState) para que la
+            // lambda se recomponga al pasar de Loading a Success; leer .value no
+            // suscribe a los cambios.
+            val estado by painter.state.collectAsState()
+            when (estado) {
                 is AsyncImagePainter.State.Success -> SubcomposeAsyncImageContent(
                     modifier = Modifier.fillMaxSize()
                 )

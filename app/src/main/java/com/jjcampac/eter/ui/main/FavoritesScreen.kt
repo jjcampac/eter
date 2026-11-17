@@ -42,7 +42,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -121,7 +120,16 @@ fun FavoritesScreen(
             // Estado del arrastre a nivel pantalla: evita que la lista se resetee
             // si Room emite una nueva copia mientras el usuario está arrastrando.
             var isDragging by remember { mutableStateOf(false) }
-            var sortedFavorites by remember { mutableStateOf(favorites) }
+
+            // Orden temporal aplicado solo durante el arrastre (pulsación larga).
+            // Cuando es null, sortedFavorites es favorites directamente (siempre al
+            // día con Room), de modo que las filas —y sus iconos— se pintan con los
+            // datos actuales nada más entrar a la pantalla o volver de otra pestaña.
+            var draggedOrder by remember { mutableStateOf<List<Station>?>(null) }
+
+            // Lista mostrada: durante el arrastre se usa la copia reordenada; fuera
+            // de arrastre se muestra favorites tal como llega de Room.
+            val sortedFavorites: List<Station> = draggedOrder ?: favorites
 
             // Vibración háptica breve cuando empieza el arrastre.
             val context = LocalContext.current
@@ -141,17 +149,11 @@ fun FavoritesScreen(
                 onDispose {}
             }
 
-            // Sincroniza con Room solo cuando no hay un arrastre en curso.
-            LaunchedEffect(favorites) {
-                if (!isDragging) {
-                    sortedFavorites = favorites
-                }
-            }
-
             val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
-                // Durante el arrastre solo se modifica la lista local; NO se escribe
+                // Durante el arrastre solo se modifica la copia temporal; NO se escribe
                 // en Room en cada movimiento.
-                sortedFavorites = sortedFavorites.toMutableList().apply {
+                val base = draggedOrder ?: sortedFavorites
+                draggedOrder = base.toMutableList().apply {
                     add(to.index, removeAt(from.index))
                 }
             }
@@ -171,19 +173,21 @@ fun FavoritesScreen(
                         // Mueve un paso la emisora (usado por las acciones de accesibilidad) y
                         // persiste el nuevo orden en una sola transacción de Room.
                         val moveOneStep: (Boolean) -> Boolean = { moveUp ->
-                            val currentIndex = sortedFavorites.indexOfFirst { it.id == station.id }
+                            val base = draggedOrder ?: sortedFavorites
+                            val currentIndex = base.indexOfFirst { it.id == station.id }
                             val targetIndex = if (moveUp) currentIndex - 1 else currentIndex + 1
                             if (currentIndex == -1 ||
                                 targetIndex < 0 ||
-                                targetIndex >= sortedFavorites.size
+                                targetIndex >= base.size
                             ) {
                                 false
                             } else {
-                                sortedFavorites = sortedFavorites.toMutableList().apply {
+                                val nuevaOrden = base.toMutableList().apply {
                                     val moved = removeAt(currentIndex)
                                     add(targetIndex, moved)
                                 }
-                                mainViewModel.reorderFavorites(sortedFavorites.map { it.id })
+                                draggedOrder = nuevaOrden
+                                mainViewModel.reorderFavorites(nuevaOrden.map { it.id })
                                 true
                             }
                         }
@@ -197,9 +201,9 @@ fun FavoritesScreen(
                                     onDragStopped = {
                                         isDragging = false
                                         // Guarda el nuevo orden en una sola transacción de Room.
-                                        mainViewModel.reorderFavorites(
-                                            sortedFavorites.map { it.id }
-                                        )
+                                        val ordenFinal = draggedOrder ?: favorites
+                                        mainViewModel.reorderFavorites(ordenFinal.map { it.id })
+                                        draggedOrder = null
                                     }
                                 )
                                 .animateItem()

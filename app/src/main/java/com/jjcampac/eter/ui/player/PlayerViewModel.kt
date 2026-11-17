@@ -139,7 +139,17 @@ class PlayerViewModel(
             diag("UI: onMediaItemTransition mediaId=$id reason=$reason", controller)
             viewModelScope.launch {
                 repository.getStation(id)?.let { emisora ->
-                    _state.update { it.copy(currentStation = emisora, errorMessage = null) }
+                    // Al cambiar de emisora se limpia la carátula del stream anterior.
+                    // Si la nueva no trae artwork, onMediaMetadataChanged no la repoblará
+                    // y CaratulaStream caerá al icono de iniciales de la emisora actual.
+                    _state.update {
+                        it.copy(
+                            currentStation = emisora,
+                            errorMessage = null,
+                            streamArtworkData = null,
+                            streamArtworkUri = null
+                        )
+                    }
                 }
             }
         }

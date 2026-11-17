@@ -57,6 +57,11 @@ class EterApplication : Application(), SingletonImageLoader.Factory {
         super.onCreate()
         // Cargar el idioma guardado en el flujo observado por la UI.
         AppLanguage.init(applicationContext)
+        // Forzar la inicialización del ImageLoader de Coil 3 al arrancar, para que
+        // los iconos de emisora (favicon/logo) estén disponibles desde el primer
+        // momento en cualquier pantalla (Favoritas, Estaciones, etc.) y no solo
+        // tras la primera reproducción en el reproductor.
+        SingletonImageLoader.get(applicationContext)
     }
 
     /**

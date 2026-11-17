@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,11 +98,16 @@ fun EstacionIcono(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize()
             ) {
-                when (painter.state.value) {
+                // IMPORTANTE: hay que observar el estado como State de Compose con
+                // collectAsState(). Leer painter.state.value a secas NO vuelve a
+                // recomponer la lambda al pasar de Loading a Success, así que el
+                // icono se quedaba en iniciales hasta salir y volver a la pantalla.
+                val estado by painter.state.collectAsState()
+                when (estado) {
                     is AsyncImagePainter.State.Success -> SubcomposeAsyncImageContent(
                         modifier = Modifier.fillMaxSize()
                     )
-                    // Vacío, cargando o error -> icono de iniciales (sin parpadeos).
+                    // Vacío, cargando o error -> iniciales de respaldo (sin parpadeos).
                     else -> InicialesBox(iniciales, fontSize)
                 }
             }
