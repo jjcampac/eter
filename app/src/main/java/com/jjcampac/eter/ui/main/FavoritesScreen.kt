@@ -230,6 +230,7 @@ fun FavoritesScreen(
                                     playerState.currentStation?.url == station.url,
                                 isPaused = playerState.currentStation?.url == station.url &&
                                     playerState.status == PlaybackStatus.PAUSED,
+                                isSelected = playerState.currentStation?.url == station.url,
                                 onClick = {
                                     if (!itemIsDragging) onStationClick(station)
                                 },

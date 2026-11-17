@@ -20,7 +20,13 @@
  */
 package com.jjcampac.eter.ui.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,18 +44,20 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jjcampac.eter.domain.model.Station
-import com.jjcampac.eter.ui.theme.EterShapeCard
 import com.jjcampac.eter.ui.theme.EterSurfaceCardDark
 import com.jjcampac.eter.ui.theme.EterSurfaceCardLight
 import com.jjcampac.eter.ui.theme.LocalEterDarkTheme
@@ -73,33 +81,85 @@ fun StationItem(
     onClick: () -> Unit,
     onFavoriteToggle: (() -> Unit)? = null,
     onEdit: (() -> Unit)? = null,
+    isSelected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    // Resaltado de la emisora en reproducción (rediseño):
-    //  - Sin borde gris (se veía básico).
-    //  - La tarjeta activa usa el MISMO fondo que el MiniPlayer: color `surface`
-    //    con tonalElevation = 12.dp. Eso aplica el overlay del surfaceTint (naranja
-    //    de marca) y la diferencia del resto de tarjetas neutras.
-    //  - Se eleva un poco (shadowElevation) para despegarla de la lista.
-    //  - Barra vertical fina en el borde izquierdo con el color primario (marca):
-    //    el recurso típico de "sonando ahora" en apps profesionales.
-    // El resto de tarjetas mantiene el color neutro de tarjeta por tema.
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressedState = interactionSource.collectIsPressedAsState()
+
+    StationItemContent(
+        station = station,
+        isCurrent = isCurrent,
+        isPlaying = isPlaying,
+        isPaused = isPaused,
+        isSelected = isSelected,
+        interactionSource = interactionSource,
+        isPressedState = isPressedState,
+        onClick = onClick,
+        onFavoriteToggle = onFavoriteToggle,
+        onEdit = onEdit,
+        modifier = modifier
+    )
+}
+
+/**
+ * Contenido de la fila de una emisora en las listas de la app.
+ *
+ * Se expone por separado de [StationItem] para poder previsualizar los estados
+ * normal, seleccionada y pulsada sin depender de un [MutableInteractionSource]
+ * real.
+ *
+ * Usa exclusivamente colores de MaterialTheme.colorScheme y formas de ui/theme.
+ * No hay colores sueltos en esta pantalla.
+ *
+ * @param isSelected true si la fila es la emisora seleccionada/en reproducción.
+ * @param interactionSource fuente de interacciones de la fila (una por fila).
+ * @param isPressedState estado de pulsación observado de [interactionSource].
+ */
+@Composable
+fun StationItemContent(
+    station: Station,
+    isCurrent: Boolean = false,
+    isPlaying: Boolean = false,
+    isPaused: Boolean = false,
+    isSelected: Boolean = false,
+    interactionSource: MutableInteractionSource,
+    isPressedState: State<Boolean>,
+    onClick: () -> Unit,
+    onFavoriteToggle: (() -> Unit)? = null,
+    onEdit: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
     val isHighlighted = isCurrent || isPlaying || isPaused
-    val cardColor = if (LocalEterDarkTheme.current) EterSurfaceCardDark else EterSurfaceCardLight
+    val isDarkTheme = LocalEterDarkTheme.current
+    val cardColor = if (isDarkTheme) EterSurfaceCardDark else EterSurfaceCardLight
     val accentBarColor = MaterialTheme.colorScheme.primary
 
-    Surface(
+    // Foco de teclado/D-pad (el toque ya no muestra indicación de ripple).
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    Box(
         // Toda la fila es pulsable: selecciona y reproduce la emisora (y hace
         // aparecer el mini reproductor). Los IconButton de la derecha consumen
         // sus propios toques, así que no interfieren.
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = EterShapeCard,
-        color = if (isHighlighted) MaterialTheme.colorScheme.surface else cardColor,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        tonalElevation = 12.dp,
-        shadowElevation = if (isHighlighted) 6.dp else 0.dp
+            .stationRowEffect(isSelected = isSelected, isPressedState = isPressedState)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null, // Sin ripple táctil: la retroalimentación es el efecto hundido de stationRowEffect.
+                onClick = onClick
+            )
+            .focusable(interactionSource = interactionSource)
+            .then(
+                if (isFocused) {
+                    // Indicador de foco accesible solo para teclado o D-pad.
+                    Modifier.border(1.dp, MaterialTheme.colorScheme.primary)
+                } else {
+                    Modifier
+                }
+            )
+            .semantics { selected = isSelected },
     ) {
         androidx.compose.foundation.layout.Row(
             modifier = Modifier

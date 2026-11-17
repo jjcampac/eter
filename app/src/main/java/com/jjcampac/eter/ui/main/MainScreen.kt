@@ -218,6 +218,7 @@ private fun LocalStationsSection(
                         LocalStationRow(
                             station = station,
                             playerState = playerState,
+                            isSelected = playerState.currentStation?.url == station.url,
                             onStationClick = onStationClick,
                             onToggleFavorite = onToggleFavorite,
                             onEditStation = onEditStation,
@@ -297,6 +298,7 @@ private fun InternetStationsSection(
                             playerState.currentStation?.url == station.url,
                         isPaused = playerState.currentStation?.url == station.url &&
                             playerState.status == PlaybackStatus.PAUSED,
+                        isSelected = playerState.currentStation?.url == station.url,
                         onClick = { onStationClick(station) },
                         onFavoriteToggle = { onToggleFavorite(station) },
                         onEdit = null
@@ -333,10 +335,12 @@ private fun LocalStationRow(
     onStationClick: (Station) -> Unit,
     onToggleFavorite: (Station) -> Unit,
     onEditStation: (Station) -> Unit,
+    isSelected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     StationItem(
         station = station,
+        isSelected = isSelected,
         isCurrent = playerState.currentStation?.url == station.url,
         isPlaying = playerState.status == PlaybackStatus.PLAYING &&
             playerState.currentStation?.url == station.url,
