@@ -12,7 +12,7 @@ plugins {
 
 /** Versión base de la app (sin sufijo de build). El sufijo "d"/"r" se añade
  *  en cada build type para distinguir debug de release. */
-val baseVersionName = "1.0.1"
+val baseVersionName = "1.1.0"
 
 /** Credenciales de la keystore de release. El fichero no se versiona (contiene
  *  contraseñas). Si no existe, la variante release se firma con la keystore de
