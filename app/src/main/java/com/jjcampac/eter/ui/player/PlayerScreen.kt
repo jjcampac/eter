@@ -82,6 +82,13 @@ import com.jjcampac.eter.ui.theme.EterCoverSize
 import com.jjcampac.eter.ui.theme.EterPlayButtonSize
 import com.jjcampac.eter.ui.theme.EterShapeCover
 import kotlin.math.ceil
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.ScreenPreviews
+import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.PreviewData
+import androidx.compose.material3.Surface
+import com.jjcampac.eter.player.PlayerState
+import com.jjcampac.eter.ui.theme.ThemePreviews
 
 private const val TAG = "PlayerScreen"
 
@@ -121,6 +128,50 @@ fun PlayerScreen(
     Log.d(TAG, "PlayerScreen() station=${station.name} url=${station.url}")
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
     val sleepTimerState by sleepTimer.state.collectAsStateWithLifecycle()
+
+    PlayerScreenContent(
+        station = station,
+        playerState = playerState,
+        sleepTimerState = sleepTimerState,
+        selectedTimerMinutes = sleepTimer.selectedMinutes(),
+        onBack = onBack,
+        onPlayPause = { target -> playerViewModel.togglePlay(target) },
+        onPrevious = { playerViewModel.prevFavorite() },
+        onNext = { playerViewModel.nextFavorite() },
+        onToggleFavorite = onToggleFavorite,
+        onTimerSelected = { minutes ->
+            if (minutes <= 0) sleepTimer.stop() else sleepTimer.start(minutes)
+        },
+        canSkipPrevious = canSkipPrevious,
+        canSkipNext = canSkipNext,
+        modifier = modifier
+    )
+}
+
+/**
+ * Contenido sin estado del reproductor a pantalla completa: recibe la emisora,
+ * el estado de reproducción y del temporizador, y las acciones como parámetros.
+ *
+ * Se expone por separado de [PlayerScreen] para poder previsualizar los estados
+ * reproduciendo, en pausa, cargando y con error sin Media3 ni ViewModel.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun PlayerScreenContent(
+    station: Station,
+    playerState: PlayerState,
+    sleepTimerState: SleepTimer.State,
+    selectedTimerMinutes: Int,
+    onBack: () -> Unit,
+    onPlayPause: (Station) -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    onToggleFavorite: ((Station) -> Unit)? = null,
+    onTimerSelected: (Int) -> Unit = {},
+    canSkipPrevious: Boolean = true,
+    canSkipNext: Boolean = true,
+    modifier: Modifier = Modifier
+) {
     var showTimerDialog by rememberSaveable { mutableStateOf(false) }
 
     // La emisora mostrada es la que está cargada en el reproductor: al saltar a la
@@ -301,7 +352,7 @@ fun PlayerScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedIconButton(
-                    onClick = { playerViewModel.prevFavorite() },
+                    onClick = onPrevious,
                     enabled = canSkipPrevious,
                     modifier = Modifier.size(56.dp)
                 ) {
@@ -315,7 +366,7 @@ fun PlayerScreen(
                 Spacer(modifier = Modifier.width(28.dp))
 
                 FilledIconButton(
-                    onClick = { playerViewModel.togglePlay(displayedStation) },
+                    onClick = { onPlayPause(displayedStation) },
                     modifier = Modifier.size(EterPlayButtonSize)
                 ) {
                     Icon(
@@ -330,7 +381,7 @@ fun PlayerScreen(
                 Spacer(modifier = Modifier.width(28.dp))
 
                 OutlinedIconButton(
-                    onClick = { playerViewModel.nextFavorite() },
+                    onClick = onNext,
                     enabled = canSkipNext,
                     modifier = Modifier.size(56.dp)
                 ) {
@@ -377,7 +428,11 @@ fun PlayerScreen(
 
     // Selector de minutos del temporizador (mismas opciones que en Ajustes).
     if (showTimerDialog) {
-        TimerDialog(sleepTimer = sleepTimer, onDismiss = { showTimerDialog = false })
+        TimerDialog(
+            selectedMinutes = selectedTimerMinutes,
+            onSelectMinutes = onTimerSelected,
+            onDismiss = { showTimerDialog = false }
+        )
     }
 }
 
@@ -389,7 +444,8 @@ fun PlayerScreen(
  */
 @Composable
 private fun TimerDialog(
-    sleepTimer: SleepTimer,
+    selectedMinutes: Int,
+    onSelectMinutes: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
     val options = listOf(
@@ -399,7 +455,6 @@ private fun TimerDialog(
         45 to R.string.sleep_45,
         60 to R.string.sleep_60
     )
-    val selectedMinutes = sleepTimer.selectedMinutes()
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -414,7 +469,7 @@ private fun TimerDialog(
                                 selected = selectedMinutes == minutes,
                                 role = Role.RadioButton,
                                 onClick = {
-                                    if (minutes == 0) sleepTimer.stop() else sleepTimer.start(minutes)
+                                    onSelectMinutes(minutes)
                                     onDismiss()
                                 }
                             )
@@ -440,4 +495,82 @@ private fun TimerDialog(
             }
         }
     )
+}
+
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/**
+ * Envoltorio de las previews: tema de la app y fondo, sin Media3 ni ViewModel.
+ * La carátula cae en las iniciales de la emisora (no se descarga nada).
+ */
+@Composable
+private fun PlayerScreenPreviewContainer(
+    playerState: PlayerState,
+    sleepTimerState: SleepTimer.State = PreviewData.temporizadorApagado
+) {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            PlayerScreenContent(
+                station = PreviewData.copeSevilla,
+                playerState = playerState,
+                sleepTimerState = sleepTimerState,
+                selectedTimerMinutes = 30,
+                onBack = {},
+                onPlayPause = {},
+                onPrevious = {},
+                onNext = {},
+                onToggleFavorite = {}
+            )
+        }
+    }
+}
+
+/** Reproductor en directo con título ICY. */
+@ScreenPreviews
+@Composable
+private fun PlayerScreenReproduciendoPreview() =
+    PlayerScreenPreviewContainer(PreviewData.reproduciendo())
+
+/** Reproductor en pausa. */
+@ScreenPreviews
+@Composable
+private fun PlayerScreenEnPausaPreview() =
+    PlayerScreenPreviewContainer(PreviewData.enPausa())
+
+/** Reproductor conectando con el stream. */
+@ScreenPreviews
+@Composable
+private fun PlayerScreenCargandoPreview() =
+    PlayerScreenPreviewContainer(PreviewData.cargando())
+
+/** Reproductor con error de conexión (texto de error en rojo). */
+@ScreenPreviews
+@Composable
+private fun PlayerScreenErrorPreview() =
+    PlayerScreenPreviewContainer(PreviewData.conError())
+
+/** Reproductor con el temporizador para dormir en marcha. */
+@ScreenPreviews
+@Composable
+private fun PlayerScreenConTemporizadorPreview() = PlayerScreenPreviewContainer(
+    playerState = PreviewData.reproduciendo(),
+    sleepTimerState = PreviewData.temporizadorActivo
+)
+
+/** Diálogo de selección de minutos del temporizador para dormir. */
+@ThemePreviews
+@Composable
+private fun TimerDialogPreview() {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        TimerDialog(
+            selectedMinutes = 30,
+            onSelectMinutes = {},
+            onDismiss = {}
+        )
+    }
 }

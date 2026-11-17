@@ -47,7 +47,11 @@ import com.jjcampac.eter.R
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.player.PlayerState
 import com.jjcampac.eter.player.SleepTimer
+import com.jjcampac.eter.ui.PreviewData
 import com.jjcampac.eter.ui.theme.EterShapePanel
+import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.ThemePreviews
 
 /**
  * Mini reproductor compacto que se muestra sobre la barra de navegación.
@@ -64,12 +68,35 @@ fun MiniPlayer(
     onPlayPause: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val sleepTimerState by sleepTimer.state.collectAsState()
+    MiniPlayerContent(
+        playerState = playerState,
+        sleepTimerState = sleepTimerState,
+        onClick = onClick,
+        onPlayPause = onPlayPause,
+        modifier = modifier
+    )
+}
+
+/**
+ * Contenido sin estado del mini reproductor: recibe el estado del reproductor y
+ * del temporizador como parámetros, sin ViewModel ni dependencias reales.
+ *
+ * Se expone por separado de [MiniPlayer] para poder previsualizarlo en sus
+ * cuatro estados (reproduciendo, en pausa, cargando y error).
+ */
+@Composable
+fun MiniPlayerContent(
+    playerState: PlayerState,
+    sleepTimerState: SleepTimer.State,
+    onClick: () -> Unit,
+    onPlayPause: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val station = playerState.currentStation ?: return
 
     val isThisStation = playerState.currentStation?.url == station.url
     val isPlaying = isThisStation && playerState.status == PlaybackStatus.PLAYING
-
-    val sleepTimerState by sleepTimer.state.collectAsState()
 
     // Segunda línea del mini reproductor: el título de la canción solo se
     // muestra mientras la emisora está en reproducción. En pausa, conectando,
@@ -163,4 +190,70 @@ fun MiniPlayer(
         }
     }
 }
+
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/** Envoltorio común: tema de la app y fondo, sin ViewModel ni reproductor real. */
+@Composable
+private fun MiniPlayerPreviewContainer(
+    playerState: PlayerState,
+    sleepTimerState: SleepTimer.State
+) {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            MiniPlayerContent(
+                playerState = playerState,
+                sleepTimerState = sleepTimerState,
+                onClick = {},
+                onPlayPause = {},
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
+
+/** Mini reproductor reproduciendo "En directo" con el título ICY. */
+@ThemePreviews
+@Composable
+private fun MiniPlayerReproduciendoPreview() = MiniPlayerPreviewContainer(
+    playerState = PreviewData.reproduciendo(),
+    sleepTimerState = PreviewData.temporizadorApagado
+)
+
+/** Mini reproductor en pausa. */
+@ThemePreviews
+@Composable
+private fun MiniPlayerEnPausaPreview() = MiniPlayerPreviewContainer(
+    playerState = PreviewData.enPausa(),
+    sleepTimerState = PreviewData.temporizadorApagado
+)
+
+/** Mini reproductor conectando con el stream. */
+@ThemePreviews
+@Composable
+private fun MiniPlayerCargandoPreview() = MiniPlayerPreviewContainer(
+    playerState = PreviewData.cargando(),
+    sleepTimerState = PreviewData.temporizadorApagado
+)
+
+/** Mini reproductor con error de conexión. */
+@ThemePreviews
+@Composable
+private fun MiniPlayerErrorPreview() = MiniPlayerPreviewContainer(
+    playerState = PreviewData.conError(),
+    sleepTimerState = PreviewData.temporizadorApagado
+)
+
+/** Mini reproductor con el temporizador para dormir activo. */
+@ThemePreviews
+@Composable
+private fun MiniPlayerConTemporizadorPreview() = MiniPlayerPreviewContainer(
+    playerState = PreviewData.reproduciendo(),
+    sleepTimerState = PreviewData.temporizadorActivo
+)
 

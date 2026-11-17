@@ -9,6 +9,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Caché generada por el compilador de Kotlin (KSP)
+.kotlin/
 # Credenciales de firma (contraseñas): nunca versionar
 /keystore.properties
 # Keystore de firma de release (clave privada): no versionar

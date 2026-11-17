@@ -20,7 +20,6 @@
  */
 package com.jjcampac.eter.ui.components
 
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -38,6 +37,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.jjcampac.eter.ui.theme.ThemePreviews
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.EterTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
 
 @Composable
 fun AnimatedWavesIcon(
@@ -78,6 +84,27 @@ fun AnimatedWavesIcon(
                 size = Size(barWidth, h),
                 cornerRadius = CornerRadius(barWidth / 2f)
             )
+        }
+    }
+}
+
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/** Ondas animadas en el color de acento del tema (icono de "en directo"). */
+@ThemePreviews
+@Composable
+private fun AnimatedWavesIconPreview() {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Box(modifier = Modifier.padding(24.dp)) {
+                AnimatedWavesIcon(
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(64.dp),
+                    contentDescription = "En directo"
+                )
+            }
         }
     }
 }

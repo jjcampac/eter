@@ -51,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -61,8 +62,19 @@ import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.ui.components.EterWatermark
+import com.jjcampac.eter.ui.components.SELECTED_ROW_Z_INDEX
 import com.jjcampac.eter.ui.components.StationItem
 import com.jjcampac.eter.ui.player.PlayerViewModel
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.ScreenPreviews
+import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.components.EterTopAppBar
+import com.jjcampac.eter.ui.components.EterNavigationBar
+import com.jjcampac.eter.ui.PreviewData
+import com.jjcampac.eter.player.PlayerState
+import androidx.compose.material3.Scaffold
+import com.jjcampac.eter.ui.theme.ThemePreviews
+import androidx.compose.material3.Surface
 
 /**
  * Pestaña "Estaciones": buscador y catálogo de emisoras.
@@ -85,6 +97,44 @@ fun MainScreen(
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
 
+    MainScreenContent(
+        uiState = uiState,
+        playerState = playerState,
+        onSourceChange = mainViewModel::onSourceChange,
+        onQueryChange = mainViewModel::onQueryChange,
+        onCountryChange = mainViewModel::onCountryChange,
+        onGenreChange = mainViewModel::onGenreChange,
+        onStationClick = onStationClick,
+        onEditStation = onEditStation,
+        onDeleteStation = onDeleteStation,
+        onToggleFavorite = onToggleFavorite,
+        onRetry = mainViewModel::retrySearch,
+        modifier = modifier
+    )
+}
+
+/**
+ * Contenido sin estado de la pestaña "Estaciones": recibe el estado de la
+ * pantalla y las acciones como parámetros, sin ViewModel ni red.
+ *
+ * Se expone por separado de [MainScreen] para poder previsualizar la búsqueda
+ * local, la de Internet, el estado de carga y el de error.
+ */
+@Composable
+internal fun MainScreenContent(
+    uiState: MainUiState,
+    playerState: PlayerState,
+    onSourceChange: (SearchSource) -> Unit,
+    onQueryChange: (String) -> Unit,
+    onCountryChange: (String) -> Unit,
+    onGenreChange: (String) -> Unit,
+    onStationClick: (Station) -> Unit,
+    onEditStation: (Station) -> Unit,
+    onDeleteStation: (Station) -> Unit,
+    onToggleFavorite: (Station) -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -97,19 +147,19 @@ fun MainScreen(
         ) {
             FilterChip(
                 selected = uiState.source == SearchSource.INTERNET,
-                onClick = { mainViewModel.onSourceChange(SearchSource.INTERNET) },
+                onClick = { onSourceChange(SearchSource.INTERNET) },
                 label = { Text(stringResource(R.string.search_source_internet)) }
             )
             FilterChip(
                 selected = uiState.source == SearchSource.LOCAL,
-                onClick = { mainViewModel.onSourceChange(SearchSource.LOCAL) },
+                onClick = { onSourceChange(SearchSource.LOCAL) },
                 label = { Text(stringResource(R.string.search_source_local)) }
             )
         }
 
         OutlinedTextField(
             value = uiState.query,
-            onValueChange = mainViewModel::onQueryChange,
+            onValueChange = onQueryChange,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
@@ -128,14 +178,14 @@ fun MainScreen(
             ) {
                 OutlinedTextField(
                     value = uiState.country,
-                    onValueChange = mainViewModel::onCountryChange,
+                    onValueChange = onCountryChange,
                     modifier = Modifier.weight(1f),
                     label = { Text(stringResource(R.string.search_country_label)) },
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = uiState.genre,
-                    onValueChange = mainViewModel::onGenreChange,
+                    onValueChange = onGenreChange,
                     modifier = Modifier.weight(1f),
                     label = { Text(stringResource(R.string.search_genre_label)) },
                     singleLine = true
@@ -158,7 +208,7 @@ fun MainScreen(
                 playerState = playerState,
                 onStationClick = onStationClick,
                 onToggleFavorite = onToggleFavorite,
-                onRetry = mainViewModel::retrySearch
+                onRetry = onRetry
             )
         }
     }
@@ -214,10 +264,19 @@ private fun LocalStationsSection(
                     // izquierda. Para que TalkBack pueda hacerlo sin gesto, se añade
                     // la misma acción a la propia fila.
                     val etiquetaEliminar = stringResource(R.string.delete_station)
-                    SwipeToDelete(onDelete = { onDeleteStation(station) }) {
+                    val esSeleccionada = playerState.currentStation?.url == station.url
+                    SwipeToDelete(
+                        onDelete = { onDeleteStation(station) },
+                        // La emisora en reproducción sube de capa para que su sombra
+                        // proyectada se dibuje sobre la fila siguiente.
+                        modifier = Modifier.zIndex(
+                            if (esSeleccionada) SELECTED_ROW_Z_INDEX else 0f
+                        )
+                    ) {
                         LocalStationRow(
                             station = station,
                             playerState = playerState,
+                            isSelected = esSeleccionada,
                             onStationClick = onStationClick,
                             onToggleFavorite = onToggleFavorite,
                             onEditStation = onEditStation,
@@ -290,16 +349,23 @@ private fun InternetStationsSection(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 items(uiState.internetStations, key = { it.id }) { station ->
+                    val esSeleccionada = playerState.currentStation?.url == station.url
                     StationItem(
                         station = station,
-                        isCurrent = playerState.currentStation?.url == station.url,
+                        isCurrent = esSeleccionada,
                         isPlaying = playerState.status == PlaybackStatus.PLAYING &&
-                            playerState.currentStation?.url == station.url,
-                        isPaused = playerState.currentStation?.url == station.url &&
+                            esSeleccionada,
+                        isPaused = esSeleccionada &&
                             playerState.status == PlaybackStatus.PAUSED,
+                        isSelected = esSeleccionada,
                         onClick = { onStationClick(station) },
                         onFavoriteToggle = { onToggleFavorite(station) },
-                        onEdit = null
+                        onEdit = null,
+                        // Sube de capa para que la sombra proyectada se dibuje
+                        // sobre la fila siguiente.
+                        modifier = Modifier.zIndex(
+                            if (esSeleccionada) SELECTED_ROW_Z_INDEX else 0f
+                        )
                     )
                 }
             }
@@ -333,10 +399,12 @@ private fun LocalStationRow(
     onStationClick: (Station) -> Unit,
     onToggleFavorite: (Station) -> Unit,
     onEditStation: (Station) -> Unit,
+    isSelected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     StationItem(
         station = station,
+        isSelected = isSelected,
         isCurrent = playerState.currentStation?.url == station.url,
         isPlaying = playerState.status == PlaybackStatus.PLAYING &&
             playerState.currentStation?.url == station.url,
@@ -360,6 +428,7 @@ private fun LocalStationRow(
 @Composable
 private fun SwipeToDelete(
     onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
@@ -373,7 +442,7 @@ private fun SwipeToDelete(
 
     SwipeToDismissBox(
         state = dismissState,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         enableDismissFromStartToEnd = false,
         backgroundContent = {
             Box(
@@ -392,5 +461,104 @@ private fun SwipeToDelete(
         }
     ) {
         content()
+    }
+}
+
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/**
+ * Envoltorio de las previews de la pantalla: tema, Scaffold real (barra
+ * superior con el título de "Estaciones" y barra de navegación) y contenido.
+ */
+@Composable
+private fun MainScreenPreviewContainer(
+    uiState: MainUiState,
+    playerState: PlayerState
+) {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = MaterialTheme.colorScheme.background,
+            topBar = { EterTopAppBar(title = stringResource(R.string.all_stations)) },
+            bottomBar = { EterNavigationBar(selectedTab = 1, onTabSelected = {}) }
+        ) { innerPadding ->
+            MainScreenContent(
+                uiState = uiState,
+                playerState = playerState,
+                onSourceChange = {},
+                onQueryChange = {},
+                onCountryChange = {},
+                onGenreChange = {},
+                onStationClick = {},
+                onEditStation = {},
+                onDeleteStation = {},
+                onToggleFavorite = {},
+                onRetry = {},
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            )
+        }
+    }
+}
+
+/** "Internet" con resultados de Radio Browser. */
+@ScreenPreviews
+@Composable
+private fun MainScreenInternetConResultadosPreview() = MainScreenPreviewContainer(
+    uiState = PreviewData.mainInternetConResultados,
+    playerState = PreviewData.reproduciendo(PreviewData.copeSevilla)
+)
+
+/** "Internet" mientras se consulta la API (indicador de progreso). */
+@ScreenPreviews
+@Composable
+private fun MainScreenInternetBuscandoPreview() = MainScreenPreviewContainer(
+    uiState = PreviewData.mainInternetBuscando,
+    playerState = PlayerState()
+)
+
+/** "Internet" con error de conexión y botón de reintentar. */
+@ScreenPreviews
+@Composable
+private fun MainScreenInternetConErrorPreview() = MainScreenPreviewContainer(
+    uiState = PreviewData.mainInternetConError,
+    playerState = PlayerState()
+)
+
+/** "Internet" sin consulta escrita (mensaje de ayuda). */
+@ScreenPreviews
+@Composable
+private fun MainScreenInternetSinConsultaPreview() = MainScreenPreviewContainer(
+    uiState = PreviewData.mainInternetSinConsulta,
+    playerState = PlayerState()
+)
+
+/** "Mis emisoras" con emisoras manuales. */
+@ScreenPreviews
+@Composable
+private fun MainScreenLocalConEmisorasPreview() = MainScreenPreviewContainer(
+    uiState = PreviewData.mainLocalConEmisoras,
+    playerState = PreviewData.reproduciendo(PreviewData.emisoraManual)
+)
+
+/** "Mis emisoras" vacía. */
+@ScreenPreviews
+@Composable
+private fun MainScreenLocalVaciaPreview() = MainScreenPreviewContainer(
+    uiState = PreviewData.mainLocalVacia,
+    playerState = PlayerState()
+)
+
+/** Mensaje de estado vacío o sin resultados de la lista. */
+@ThemePreviews
+@Composable
+private fun EmptyStateMessagePreview() {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            EmptyStateMessage(text = stringResource(R.string.no_results))
+        }
     }
 }

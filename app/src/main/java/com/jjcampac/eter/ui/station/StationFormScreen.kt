@@ -43,11 +43,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jjcampac.eter.R
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.ScreenPreviews
+import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.PreviewData
+import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +63,39 @@ fun StationFormScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
+    StationFormContent(
+        state = state,
+        onNameChange = viewModel::onNameChange,
+        onUrlChange = viewModel::onUrlChange,
+        onImageUrlChange = viewModel::onImageUrlChange,
+        onCountryChange = viewModel::onCountryChange,
+        onGenreChange = viewModel::onGenreChange,
+        onSave = { viewModel.save(onSaved) },
+        onBack = onBack,
+        modifier = modifier
+    )
+}
+
+/**
+ * Contenido sin estado del formulario de emisora: recibe el estado y las
+ * acciones como parámetros, sin ViewModel ni repositorio.
+ *
+ * Se expone por separado de [StationFormScreen] para poder previsualizar el
+ * alta, la edición, el guardado en curso y el error.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun StationFormContent(
+    state: StationFormUiState,
+    onNameChange: (String) -> Unit,
+    onUrlChange: (String) -> Unit,
+    onImageUrlChange: (String) -> Unit,
+    onCountryChange: (String) -> Unit,
+    onGenreChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -84,14 +121,14 @@ fun StationFormScreen(
         ) {
             OutlinedTextField(
                 value = state.name,
-                onValueChange = viewModel::onNameChange,
+                onValueChange = onNameChange,
                 label = { Text("Nombre") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
             OutlinedTextField(
                 value = state.url,
-                onValueChange = viewModel::onUrlChange,
+                onValueChange = onUrlChange,
                 label = { Text("URL del stream") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -100,21 +137,21 @@ fun StationFormScreen(
             // carátula del reproductor y en la notificación.
             OutlinedTextField(
                 value = state.imageUrl,
-                onValueChange = viewModel::onImageUrlChange,
+                onValueChange = onImageUrlChange,
                 label = { Text("URL del favicon (opcional)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
             OutlinedTextField(
                 value = state.country,
-                onValueChange = viewModel::onCountryChange,
+                onValueChange = onCountryChange,
                 label = { Text("País (opcional)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
             OutlinedTextField(
                 value = state.genre,
-                onValueChange = viewModel::onGenreChange,
+                onValueChange = onGenreChange,
                 label = { Text("Género (opcional)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -133,7 +170,7 @@ fun StationFormScreen(
                     CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp))
                 }
                 Button(
-                    onClick = { viewModel.save(onSaved) },
+                    onClick = onSave,
                     enabled = state.isValid && !state.isSaving
                 ) {
                     Text("Guardar")
@@ -142,3 +179,49 @@ fun StationFormScreen(
         }
     }
 }
+
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/** Envoltorio de las previews: tema de la app y fondo, sin ViewModel. */
+@Composable
+private fun StationFormPreviewContainer(state: StationFormUiState) {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            StationFormContent(
+                state = state,
+                onNameChange = {},
+                onUrlChange = {},
+                onImageUrlChange = {},
+                onCountryChange = {},
+                onGenreChange = {},
+                onSave = {},
+                onBack = {}
+            )
+        }
+    }
+}
+
+/** Alta de emisora: formulario en blanco. */
+@ScreenPreviews
+@Composable
+private fun StationFormAltaPreview() = StationFormPreviewContainer(PreviewData.formularioNuevo)
+
+/** Edición de una emisora existente (campos rellenos). */
+@ScreenPreviews
+@Composable
+private fun StationFormEdicionPreview() = StationFormPreviewContainer(PreviewData.formularioEdicion)
+
+/** Guardando: indicador de progreso y botón deshabilitado. */
+@ScreenPreviews
+@Composable
+private fun StationFormGuardandoPreview() = StationFormPreviewContainer(PreviewData.formularioGuardando)
+
+/** Error al guardar la emisora. */
+@ScreenPreviews
+@Composable
+private fun StationFormErrorPreview() = StationFormPreviewContainer(PreviewData.formularioConError)
