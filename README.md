@@ -209,7 +209,7 @@ Objetivo: que Eter aparezca en el coche como app de audio, sin desarrollar panta
 | Post-5 | Botón de favorita del reproductor: el icono refleja el estado real de Room | ✅ Completada (probada en dispositivo) |
 | Post-5 | Formulario de emisora: campo opcional de favicon y normalización de espacios en las URL | ✅ Completada (probada en dispositivo) |
 | Post-5 | Logos de emisora no se actualizaban (Favoritas y reproductor): `painter.state.value` no recomponía; arreglado con `collectAsState()` en `EstacionIcono`/`CaratulaStream` | ✅ Completada (verificada en dispositivo con captura y logcat) |
-| Post-5 | Filas de emisora: efecto elevado en la seleccionada (sombra 8 dp, reflejo superior, fondo del MiniPlayer) y hundido al pulsar (sin ripple), con foco de teclado/D-pad y previews en claro/oscuro | ✅ Completada (build debug/release y tests OK; probada en dispositivo en oscuro y claro) |
+| Post-5 | Filas de emisora: efecto elevado en la seleccionada (fondo tonal del MiniPlayer, reflejo superior y sombra proyectada sobre la fila siguiente) y hundido al pulsar (sombra interior, sin ripple), ajustado a las capturas de referencia, con foco de teclado/D-pad y previews en claro/oscuro | ✅ Completada (build debug/release y tests OK; probada en dispositivo y comparada con las capturas) |
 
 ---
 

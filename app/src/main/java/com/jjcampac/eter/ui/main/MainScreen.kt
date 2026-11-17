@@ -51,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -61,6 +62,7 @@ import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.ui.components.EterWatermark
+import com.jjcampac.eter.ui.components.SELECTED_ROW_Z_INDEX
 import com.jjcampac.eter.ui.components.StationItem
 import com.jjcampac.eter.ui.player.PlayerViewModel
 
@@ -214,11 +216,19 @@ private fun LocalStationsSection(
                     // izquierda. Para que TalkBack pueda hacerlo sin gesto, se añade
                     // la misma acción a la propia fila.
                     val etiquetaEliminar = stringResource(R.string.delete_station)
-                    SwipeToDelete(onDelete = { onDeleteStation(station) }) {
+                    val esSeleccionada = playerState.currentStation?.url == station.url
+                    SwipeToDelete(
+                        onDelete = { onDeleteStation(station) },
+                        // La emisora en reproducción sube de capa para que su sombra
+                        // proyectada se dibuje sobre la fila siguiente.
+                        modifier = Modifier.zIndex(
+                            if (esSeleccionada) SELECTED_ROW_Z_INDEX else 0f
+                        )
+                    ) {
                         LocalStationRow(
                             station = station,
                             playerState = playerState,
-                            isSelected = playerState.currentStation?.url == station.url,
+                            isSelected = esSeleccionada,
                             onStationClick = onStationClick,
                             onToggleFavorite = onToggleFavorite,
                             onEditStation = onEditStation,
@@ -291,17 +301,23 @@ private fun InternetStationsSection(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 items(uiState.internetStations, key = { it.id }) { station ->
+                    val esSeleccionada = playerState.currentStation?.url == station.url
                     StationItem(
                         station = station,
-                        isCurrent = playerState.currentStation?.url == station.url,
+                        isCurrent = esSeleccionada,
                         isPlaying = playerState.status == PlaybackStatus.PLAYING &&
-                            playerState.currentStation?.url == station.url,
-                        isPaused = playerState.currentStation?.url == station.url &&
+                            esSeleccionada,
+                        isPaused = esSeleccionada &&
                             playerState.status == PlaybackStatus.PAUSED,
-                        isSelected = playerState.currentStation?.url == station.url,
+                        isSelected = esSeleccionada,
                         onClick = { onStationClick(station) },
                         onFavoriteToggle = { onToggleFavorite(station) },
-                        onEdit = null
+                        onEdit = null,
+                        // Sube de capa para que la sombra proyectada se dibuje
+                        // sobre la fila siguiente.
+                        modifier = Modifier.zIndex(
+                            if (esSeleccionada) SELECTED_ROW_Z_INDEX else 0f
+                        )
                     )
                 }
             }
@@ -364,6 +380,7 @@ private fun LocalStationRow(
 @Composable
 private fun SwipeToDelete(
     onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
@@ -377,7 +394,7 @@ private fun SwipeToDelete(
 
     SwipeToDismissBox(
         state = dismissState,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         enableDismissFromStartToEnd = false,
         backgroundContent = {
             Box(

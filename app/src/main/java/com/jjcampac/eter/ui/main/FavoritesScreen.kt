@@ -55,11 +55,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.ui.components.EterWatermark
+import com.jjcampac.eter.ui.components.SELECTED_ROW_Z_INDEX
 import com.jjcampac.eter.ui.components.StationItem
 import com.jjcampac.eter.ui.player.PlayerViewModel
 import sh.calvin.reorderable.ReorderableItem
@@ -168,8 +170,20 @@ fun FavoritesScreen(
                 items(stations, key = { it.id }) { station ->
                     ReorderableItem(
                         state = reorderableState,
-                        key = station.id
+                        key = station.id,
+                        // La emisora en reproducción sube de capa para que su sombra
+                        // proyectada se dibuje sobre la fila siguiente.
+                        modifier = Modifier.zIndex(
+                            if (playerState.currentStation?.url == station.url) {
+                                SELECTED_ROW_Z_INDEX
+                            } else {
+                                0f
+                            }
+                        )
                     ) { itemIsDragging ->
+                        // Emisora en reproducción: sube de capa para que la sombra
+                        // proyectada se dibuje sobre la fila siguiente.
+                        val esSeleccionada = playerState.currentStation?.url == station.url
                         // Mueve un paso la emisora (usado por las acciones de accesibilidad) y
                         // persiste el nuevo orden en una sola transacción de Room.
                         val moveOneStep: (Boolean) -> Boolean = { moveUp ->
@@ -225,12 +239,12 @@ fun FavoritesScreen(
                         ) {
                             StationItem(
                                 station = station,
-                                isCurrent = playerState.currentStation?.url == station.url,
+                                isCurrent = esSeleccionada,
                                 isPlaying = playerState.status == PlaybackStatus.PLAYING &&
-                                    playerState.currentStation?.url == station.url,
-                                isPaused = playerState.currentStation?.url == station.url &&
+                                    esSeleccionada,
+                                isPaused = esSeleccionada &&
                                     playerState.status == PlaybackStatus.PAUSED,
-                                isSelected = playerState.currentStation?.url == station.url,
+                                isSelected = esSeleccionada,
                                 onClick = {
                                     if (!itemIsDragging) onStationClick(station)
                                 },
