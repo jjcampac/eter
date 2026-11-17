@@ -44,10 +44,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jjcampac.eter.domain.model.Station
-import com.jjcampac.eter.ui.theme.EterOutlineColor
 import com.jjcampac.eter.ui.theme.EterShapeCard
 import com.jjcampac.eter.ui.theme.EterSurfaceCardDark
 import com.jjcampac.eter.ui.theme.EterSurfaceCardLight
@@ -74,16 +75,18 @@ fun StationItem(
     onEdit: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    // Las tarjetas usan el MISMO componente y tono que el mini reproductor (MiniPlayer.kt:
-    // Surface de color surface con tonalElevation = 12.dp). Así el overlay del surfaceTint
-    // (naranja de marca) aclara la tarjeta y deja de confundirse con el fondo de la app.
-    // En el estado actual/reproduciendo se mantiene el realce con primaryContainer y borde.
-    // El fondo de la tarjeta es SIEMPRE el mismo (surface), tanto para la emisora
-    // actual/en reproducción como para el resto. La selección solo se remarca con
-    // el borde (EterOutlineColor), que se atenúa en el tema oscuro para no brillar.
-    // Usar color de tarjeta específico para tema oscuro: #1f2126
-    val hasBorder = isCurrent || isPlaying
+    // Resaltado de la emisora en reproducción (rediseño):
+    //  - Sin borde gris (se veía básico).
+    //  - La tarjeta activa usa el MISMO fondo que el MiniPlayer: color `surface`
+    //    con tonalElevation = 12.dp. Eso aplica el overlay del surfaceTint (naranja
+    //    de marca) y la diferencia del resto de tarjetas neutras.
+    //  - Se eleva un poco (shadowElevation) para despegarla de la lista.
+    //  - Barra vertical fina en el borde izquierdo con el color primario (marca):
+    //    el recurso típico de "sonando ahora" en apps profesionales.
+    // El resto de tarjetas mantiene el color neutro de tarjeta por tema.
+    val isHighlighted = isCurrent || isPlaying || isPaused
     val cardColor = if (LocalEterDarkTheme.current) EterSurfaceCardDark else EterSurfaceCardLight
+    val accentBarColor = MaterialTheme.colorScheme.primary
 
     Surface(
         // Toda la fila es pulsable: selecciona y reproduce la emisora (y hace
@@ -93,16 +96,27 @@ fun StationItem(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = EterShapeCard,
-        color = cardColor,
+        color = if (isHighlighted) MaterialTheme.colorScheme.surface else cardColor,
         contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = 12.dp,
-        border = if (hasBorder)
-            androidx.compose.foundation.BorderStroke(2.dp, EterOutlineColor())
-        else null
+        shadowElevation = if (isHighlighted) 6.dp else 0.dp
     ) {
         androidx.compose.foundation.layout.Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(
+                    if (isHighlighted) {
+                        // Barra de acento en el borde izquierdo (altura completa).
+                        Modifier.drawBehind {
+                            drawRect(
+                                color = accentBarColor,
+                                size = Size(4.dp.toPx(), size.height)
+                            )
+                        }
+                    } else {
+                        Modifier
+                    }
+                )
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
