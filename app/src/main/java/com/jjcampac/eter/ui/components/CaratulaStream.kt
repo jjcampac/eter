@@ -23,9 +23,11 @@ package com.jjcampac.eter.ui.components
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +38,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.ThemePreviews
 import coil3.compose.AsyncImagePainter
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.SubcomposeAsyncImageContent
@@ -113,6 +118,32 @@ fun CaratulaStream(
                     size = size,
                     contentDescription = contentDescription,
                     shape = shape
+                )
+            }
+        }
+    }
+}
+
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/**
+ * Carátula sin artwork del stream: cae en el icono de la emisora con sus
+ * iniciales (no se descarga ninguna imagen).
+ */
+@ThemePreviews
+@Composable
+private fun CaratulaStreamInicialesPreview() {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Box(modifier = Modifier.padding(16.dp)) {
+                CaratulaStream(
+                    nombre = "Cope Sevilla",
+                    imageUrl = null,
+                    streamArtworkData = null,
+                    streamArtworkUri = null,
+                    size = 180.dp
                 )
             }
         }

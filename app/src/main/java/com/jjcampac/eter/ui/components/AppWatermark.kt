@@ -31,6 +31,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.jjcampac.eter.R
+import com.jjcampac.eter.ui.theme.ThemePreviews
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.EterTheme
+import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 
 /**
  * Marca de agua de fondo para las pantallas de listado de emisoras (Favoritas y Todas).
@@ -55,5 +62,23 @@ fun EterWatermark(modifier: Modifier = Modifier) {
                 .fillMaxHeight(0.7f)
                 .aspectRatio(1f)
         )
+    }
+}
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/** Marca de agua de fondo (dibujo de ondas de radio) sobre el tema de la app. */
+@ThemePreviews
+@Composable
+private fun EterWatermarkPreview() {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            EterWatermark(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+        }
     }
 }

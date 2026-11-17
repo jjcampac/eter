@@ -58,9 +58,16 @@ import com.jjcampac.eter.ui.theme.ThemeMode
 import com.jjcampac.eter.ui.theme.ThemeViewModel
 import com.jjcampac.eter.util.AppLanguage
 import com.jjcampac.eter.util.ReconnectPreferences
+import com.jjcampac.eter.ui.theme.ScreenPreviews
+import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.components.EterTopAppBar
+import com.jjcampac.eter.ui.components.EterNavigationBar
+import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 /** Secciones desplegables de Ajustes. Solo puede haber una abierta a la vez. */
-private enum class SettingsAccordion { TEMA, RECONEXION, IDIOMA, DORMIR }
+internal enum class SettingsSection { TEMA, RECONEXION, IDIOMA, DORMIR }
 
 /**
  * Pestaña "Ajustes".
@@ -83,6 +90,61 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
     // Temporizador para dormir (Fase 5).
     val sleepTimer: SleepTimer = remember { AppModule.sleepTimer(context) }
     var sleepMinutes by remember { mutableStateOf(sleepTimer.selectedMinutes()) }
+
+    // Idioma (Fase 5). Los acordeones son excluyentes: solo uno abierto a la vez.
+    val currentLanguageCode = remember { AppLanguage.current(context) }
+    var openSection by remember { mutableStateOf<SettingsSection?>(null) }
+
+    SettingsScreenContent(
+        themeMode = currentTheme,
+        reconnectSeconds = reconnectSeconds,
+        sleepMinutes = sleepMinutes,
+        currentLanguageCode = currentLanguageCode,
+        openSection = openSection,
+        onSectionToggle = { section ->
+            openSection = if (openSection == section) null else section
+        },
+        onThemeSelected = { mode -> themeViewModel.saveThemeMode(mode) },
+        onReconnectSelected = { seconds ->
+            reconnectSeconds = seconds
+            reconnectPrefs.saveReconnectSeconds(seconds)
+        },
+        onSleepSelected = { minutes ->
+            sleepMinutes = minutes
+            if (minutes <= 0) sleepTimer.stop() else sleepTimer.start(minutes)
+        },
+        onLanguageSelected = { code ->
+            if (code != currentLanguageCode) {
+                AppLanguage.save(context, code)
+                // Recrea la Activity para aplicar el idioma al instante.
+                (context as? Activity)?.recreate()
+            }
+        },
+        modifier = modifier
+    )
+}
+
+/**
+ * Contenido sin estado de la pestaña "Ajustes": recibe las preferencias y las
+ * acciones como parámetros, sin ViewModel, DataStore, temporizador ni Context.
+ *
+ * Se expone por separado de [SettingsScreen] para poder previsualizar los
+ * acordeones (tema, reconexión, idioma y temporizador) sin dependencias reales.
+ */
+@Composable
+internal fun SettingsScreenContent(
+    themeMode: ThemeMode,
+    reconnectSeconds: Int,
+    sleepMinutes: Int,
+    currentLanguageCode: String,
+    openSection: SettingsSection?,
+    onSectionToggle: (SettingsSection) -> Unit,
+    onThemeSelected: (ThemeMode) -> Unit,
+    onReconnectSelected: (Int) -> Unit,
+    onSleepSelected: (Int) -> Unit,
+    onLanguageSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val sleepOptions = listOf(
         0 to R.string.sleep_off,
         15 to R.string.sleep_15,
@@ -91,17 +153,10 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         60 to R.string.sleep_60
     )
 
-    // Idioma (Fase 5). Los acordeones son excluyentes: solo uno abierto a la vez.
-    val currentLanguageCode = remember { AppLanguage.current(context) }
-    val currentLanguageName = remember(currentLanguageCode) {
-        AppLanguage.options.firstOrNull { it.code == currentLanguageCode }
-            ?.name ?: AppLanguage.options.first().name
-    }
-    var openAccordion by remember { mutableStateOf<SettingsAccordion?>(null) }
-    fun toggleAccordion(section: SettingsAccordion) {
-        openAccordion = if (openAccordion == section) null else section
-    }
-
+    // Nombre visible del idioma actual (AppLanguage es estático: sin Context).
+    val currentLanguageName = AppLanguage.options
+        .firstOrNull { it.code == currentLanguageCode }
+        ?.name ?: AppLanguage.options.first().name
     Column(
         modifier = modifier
             .padding(vertical = 8.dp)
@@ -110,7 +165,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         ListItem(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { toggleAccordion(SettingsAccordion.TEMA) },
+                .clickable { onSectionToggle(SettingsSection.TEMA) },
             headlineContent = {
                 Text(
                     text = stringResource(R.string.settings_theme),
@@ -127,7 +182,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             },
             trailingContent = {
                 Icon(
-                    imageVector = if (openAccordion == SettingsAccordion.TEMA) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    imageVector = if (openSection == SettingsSection.TEMA) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                     contentDescription = stringResource(R.string.settings_theme),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -135,27 +190,27 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         )
 
         // Opciones de tema expandibles
-        AnimatedVisibility(visible = openAccordion == SettingsAccordion.TEMA) {
+        AnimatedVisibility(visible = openSection == SettingsSection.TEMA) {
             Column {
                 ThemeOption(
                     label = stringResource(R.string.theme_system),
                     description = stringResource(R.string.theme_system_desc),
-                    selected = currentTheme == ThemeMode.SISTEMA,
-                    onClick = { themeViewModel.saveThemeMode(ThemeMode.SISTEMA) }
+                    selected = themeMode == ThemeMode.SISTEMA,
+                    onClick = { onThemeSelected(ThemeMode.SISTEMA) }
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                 ThemeOption(
                     label = stringResource(R.string.theme_light),
                     description = stringResource(R.string.theme_light_desc),
-                    selected = currentTheme == ThemeMode.CLARO,
-                    onClick = { themeViewModel.saveThemeMode(ThemeMode.CLARO) }
+                    selected = themeMode == ThemeMode.CLARO,
+                    onClick = { onThemeSelected(ThemeMode.CLARO) }
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                 ThemeOption(
                     label = stringResource(R.string.theme_dark),
                     description = stringResource(R.string.theme_dark_desc),
-                    selected = currentTheme == ThemeMode.OSCURO,
-                    onClick = { themeViewModel.saveThemeMode(ThemeMode.OSCURO) }
+                    selected = themeMode == ThemeMode.OSCURO,
+                    onClick = { onThemeSelected(ThemeMode.OSCURO) }
                 )
             }
         }
@@ -165,7 +220,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         ListItem(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { toggleAccordion(SettingsAccordion.RECONEXION) },
+                .clickable { onSectionToggle(SettingsSection.RECONEXION) },
             headlineContent = {
                 Text(
                     text = stringResource(R.string.settings_reconnect),
@@ -182,48 +237,36 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             },
             trailingContent = {
                 Icon(
-                    imageVector = if (openAccordion == SettingsAccordion.RECONEXION) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    imageVector = if (openSection == SettingsSection.RECONEXION) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                     contentDescription = stringResource(R.string.settings_reconnect),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
         )
-        AnimatedVisibility(visible = openAccordion == SettingsAccordion.RECONEXION) {
+        AnimatedVisibility(visible = openSection == SettingsSection.RECONEXION) {
             Column {
                 ReconnectOption(
                     label = stringResource(R.string.reconnect_10s),
                     selected = reconnectSeconds == 10,
-                    onClick = {
-                        reconnectSeconds = 10
-                        reconnectPrefs.saveReconnectSeconds(10)
-                    }
+                    onClick = { onReconnectSelected(10) }
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                 ReconnectOption(
                     label = stringResource(R.string.reconnect_20s),
                     selected = reconnectSeconds == 20,
-                    onClick = {
-                        reconnectSeconds = 20
-                        reconnectPrefs.saveReconnectSeconds(20)
-                    }
+                    onClick = { onReconnectSelected(20) }
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                 ReconnectOption(
                     label = stringResource(R.string.reconnect_30s),
                     selected = reconnectSeconds == 30,
-                    onClick = {
-                        reconnectSeconds = 30
-                        reconnectPrefs.saveReconnectSeconds(30)
-                    }
+                    onClick = { onReconnectSelected(30) }
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                 ReconnectOption(
                     label = stringResource(R.string.reconnect_unlimited),
                     selected = reconnectSeconds == ReconnectPreferences.UNLIMITED,
-                    onClick = {
-                        reconnectSeconds = ReconnectPreferences.UNLIMITED
-                        reconnectPrefs.saveReconnectSeconds(ReconnectPreferences.UNLIMITED)
-                    }
+                    onClick = { onReconnectSelected(ReconnectPreferences.UNLIMITED) }
                 )
             }
         }
@@ -233,7 +276,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         ListItem(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { toggleAccordion(SettingsAccordion.IDIOMA) },
+                .clickable { onSectionToggle(SettingsSection.IDIOMA) },
             headlineContent = {
                 Text(
                     text = stringResource(R.string.settings_language),
@@ -250,13 +293,13 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             },
             trailingContent = {
                 Icon(
-                    imageVector = if (openAccordion == SettingsAccordion.IDIOMA) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    imageVector = if (openSection == SettingsSection.IDIOMA) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                     contentDescription = stringResource(R.string.settings_language),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
         )
-        AnimatedVisibility(visible = openAccordion == SettingsAccordion.IDIOMA) {
+        AnimatedVisibility(visible = openSection == SettingsSection.IDIOMA) {
             Column {
                 AppLanguage.options.forEachIndexed { index, option ->
                     if (index > 0) {
@@ -265,13 +308,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                     LanguageOption(
                         label = option.name,
                         selected = currentLanguageCode == option.code,
-                        onClick = {
-                            if (option.code != currentLanguageCode) {
-                                AppLanguage.save(context, option.code)
-                                // Recrea la Activity para aplicar el idioma al instante.
-                                (context as? Activity)?.recreate()
-                            }
-                        }
+                        onClick = { onLanguageSelected(option.code) }
                     )
                 }
             }
@@ -282,7 +319,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         ListItem(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { toggleAccordion(SettingsAccordion.DORMIR) },
+                .clickable { onSectionToggle(SettingsSection.DORMIR) },
             headlineContent = {
                 Text(
                     text = stringResource(R.string.sleep_timer),
@@ -299,13 +336,13 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             },
             trailingContent = {
                 Icon(
-                    imageVector = if (openAccordion == SettingsAccordion.DORMIR) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    imageVector = if (openSection == SettingsSection.DORMIR) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                     contentDescription = stringResource(R.string.sleep_timer),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
         )
-        AnimatedVisibility(visible = openAccordion == SettingsAccordion.DORMIR) {
+        AnimatedVisibility(visible = openSection == SettingsSection.DORMIR) {
             Column {
                 sleepOptions.forEachIndexed { index, (minutes, labelRes) ->
                     if (index > 0) {
@@ -314,14 +351,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                     SleepOption(
                         label = stringResource(labelRes),
                         selected = sleepMinutes == minutes,
-                        onClick = {
-                            sleepMinutes = minutes
-                            if (minutes <= 0) {
-                                sleepTimer.stop()
-                            } else {
-                                sleepTimer.start(minutes)
-                            }
-                        }
+                        onClick = { onSleepSelected(minutes) }
                     )
                 }
             }
@@ -469,3 +499,60 @@ private fun LanguageOption(
     )
 }
 
+
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/**
+ * Envoltorio de las previews de la pantalla: tema, Scaffold real (barra
+ * superior "Ajustes" y barra de navegación) y contenido sin estado.
+ */
+@Composable
+private fun SettingsScreenPreviewContainer(
+    themeMode: ThemeMode = ThemeMode.OSCURO,
+    openSection: SettingsSection? = null
+) {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = MaterialTheme.colorScheme.background,
+            topBar = { EterTopAppBar(title = stringResource(R.string.tab_settings)) },
+            bottomBar = { EterNavigationBar(selectedTab = 2, onTabSelected = {}) }
+        ) { innerPadding ->
+            SettingsScreenContent(
+                themeMode = themeMode,
+                reconnectSeconds = 20,
+                sleepMinutes = 30,
+                currentLanguageCode = "es",
+                openSection = openSection,
+                onSectionToggle = {},
+                onThemeSelected = {},
+                onReconnectSelected = {},
+                onSleepSelected = {},
+                onLanguageSelected = {},
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+            )
+        }
+    }
+}
+
+/** Ajustes con todos los acordeones cerrados. */
+@ScreenPreviews
+@Composable
+private fun SettingsScreenCerradoPreview() = SettingsScreenPreviewContainer()
+
+/** Ajustes con el selector de tema desplegado. */
+@ScreenPreviews
+@Composable
+private fun SettingsScreenTemaAbiertoPreview() =
+    SettingsScreenPreviewContainer(openSection = SettingsSection.TEMA)
+
+/** Ajustes con el temporizador para dormir desplegado. */
+@ScreenPreviews
+@Composable
+private fun SettingsScreenTemporizadorAbiertoPreview() =
+    SettingsScreenPreviewContainer(openSection = SettingsSection.DORMIR)

@@ -42,7 +42,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +65,16 @@ import com.jjcampac.eter.ui.components.StationItem
 import com.jjcampac.eter.ui.player.PlayerViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.ScreenPreviews
+import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.components.EterTopAppBar
+import com.jjcampac.eter.ui.components.EterNavigationBar
+import com.jjcampac.eter.ui.PreviewData
+import com.jjcampac.eter.player.PlayerState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.Scaffold
+import android.content.Context
 
 private const val TAG = "FavoritesScreen"
 
@@ -84,10 +93,42 @@ fun FavoritesScreen(
     onToggleFavorite: (Station) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
     val favorites by mainViewModel.favorites.collectAsStateWithLifecycle()
 
+    // Vibración háptica breve al empezar a arrastrar. Vive en el envoltorio con
+    // estado porque necesita Context; el contenido no depende de él.
+    val context = LocalContext.current
+    FavoritesScreenContent(
+        favorites = favorites,
+        playerState = playerState,
+        onStationClick = onStationClick,
+        onToggleFavorite = onToggleFavorite,
+        onReorderFavorites = mainViewModel::reorderFavorites,
+        onDraggingChanged = { dragging ->
+            if (dragging) vibrarAlEmpezarArrastre(context)
+        },
+        modifier = modifier
+    )
+}
+
+/**
+ * Contenido sin estado de la pestaña "Favoritas": recibe las favoritas, el
+ * estado del reproductor y las acciones como parámetros, sin ViewModel.
+ *
+ * Se expone por separado de [FavoritesScreen] para poder previsualizar la lista
+ * (con datos y vacía) sin depender de Room ni del reproductor.
+ */
+@Composable
+internal fun FavoritesScreenContent(
+    favorites: List<Station>,
+    playerState: PlayerState,
+    onStationClick: (Station) -> Unit,
+    onToggleFavorite: (Station) -> Unit,
+    onReorderFavorites: (List<String>) -> Unit,
+    onDraggingChanged: (Boolean) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     if (favorites.isEmpty()) {
         Column(
             modifier = modifier
@@ -133,22 +174,10 @@ fun FavoritesScreen(
             // de arrastre se muestra favorites tal como llega de Room.
             val sortedFavorites: List<Station> = draggedOrder ?: favorites
 
-            // Vibración háptica breve cuando empieza el arrastre.
-            val context = LocalContext.current
-            DisposableEffect(isDragging) {
-                if (isDragging) {
-                    // Algunos dispositivos no permiten vibrar (SecurityException p. ej.);
-                    // la IU nunca debe crashear por la háptica.
-                    try {
-                        val vibrator = context.getSystemService(Vibrator::class.java)
-                        vibrator?.vibrate(
-                            VibrationEffect.createOneShot(120, VibrationEffect.DEFAULT_AMPLITUDE)
-                        )
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Vibración al arrastrar no disponible: ${e.message}")
-                    }
-                }
-                onDispose {}
+            // Vibración háptica breve cuando empieza el arrastre: la ejecuta el
+            // envoltorio con estado (aquí solo se notifica el cambio).
+            LaunchedEffect(isDragging) {
+                onDraggingChanged(isDragging)
             }
 
             val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
@@ -201,7 +230,7 @@ fun FavoritesScreen(
                                     add(targetIndex, moved)
                                 }
                                 draggedOrder = nuevaOrden
-                                mainViewModel.reorderFavorites(nuevaOrden.map { it.id })
+                                onReorderFavorites(nuevaOrden.map { it.id })
                                 true
                             }
                         }
@@ -216,7 +245,7 @@ fun FavoritesScreen(
                                         isDragging = false
                                         // Guarda el nuevo orden en una sola transacción de Room.
                                         val ordenFinal = draggedOrder ?: favorites
-                                        mainViewModel.reorderFavorites(ordenFinal.map { it.id })
+                                        onReorderFavorites(ordenFinal.map { it.id })
                                         draggedOrder = null
                                     }
                                 )
@@ -259,3 +288,67 @@ fun FavoritesScreen(
         }
     }
 }
+
+/** Vibración breve al empezar a arrastrar (nunca debe romper la interfaz). */
+private fun vibrarAlEmpezarArrastre(context: Context) {
+    // Algunos dispositivos no permiten vibrar (SecurityException p. ej.); la IU
+    // nunca debe crashear por la háptica.
+    try {
+        val vibrator = context.getSystemService(Vibrator::class.java)
+        vibrator?.vibrate(
+            VibrationEffect.createOneShot(120, VibrationEffect.DEFAULT_AMPLITUDE)
+        )
+    } catch (e: Exception) {
+        Log.w(TAG, "Vibración al arrastrar no disponible: ${e.message}")
+    }
+}
+
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/**
+ * Envoltorio de las previews de la pantalla: tema de la app, fondo y el mismo
+ * Scaffold (barra superior y de navegación) que la app real.
+ */
+@Composable
+private fun FavoritesScreenPreviewContainer(
+    favorites: List<Station>,
+    playerState: PlayerState
+) {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = MaterialTheme.colorScheme.background,
+            topBar = { EterTopAppBar(title = stringResource(R.string.favorites_title)) },
+            bottomBar = { EterNavigationBar(selectedTab = 0, onTabSelected = {}) }
+        ) { innerPadding ->
+            FavoritesScreenContent(
+                favorites = favorites,
+                playerState = playerState,
+                onStationClick = {},
+                onToggleFavorite = {},
+                onReorderFavorites = {},
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            )
+        }
+    }
+}
+
+/** Pantalla "Favoritas" con emisoras y una en reproducción. */
+@ScreenPreviews
+@Composable
+private fun FavoritesScreenConDatosPreview() = FavoritesScreenPreviewContainer(
+    favorites = PreviewData.favoritas,
+    playerState = PreviewData.reproduciendo(PreviewData.copeSevilla)
+)
+
+/** Pantalla "Favoritas" sin favoritas (mensaje de ayuda). */
+@ScreenPreviews
+@Composable
+private fun FavoritesScreenVaciaPreview() = FavoritesScreenPreviewContainer(
+    favorites = emptyList(),
+    playerState = PlayerState()
+)

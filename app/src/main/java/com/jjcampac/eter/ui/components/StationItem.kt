@@ -27,7 +27,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,9 +43,11 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
@@ -58,6 +59,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jjcampac.eter.domain.model.Station
+import com.jjcampac.eter.ui.PreviewData
+import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.ThemePreviews
 import com.jjcampac.eter.ui.theme.EterSurfaceCardDark
 import com.jjcampac.eter.ui.theme.EterSurfaceCardLight
 import com.jjcampac.eter.ui.theme.LocalEterDarkTheme
@@ -272,3 +277,82 @@ fun StationItemContent(
 }
 
 
+
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/**
+ * Envoltorio común de las previews de la fila: tema de la app, fondo y una
+ * fuente de interacciones falsa para poder fijar el estado de pulsación.
+ */
+@Composable
+private fun StationItemPreviewContainer(
+    station: Station = PreviewData.copeSevilla,
+    isSelected: Boolean = false,
+    isPressed: Boolean = false,
+    isPlaying: Boolean = false
+) {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            StationItemContent(
+                station = station,
+                isSelected = isSelected,
+                isPlaying = isPlaying,
+                interactionSource = remember { MutableInteractionSource() },
+                isPressedState = remember { mutableStateOf(isPressed) },
+                onClick = {},
+                onFavoriteToggle = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+        }
+    }
+}
+
+/** Fila normal (reposo) de una emisora. */
+@ThemePreviews
+@Composable
+private fun StationItemNormalPreview() = StationItemPreviewContainer()
+
+/** Fila seleccionada (la emisora está cargada en el reproductor). */
+@ThemePreviews
+@Composable
+private fun StationItemSeleccionadaPreview() = StationItemPreviewContainer(
+    isSelected = true,
+    isPlaying = true
+)
+
+/** Fila pulsada (efecto hundido). */
+@ThemePreviews
+@Composable
+private fun StationItemPulsadaPreview() = StationItemPreviewContainer(isPressed = true)
+
+/** Fila de una emisora manual: muestra el botón de editar además del corazón. */
+@ThemePreviews
+@Composable
+private fun StationItemEmisoraManualPreview() {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            StationItemContent(
+                station = PreviewData.emisoraManual,
+                isSelected = false,
+                interactionSource = remember { MutableInteractionSource() },
+                isPressedState = remember { mutableStateOf(false) },
+                onClick = {},
+                onFavoriteToggle = {},
+                onEdit = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+        }
+    }
+}

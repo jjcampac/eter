@@ -22,9 +22,11 @@ package com.jjcampac.eter.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,6 +40,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.jjcampac.eter.ui.theme.EterTheme
+import com.jjcampac.eter.ui.theme.ThemeMode
+import com.jjcampac.eter.ui.theme.ThemePreviews
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImagePainter
 import coil3.compose.SubcomposeAsyncImage
@@ -186,4 +191,34 @@ internal fun calcularIniciales(nombre: String): String {
         }
     }
     return b.toString()
+}
+
+// ============================================================
+// Previsualizaciones
+// ============================================================
+
+/** Icono de emisora con iniciales (sin logo), estado por defecto de las listas. */
+@ThemePreviews
+@Composable
+private fun EstacionIconoInicialesPreview() {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Box(modifier = Modifier.padding(16.dp)) {
+                EstacionIcono(nombre = "Cope Sevilla", imageUrl = null, size = 56.dp)
+            }
+        }
+    }
+}
+
+/** Icono con un nombre largo: comprueba el tamaño de las iniciales. */
+@ThemePreviews
+@Composable
+private fun EstacionIconoNombreLargoPreview() {
+    EterTheme(themeMode = ThemeMode.SISTEMA) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Box(modifier = Modifier.padding(16.dp)) {
+                EstacionIcono(nombre = "Onda Cero Sevilla", imageUrl = null, size = 56.dp)
+            }
+        }
+    }
 }

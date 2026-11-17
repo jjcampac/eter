@@ -3,7 +3,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo. Notificación multimedia del sistema (tarjeta de la cortina con emisora, canción, estado y controles) ✅ compilada, pendiente de prueba en dispositivo. Android Auto (app de audio con biblioteca de emisoras) ✅ probada en coche. Build release (despliegue desde Android Studio, R8 y firma) ✅ corregido y probado en dispositivo. Filas de emisora con efecto elevado/hundido (Favoritas y Estaciones) ✅ probadas en dispositivo (tema oscuro y claro).
+> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo. Notificación multimedia del sistema (tarjeta de la cortina con emisora, canción, estado y controles) ✅ compilada, pendiente de prueba en dispositivo. Android Auto (app de audio con biblioteca de emisoras) ✅ probada en coche. Build release (despliegue desde Android Studio, R8 y firma) ✅ corregido y probado en dispositivo. Filas de emisora con efecto elevado/hundido (Favoritas y Estaciones) ✅ probadas en dispositivo (tema oscuro y claro). Previsualizaciones `@Preview` de pantallas y componentes en claro y oscuro ✅ compiladas y probadas en dispositivo.
 
 ---
 
@@ -210,6 +210,7 @@ Objetivo: que Eter aparezca en el coche como app de audio, sin desarrollar panta
 | Post-5 | Formulario de emisora: campo opcional de favicon y normalización de espacios en las URL | ✅ Completada (probada en dispositivo) |
 | Post-5 | Logos de emisora no se actualizaban (Favoritas y reproductor): `painter.state.value` no recomponía; arreglado con `collectAsState()` en `EstacionIcono`/`CaratulaStream` | ✅ Completada (verificada en dispositivo con captura y logcat) |
 | Post-5 | Filas de emisora: efecto elevado en la seleccionada (fondo tonal del MiniPlayer, reflejo superior y sombra proyectada sobre la fila siguiente) y hundido al pulsar (sombra interior, sin ripple), ajustado a las capturas de referencia, con foco de teclado/D-pad y previews en claro/oscuro | ✅ Completada (build debug/release y tests OK; probada en dispositivo y comparada con las capturas) |
+| Post-6 | Previsualizaciones `@Preview` en claro y oscuro de todas las pantallas y componentes visuales (con anotaciones propias `ThemePreviews`/`ScreenPreviews`, datos estáticos en `PreviewData` y patrón stateful/stateless) | ✅ Completada (build debug/release y tests OK) |
 
 ---
 
