@@ -87,6 +87,8 @@ import com.jjcampac.eter.ui.theme.ScreenPreviews
 import com.jjcampac.eter.ui.theme.EterTheme
 import com.jjcampac.eter.ui.PreviewData
 import androidx.compose.material3.Surface
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import com.jjcampac.eter.player.PlayerState
 import com.jjcampac.eter.ui.theme.ThemePreviews
 
@@ -298,7 +300,7 @@ internal fun PlayerScreenContent(
             // --- 3. Nombre de la emisora y metadatos (artista – título) ---
             Text(
                 text = displayedStation.name,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 48.sp, lineHeight = 36.sp),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
