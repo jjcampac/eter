@@ -206,8 +206,23 @@ class RadioPlayer(context: Context) {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 val id = mediaItem?.mediaId ?: return
                 if (id == _state.value.currentStation?.id) return
-                Log.d(TAG, "onMediaItemTransition() externo mediaId=$id reason=$reason")
+                Log.d(TAG, "onMediaItemTransition() mediaId=$id reason=$reason")
                 diag("onMediaItemTransition mediaId=$id reason=$reason", exoPlayer)
+                // Actualización provisional inmediata si el MediaItem trae título y URI,
+                // para evitar condiciones de carrera antes de la consulta asíncrona a Room.
+                val metadataTitle = mediaItem.mediaMetadata.title?.toString()
+                val metadataUri = mediaItem.localConfiguration?.uri?.toString()
+                if (metadataTitle != null && metadataUri != null) {
+                    val provisional = Station(
+                        id = id,
+                        name = metadataTitle,
+                        url = metadataUri,
+                        country = mediaItem.mediaMetadata.artist?.toString()
+                    )
+                    _state.update { current ->
+                        current.copy(currentStation = provisional, errorMessage = null)
+                    }
+                }
                 metadataScope.launch {
                     val app = appContext as? EterApplication ?: return@launch
                     val emisora = app.getStationRepository().getStation(id) ?: return@launch
@@ -215,7 +230,7 @@ class RadioPlayer(context: Context) {
                     _state.update { current ->
                         current.copy(currentStation = emisora, errorMessage = null)
                     }
-                    Log.d(TAG, "emisora cambiada desde fuera: ${emisora.name}")
+                    Log.d(TAG, "emisora cambiada: ${emisora.name}")
                 }
             }
 
@@ -237,6 +252,8 @@ class RadioPlayer(context: Context) {
 
             // Cortes de red inesperados: se recupera al instante solo si NO hay una
             // ventana de reintentos activa (esa ventana la gestiona [startReconnect]).
+            @Suppress("DEPRECATION")
+            @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 diag(
                     "onPlayerStateChanged playWhenReady=$playWhenReady state=$playbackState " +
@@ -252,6 +269,7 @@ class RadioPlayer(context: Context) {
             }
 
             // Metadatos ICY (título de la canción).
+            @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
             override fun onMetadata(metadata: Metadata) {
                 for (i in 0 until metadata.length()) {
                     val clean = cleanMetadataTitle(metadata.get(i).toString())
@@ -335,7 +353,11 @@ class RadioPlayer(context: Context) {
     private fun aplicarTextoNotificacion(texto: String?) {
         val station = _state.value.currentStation ?: return
         if (exoPlayer.mediaItemCount == 0) return
-        val actual = exoPlayer.getMediaItemAt(0).mediaMetadata.artist?.toString()
+        val itemActual = exoPlayer.getMediaItemAt(0)
+        // Evita reemplazar el item si ExoPlayer está cargando una emisora distinta a la del estado
+        // (previene deshacer el cambio de emisora por condición de carrera).
+        if (itemActual.mediaId != station.id) return
+        val actual = itemActual.mediaMetadata.artist?.toString()
         if (actual == (texto ?: station.subtitle.takeIf { it.isNotBlank() })) return
         Log.d(TAG, "texto de la notificación: $texto")
         exoPlayer.replaceMediaItem(0, construirItem(station, texto))

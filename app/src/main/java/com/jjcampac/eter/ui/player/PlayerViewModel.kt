@@ -64,6 +64,7 @@ import kotlinx.coroutines.launch
  * Si el servicio se destruye, [MediaController.Listener.onDisconnected] vuelve a
  * conectar el controlador: la UI no sobrevive a una sesion muerta.
  */
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 class PlayerViewModel(
     context: Context,
     private val repository: StationRepository
@@ -170,6 +171,7 @@ class PlayerViewModel(
             }
         }
 
+        @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
         override fun onMetadata(metadata: Metadata) {
             for (i in 0 until metadata.length()) {
                 val clean = cleanMetadataTitle(metadata.get(i).toString())
@@ -323,6 +325,15 @@ class PlayerViewModel(
 
     private fun playNow(station: Station) {
         val c = controller ?: return
+        _state.update {
+            it.copy(
+                currentStation = station,
+                status = PlaybackStatus.LOADING,
+                errorMessage = null,
+                streamArtworkData = null,
+                streamArtworkUri = null
+            )
+        }
         c.setMediaItem(construirItem(station))
         c.prepare()
         c.playWhenReady = true

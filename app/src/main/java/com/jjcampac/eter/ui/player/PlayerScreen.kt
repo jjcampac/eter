@@ -252,7 +252,7 @@ internal fun PlayerScreenContent(
 
                 Text(
                     text = topStatusText,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize=18.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -300,7 +300,7 @@ internal fun PlayerScreenContent(
             // --- 3. Nombre de la emisora y metadatos (artista – título) ---
             Text(
                 text = displayedStation.name,
-                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 48.sp, lineHeight = 36.sp),
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 42.sp, lineHeight = 36.sp),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
@@ -311,7 +311,7 @@ internal fun PlayerScreenContent(
 
             Text(
                 text = subtitleText,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize=21.sp),
                 color = subtitleColor,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
@@ -329,7 +329,7 @@ internal fun PlayerScreenContent(
                 label = "wavesAlpha"
             )
             Box(
-                modifier = Modifier.size(96.dp),
+                modifier = Modifier.size(120.dp).padding(0.dp),
                 contentAlignment = Alignment.Center
             ) {
                 AnimatedWavesIcon(
