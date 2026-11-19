@@ -3,7 +3,7 @@
 
 Aplicación Android de radio por internet, **sin publicidad**, sin cuentas de usuario y sin servidor propio. El móvil se conecta directamente a los streams que publican las emisoras.
 
-> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo. Notificación multimedia del sistema (tarjeta de la cortina con emisora, canción, estado y controles) ✅ compilada, pendiente de prueba en dispositivo. Android Auto (app de audio con biblioteca de emisoras) ✅ probada en coche. Build release (despliegue desde Android Studio, R8 y firma) ✅ corregido y probado en dispositivo. Filas de emisora con efecto elevado/hundido (Favoritas y Estaciones) ✅ probadas en dispositivo (tema oscuro y claro). Previsualizaciones `@Preview` de pantallas y componentes en claro y oscuro ✅ compiladas y probadas en dispositivo.
+> **Última actualización del estado:** Fases 1-5 completadas ✅ (aplicación base funcional). Reordenamiento de Favoritas (drag & drop + accesibilidad) ✅ probado en dispositivo. Notificación multimedia del sistema (tarjeta de la cortina con emisora, canción, estado y controles) ✅ compilada, pendiente de prueba en dispositivo. Android Auto (app de audio con biblioteca de emisoras) ✅ probada en coche. Build release (despliegue desde Android Studio, R8 y firma) ✅ corregido y probado en dispositivo. Filas de emisora con efecto elevado/hundido (Favoritas y Estaciones) ✅ probadas en dispositivo (tema oscuro y claro). Previsualizaciones `@Preview` de pantallas y componentes en claro y oscuro ✅ compiladas y probadas en dispositivo. Visualizador de audio real (FFT propia, sin permisos ni librerías nuevas) en mini reproductor, pantalla del reproductor y tarjeta de la emisora ✅ compilado y con tests OK, pendiente de prueba en dispositivo.
 
 ---
 
@@ -45,7 +45,7 @@ El objetivo es disponer de un reproductor de radio sencillo, limpio y respetuoso
 8. Temporizador para dormir (15/30/45/60 min) con aviso del tiempo restante en el reproductor.
 9. Interfaz en 6 idiomas (español, inglés, alemán, francés, italiano y japonés) con cambio al instante.
 10. Tema claro/oscuro (Sistema / Claro / Oscuro) con cambio en vivo.
-11. Iconos dinámicos en la lista: ondas animadas mientras suena, pausa clásica cuando está pausada.
+11. Iconos dinámicos en la lista: visualizador de audio real mientras suena (6 barras que siguen el espectro del sonido), pausa clásica cuando está pausada.
 12. Reordenar las **favoritas** arrastrando con el dedo (pulsación larga) o mediante las acciones de accesibilidad "Mover arriba"/"Mover abajo". El orden se conserva al cerrar la app.
 13. **Notificación multimedia del sistema**: al desplegar la cortina desde el borde superior aparece la tarjeta nativa de reproducción con el logo de la emisora de fondo, su nombre como título, la canción en curso (metadatos ICY) o el estado ("Conectando…", "Error de conexión") como texto, el botón grande de reproducir/pausar, el selector de salida de audio ("Este teléfono"), flechas anterior/siguiente entre favoritas **que solo aparecen si hay otra emisora antes o después en la lista**, y una estrella que únicamente permite **añadir** la emisora en curso a favoritas (quitarla se hace desde la app).
 
@@ -211,6 +211,7 @@ Objetivo: que Eter aparezca en el coche como app de audio, sin desarrollar panta
 | Post-5 | Logos de emisora no se actualizaban (Favoritas y reproductor): `painter.state.value` no recomponía; arreglado con `collectAsState()` en `EstacionIcono`/`CaratulaStream` | ✅ Completada (verificada en dispositivo con captura y logcat) |
 | Post-5 | Filas de emisora: efecto elevado en la seleccionada (fondo tonal del MiniPlayer, reflejo superior y sombra proyectada sobre la fila siguiente) y hundido al pulsar (sombra interior, sin ripple), ajustado a las capturas de referencia, con foco de teclado/D-pad y previews en claro/oscuro | ✅ Completada (build debug/release y tests OK; probada en dispositivo y comparada con las capturas) |
 | Post-6 | Previsualizaciones `@Preview` en claro y oscuro de todas las pantallas y componentes visuales (con anotaciones propias `ThemePreviews`/`ScreenPreviews`, datos estáticos en `PreviewData` y patrón stateful/stateless) | ✅ Completada (build debug/release y tests OK) |
+| Post-7 | Visualizador de audio real (FFT propia sin librerías): `AudioProcessor` de Media3 en el `DefaultAudioSink` vía `DefaultRenderersFactory` propio, 6 bandas logarítmicas publicadas en un `StateFlow`, suavizado y dibujo en fase de dibujo; sustituye las ondas decorativas en mini reproductor, pantalla "En directo" y tarjeta de la emisora en reproducción | ✅ Completada (build debug/release OK, tests 21/21 y probada en dispositivo; corregido que `queueInput` con `EMPTY_BUFFER` lanzaba `IllegalArgumentException`) |
 
 ---
 

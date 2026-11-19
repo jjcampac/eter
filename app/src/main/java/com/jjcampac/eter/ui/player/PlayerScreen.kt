@@ -21,8 +21,6 @@
 package com.jjcampac.eter.ui.player
 
 import android.util.Log
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,7 +61,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -76,7 +73,7 @@ import com.jjcampac.eter.R
 import com.jjcampac.eter.domain.model.Station
 import com.jjcampac.eter.player.PlaybackStatus
 import com.jjcampac.eter.player.SleepTimer
-import com.jjcampac.eter.ui.components.AnimatedWavesIcon
+import com.jjcampac.eter.ui.components.AudioVisualizer
 import com.jjcampac.eter.ui.components.CaratulaStream
 import com.jjcampac.eter.ui.theme.EterCoverSize
 import com.jjcampac.eter.ui.theme.EterPlayButtonSize
@@ -320,28 +317,25 @@ internal fun PlayerScreenContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Ondas animadas entre el país y los controles. El hueco está SIEMPRE
-            // reservado (aunque no haya reproducción) para que la vista no se mueva
-            // al reproducir o pausar: solo cambia la opacidad del icono.
-            val wavesAlpha by animateFloatAsState(
-                targetValue = if (isPlaying) 1f else 0f,
-                animationSpec = tween(durationMillis = 300),
-                label = "wavesAlpha"
-            )
+            // Visualizador de audio real entre el país y los controles. El hueco
+            // está SIEMPRE reservado (aunque no haya reproducción) para que la
+            // vista no se mueva al reproducir o pausar.
             Box(
                 modifier = Modifier.size(120.dp).padding(0.dp),
                 contentAlignment = Alignment.Center
             ) {
-                AnimatedWavesIcon(
-                    tint = MaterialTheme.colorScheme.primary,
+                AudioVisualizer(
+                    modifier = Modifier.size(width = 90.dp, height = 64.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    barWidth = 10.dp,
+                    barGap = 6.dp,
+                    minBarHeight = 8.dp,
+                    active = isPlaying,
                     contentDescription = if (isPlaying) {
                         stringResource(R.string.radio_live)
                     } else {
                         null
-                    },
-                    modifier = Modifier
-                        .size(96.dp)
-                        .alpha(wavesAlpha)
+                    }
                 )
             }
 

@@ -153,12 +153,16 @@ fun MiniPlayerContent(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-// Icono animado de ondas mientras suena, a la izquierda del botón.
+            // Visualizador de audio real mientras suena, a la izquierda del botón.
             if (isPlaying) {
-                AnimatedWavesIcon(
-                    tint = MaterialTheme.colorScheme.primary,
-                    contentDescription = stringResource(R.string.radio_live),
-                    modifier = Modifier.size(28.dp)
+                AudioVisualizer(
+                    modifier = Modifier.size(28.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    barWidth = 3.dp,
+                    barGap = 2.dp,
+                    minBarHeight = 3.dp,
+                    active = isPlaying,
+                    contentDescription = stringResource(R.string.radio_live)
                 )
             }
             // Temporizador para dormir: icono de reloj y tiempo restante.

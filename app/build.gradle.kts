@@ -12,7 +12,7 @@ plugins {
 
 /** Versión base de la app (sin sufijo de build). El sufijo "d"/"r" se añade
  *  en cada build type para distinguir debug de release. */
-val baseVersionName = "1.1.2"
+val baseVersionName = "1.1.3"
 
 /** Credenciales de la keystore de release. El fichero no se versiona (contiene
  *  contraseñas). Si no existe, la variante release se firma con la keystore de
@@ -34,7 +34,7 @@ android {
         applicationId = "com.jjcampac.eter"
         minSdk = 26
         targetSdk = 37
-        versionCode = 7
+        versionCode = 8
         versionName = baseVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -95,6 +95,17 @@ android {
      */
     installation {
         enableBaselineProfile = false
+    }
+
+    /**
+     * Los tests unitarios de JVM no tienen Android real: se devuelven valores por
+     * defecto en las llamadas al framework (p. ej. `SystemClock` y `Log`) en vez
+     * de lanzar una excepción. Lo usan los tests del analizador de espectro.
+     */
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
     }
 
     buildFeatures {

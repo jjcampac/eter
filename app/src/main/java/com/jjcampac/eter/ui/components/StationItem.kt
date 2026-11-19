@@ -218,12 +218,16 @@ fun StationItemContent(
                 )
             }
 
-            // Estado de reproducción (olas animadas o pausa)
+            // Estado de reproducción (visualizador de audio real o pausa)
             if (isPlaying) {
-                AnimatedWavesIcon(
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    contentDescription = "En directo",
-                    modifier = Modifier.size(33.dp)
+                AudioVisualizer(
+                    modifier = Modifier.size(33.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    barWidth = 3.dp,
+                    barGap = 2.dp,
+                    minBarHeight = 3.dp,
+                    active = isPlaying,
+                    contentDescription = "En directo"
                 )
             } else if (isPaused) {
                 Icon(

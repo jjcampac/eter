@@ -31,11 +31,14 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.jjcampac.eter.EterApplication
 import com.jjcampac.eter.R
 import com.jjcampac.eter.diag.diag
 import com.jjcampac.eter.domain.model.Station
+import com.jjcampac.eter.player.audio.AudioSpectrum
+import com.jjcampac.eter.player.audio.EterRenderersFactory
 import com.jjcampac.eter.util.ReconnectPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -86,11 +89,14 @@ data class PlayerState(
  * de vida del reproductor. Para streams en directo no tiene sentido una barra
  * de progreso, por eso solo se modelan estados cualitativos.
  */
+@androidx.annotation.OptIn(UnstableApi::class)
 class RadioPlayer(context: Context) {
 
     private val appContext = context.applicationContext
 
-    val exoPlayer: ExoPlayer = ExoPlayer.Builder(appContext).build().apply {
+    // La fábrica de renderers propia inserta el analizador de espectro en el
+    // sumidero de audio (visualizador real); el sonido no se modifica.
+    val exoPlayer: ExoPlayer = ExoPlayer.Builder(appContext, EterRenderersFactory(appContext)).build().apply {
         // Audio focus: al pedir el foco, el sistema pausa o atenua cualquier
         // otro medio que se este reproduciendo (Spotify, YouTube, etc.).
         val audioAttributes = AudioAttributes.Builder()
@@ -174,6 +180,8 @@ class RadioPlayer(context: Context) {
                         else current.status
                     )
                 }
+                // Sin sonido no hay espectro: las barras del visualizador caen.
+                if (!isPlaying) AudioSpectrum.silenciar()
             }
 
             /**
@@ -208,6 +216,8 @@ class RadioPlayer(context: Context) {
                 if (id == _state.value.currentStation?.id) return
                 Log.d(TAG, "onMediaItemTransition() mediaId=$id reason=$reason")
                 diag("onMediaItemTransition mediaId=$id reason=$reason", exoPlayer)
+                // Emisora distinta: el espectro de la anterior ya no es válido.
+                AudioSpectrum.silenciar()
                 // Actualización provisional inmediata si el MediaItem trae título y URI,
                 // para evitar condiciones de carrera antes de la consulta asíncrona a Room.
                 val metadataTitle = mediaItem.mediaMetadata.title?.toString()
@@ -237,6 +247,7 @@ class RadioPlayer(context: Context) {
             override fun onPlayerError(error: PlaybackException) {
                 Log.e(TAG, "onPlayerError() code=${error.errorCode} message=${error.message}")
                 diag("onPlayerError code=${error.errorCode} message=${error.message}", exoPlayer)
+                AudioSpectrum.silenciar()
                 val errorMessage = when (error.errorCode) {
                     PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
                     PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT,
@@ -404,6 +415,7 @@ class RadioPlayer(context: Context) {
         Log.d(TAG, "pause()")
         diag("pause()", this, exoPlayer)
         exoPlayer.pause()
+        AudioSpectrum.silenciar()
         _state.update { it.copy(status = PlaybackStatus.PAUSED, errorMessage = null) }
     }
 
@@ -420,6 +432,7 @@ class RadioPlayer(context: Context) {
         Log.d(TAG, "stop()")
         diag("stop()", this, exoPlayer)
         resetReconnect()
+        AudioSpectrum.silenciar()
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         _state.value = PlayerState()
@@ -489,6 +502,7 @@ class RadioPlayer(context: Context) {
         resetReconnect()
         reconnectScope.cancel()
         metadataScope.cancel()
+        AudioSpectrum.reiniciar()
         exoPlayer.release()
     }
 
